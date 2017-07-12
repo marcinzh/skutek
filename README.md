@@ -1,6 +1,6 @@
 # Skutek: extensible effects without (heavy) lifting
 
-Extensible effects for Scala
+TBD
 
 # Example
 ```scala
@@ -8,18 +8,18 @@ import skutek._
 
 object Main extends App {
 
-    val eff = for {
-        a <- Get[Int]
-        b <- Ask[Int]
-        c <- if (b != 0) Return(a / b) else Wrong(s"Tried to divide $a by zero")
-        _ <- Put(c)
-    } yield ()
+  val eff = for {
+    a <- Get[Int]
+    b <- Ask[Int]
+    c <- if (b != 0) Return(a / b) else Wrong(s"Tried to divide $a by zero")
+    _ <- Put(c)
+  } yield ()
 
-    val handler = ErrorHandler[String] +! StateHandler(100).exec +! ReaderHandler(3)
+  val handler = ErrorHandler[String] +! StateHandler(100).exec +! ReaderHandler(3)
 
-    val result = handler.run(eff)
+  val result = handler.run(eff)
 
-    println(result) // prints "Right(33)"
+  println(result) // prints "Right(33)"
 }
 ```
 
@@ -58,4 +58,4 @@ TBD
 
 See [examples](https://github.com/marcinzh/skutek/tree/master/examples/src/main/scala/skutek_examples) directory.
 
-TBD
+
