@@ -11,7 +11,7 @@ object Interpreter {
       case FlatMapped(eff, k) => eff match {
         case Return(x) => loop(k(x))
         case FlatMapped(eff, j) => loop(eff.flatMap(x => j(x).flatMap(k)))
-       	case Product(eff1, eff2) => loop(eff1.flatMap(a => eff2.flatMap(b => k((a, b)))))
+        case Product(eff1, eff2) => loop(eff1.flatMap(a => eff2.flatMap(b => k((a, b)))))
         case _ => sys.error(s"Unhandled effect: $eff")
       }
       case _ => loop(eff.map(a => a))
@@ -38,17 +38,17 @@ object Interpreter {
           eff match {
             case Return(x) => loop(k(x))
             case FlatMapped(eff, j) => loop(eff.flatMap(x => j(x).flatMap(k)))
-           	case Product(eff1, eff2) => h.onProduct(loopTramp(eff1), loopTramp(eff2), kk)
+            case Product(eff1, eff2) => h.onProduct(loopTramp(eff1), loopTramp(eff2), kk)
             case op: AnyOperation[X, UV] => {
               if (op.tag == myTag) 
                 h.onOperation(op.stripTag.asInstanceOf[h.Op[X]], kkTramp)
               else 
                 suspend
             }
-           	case FilterFail() => h.onFilterFail match {
-           		case Some(op) => h.onOperation(op, kkTramp)
-           		case None => suspend
-           	}
+            case FilterFail() => h.onFilterFail match {
+              case Some(op) => h.onOperation(op, kkTramp)
+              case None => suspend
+            }
           }
         }
         case _ => loop(eff.map(a => a))

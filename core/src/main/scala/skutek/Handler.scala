@@ -52,7 +52,7 @@ protected final case class ComposedHandler[H1 <: Handler, H2 <: Handler](lhs: H1
 protected sealed trait ElementalHandler extends Handler { outer =>
   def myTag: Any
   final val tags: Set[Any] = Set(myTag)
- 	def interpretWithTag[A, U](eff: A !! U with Effects, tag: Any): Result[A] !! U
+  def interpretWithTag[A, U](eff: A !! U with Effects, tag: Any): Result[A] !! U
   final def interpret[A, U](eff: A !! U with Effects) = interpretWithTag[A, U](eff, myTag)
 }
 
@@ -63,8 +63,8 @@ protected sealed trait TaggableHandler extends ElementalHandler { outer =>
     final type Effects = outer.Effects
     final type Result[A] = S[A]
     final def myTag: Any = outer.myTag
-   	final def interpretWithTag[A, U](eff: A !! U with Effects, tag: Any): S[A] !! U = 
-   		outer.interpretWithTag[A, U](eff, tag).map(x => apply(x))
+    final def interpretWithTag[A, U](eff: A !! U with Effects, tag: Any): S[A] !! U = 
+      outer.interpretWithTag[A, U](eff, tag).map(x => apply(x))
 
     def apply[A](x: outer.Result[A]): S[A]
   }
@@ -73,7 +73,7 @@ protected sealed trait TaggableHandler extends ElementalHandler { outer =>
     type Effects = outer.Effects @! Tag
     type Result[X] = outer.Result[X]
     def myTag: Any = explicitTag
- 		def interpretWithTag[A, U](eff: A !! U with Effects, tag: Any): Result[A] !! U =
+    def interpretWithTag[A, U](eff: A !! U with Effects, tag: Any): Result[A] !! U =
       outer.interpretWithTag[A, U](eff.sideCast[U with outer.Effects], tag)
   }
 }
@@ -87,14 +87,14 @@ abstract class BaseHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends Tagga
 
 abstract class BaseHandlerWithDriver[Fx](implicit implicitTag: ClassTag[Fx]) extends BaseHandler { outer =>
 
- 	type Drv = Driver { 
- 		type Result[X] = outer.Result[X]
- 		type Effects = Fx
- 	}
+  type Drv = Driver { 
+    type Result[X] = outer.Result[X]
+    type Effects = Fx
+  }
 
- 	def driver: Drv  
+  def driver: Drv  
 
- 	final def interpretWithTag[A, U](eff: A !! U with Effects, tag: Any): Result[A] !! U = 
+  final def interpretWithTag[A, U](eff: A !! U with Effects, tag: Any): Result[A] !! U = 
     Interpreter.impure[A, U, Effects, Drv](driver, tag, eff)
 }
 
@@ -121,7 +121,7 @@ protected trait Handler_exports {
 
     final class HandleWithPoly[V] {
       def apply[H <: Handler](h: H)(implicit ev: (A !! U) <:< (A !! H#Effects with V)) = h.interpret[A, V](thiz)
-    }		
+    }
 
     def fx[Fx](implicit ev: TagOfFx[Fx]) = new TagSetBuilder[Any](Set[Any]()).fx[Fx]
 
