@@ -41,8 +41,8 @@ abstract class Operation[+A, Fx](implicit implicitTag: ClassTag[Fx]) extends Any
 
   final def @![Tag](explicitTag: Tag): A !! (Fx @! Tag) = 
     new AnyOperation[A, Fx @! Tag] {
-     	val tag = explicitTag
-     	def stripTag = outer
+      val tag = explicitTag
+      def stripTag = outer
       override def toString = s"$outer @! $tag"
     }
 }
