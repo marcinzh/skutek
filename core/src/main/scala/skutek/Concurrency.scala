@@ -35,5 +35,5 @@ case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends BaseHandl
 }
 
 object ConcurrencyHandler {
-  def default = ConcurrencyHandler()(ExecutionContext.Implicits.global)
+  def global = ConcurrencyHandler()(ExecutionContext.Implicits.global)
 }
