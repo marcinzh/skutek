@@ -1,14 +1,11 @@
 sourcesInBase := false
 
 
-lazy val veryCommonSettings = Seq(
+lazy val commonSettings = Seq(
   organization := "com.github.marcinzh",
-  version := "0.4.0",
+  version := "0.5.0-SNAPSHOT",
   scalaVersion := "2.12.2",
-  crossScalaVersions := Seq(scalaVersion.value, "2.11.11")
-)
-
-lazy val commonSettings = veryCommonSettings ++ Seq(
+  crossScalaVersions := Seq(scalaVersion.value, "2.11.11"),
   scalacOptions ++= Seq(
     "-language:implicitConversions",
     "-language:higherKinds",
@@ -23,6 +20,7 @@ lazy val commonSettings = veryCommonSettings ++ Seq(
   ),
   resolvers += Resolver.sonatypeRepo("releases"),
   libraryDependencies += compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
+
 )
 
 
@@ -36,7 +34,7 @@ lazy val dontPublishMe = Seq(
 lazy val root = project
   .in(file("."))
   .settings(name := "skutek-root")
-  .settings(veryCommonSettings: _*)
+  .settings(commonSettings: _*)
   .settings(dontPublishMe: _*)
   .aggregate(core, examples)
 
