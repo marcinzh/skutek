@@ -23,7 +23,7 @@ lazy val commonSettings = Seq(
   licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
   resolvers += Resolver.jcenterRepo,
   credentials += Credentials(Path.userHome / ".bintray" / ".credentials"),
-  publishTo := Some("Bintray API Realm" at ("https://api.bintray.com/content/marcinzh/zzz/skutek/" ++ version.value))
+  publishTo := Some("Bintray API Realm" at ("https://api.bintray.com/content/marcinzh/maven/skutek/" ++ version.value))
 )
 
 
