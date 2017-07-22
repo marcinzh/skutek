@@ -19,7 +19,9 @@ lazy val commonSettings = Seq(
     // "-Ywarn-unused:imports,privates,-patvars,-locals,-params,-implicits"
   ),
   resolvers += Resolver.sonatypeRepo("releases"),
-  libraryDependencies += compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
+  libraryDependencies += compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
+
+  licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
 
 )
 
