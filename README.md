@@ -22,40 +22,45 @@ object Main extends App {
   println(result) // prints "Right(33)"
 }
 ```
+More in [examples](https://github.com/marcinzh/skutek/tree/master/examples/src/main/scala/skutek_examples) directory.
+
+# Setup
+
+```scala
+resolvers += Resolver.jcenterRepo
+
+libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.0"
+```
 
 # Features
 
 - Simplicity of use:
-    - No need of defining the effect stack upfront. Just compose your computations, and the stack will grow as needed, with help of Scala's type inference.
-    - No need of "lifting into the monad". Effect's operations (`Get[Int]`, `Put(42)`) are usable directly. 
-    - Effect extensiblity is provided by classic, vanilla OOP inheritance.
-    - Effect subtyping ‥‥
+    - No need of defining the effect stack upfront. 
+    - No need of "lifting into the monad".
+    - Effect extensiblity is provided by classic OOP inheritance.
+    - Effect subtyping.
     
 - Simplicity of implementation:
     - No dependencies on external libraries.
-    - No clever type-fu, no macros. Mostly OOP style without use of mutablity.
+    - No clever type-fu, no macros. Mostly immutable OOP style.
      
 - Practical stuff:
-    - Predefined set of basic effects (`Reader`, `Writer`, ...).
-    - Ability to annotate effects with tags (labels), to allow inclusion of multiple instances of single effect in the stack (`@!` operator)
-    - Potentially parallel execution of effects, without breaking monad laws (`*!` operator and `traverse` methods).
-    - Support for `for` comprehension guards (`withFilter`), for effects compatible with filtering (`Maybe` and `Choice`).
+    - Predefined set of basic effects (`Reader`, `Writer`, etc.).
+    - Ability to annotate effects with tags
+    - Potentially parallel execution of effects, without breaking monad laws.
+    - Support for `for` comprehension guards, for effects compatible with filtering (e.g. `Maybe`, `Choice`).
     - Tested stack safety.    
     
 - Caveats and limitations:
     - General infancy of the project.
+    - No possiblity of adopting pre-existing monads as Skutek's effects.
+    - While adding effects to the stack is easy, removing them isn't. Some explicit typing is necessary.
+    - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`...")
+    - Using patterns in `for` comprehensions can trigger surprising errors (Scala's wart, not specific to Skutek)
+    - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. 
     - Lack of performance analysis.
-    - Rare occurences of false positives by Scala's linter ("inferred `Any`...")
-    - Using patterns in `for` comprehensions can trigger surprising errors (well known Scala's wart, not specific to Skutek)
-    - `Concurrency` is a hack.
-    - **Type unsafety:** Certain class of malformed effect stacks (`Reader[Int] with Reader[String]`) are detected **at runtime** only. And no sooner than at the first call to handler, or at composition of handlers.
+    - `Concurrency` effect is a hack.
 
-# Setup
 
-TBD
-
-# Examples
-
-See [examples](https://github.com/marcinzh/skutek/tree/master/examples/src/main/scala/skutek_examples) directory.
 
 
