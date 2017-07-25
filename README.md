@@ -22,6 +22,15 @@ object Main extends App {
   println(result) // prints "Right(33)"
 }
 ```
+More in [examples](https://github.com/marcinzh/skutek/tree/master/examples/src/main/scala/skutek_examples) directory.
+
+# Setup
+
+```scala
+resolvers += Resolver.jcenterRepo
+
+libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.0"
+```
 
 # Features
 
@@ -50,12 +59,6 @@ object Main extends App {
     - `Concurrency` is a hack.
     - **Type unsafety:** Certain class of malformed effect stacks (`Reader[Int] with Reader[String]`) are detected **at runtime** only. And no sooner than at the first call to handler, or at composition of handlers.
 
-# Setup
 
-TBD
-
-# Examples
-
-See [examples](https://github.com/marcinzh/skutek/tree/master/examples/src/main/scala/skutek_examples) directory.
 
 
