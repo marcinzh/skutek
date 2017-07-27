@@ -20,12 +20,15 @@ Choice
                
 
 type Eff = Foo !! State[Double] with Error[String] with Choice
-// Same as above, but uses `!!` type alias of Effectful[_, _].
+// Same as above, but uses `!!`, an infix type alias of Effectful[_, _].
 // Precedence of `!!` is lower than of `with`
 // but with higher than of `=>`.
 ```
 
 # Computations
+
+Computations are values of type `Effectful[+A, -U]`
+
 ```scala
 
 Return(a)  // Equivalent of Pure(_), Some(_), Right(_), Success(_) in other monads. 
@@ -38,7 +41,7 @@ eff1.flatMap(x => eff2)  // Effect stacks of eff1 and eff2 can be different.
                          // representation, it's an intersection of 2 types. Weird, isn't it?
 
 eff1 *! eff2   // Potentially parallel composition of 2 computations, retuning a pair.
-               // Actual parallelism depends on a handler stack used later.
+               // Actual parallelism depends on the handler stack used later to run it.
                // Effects stacks of eff1 and eff2 are joined, just like it happens with flatMap.
 
 eff1 *<! eff2  // Same, but projects the resulting pair to its left component
@@ -56,7 +59,7 @@ TBD
 # Traversing
 
 ```scala
-// asuming:
+// assuming:
 effs : SomeCollection[A !! U] 
 // where: SomeCollection[_] is an Iterable[_], Option[_] or Either[Foo, _]
 
@@ -69,8 +72,8 @@ effs.traverseVoid // Same, but does it only for the effects, ignoring each resul
                   
 effs.traverseLazy // Similar to .traverse, but sequences effects in a chain, even though elements 
                   // themselves are independent. Prevents parallelism.
-                  // Abortable effects, like Maybe, Error or Validation can abort the computation
-                  // on the first error/failure/etc.
+                  // Abortable effects, like Maybe, Error or Validation can abort the whole
+                  // computation, on the first error/failure/etc. encountered in the sequence.
               
 effs.traverseLazyVoid // Obvious.
                
