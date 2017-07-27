@@ -112,15 +112,17 @@ State[Double] with Error[String] with Choice
 
 The **easiest** way of using handlers, is to handle all effects at once: 
 1. Create composed handler, covering all effects in the computation's effect stack.
-2. Handle and execute computation, all in one call.
+2. Handle and execute the computation, all in one call.
 
 Example:
 ```scala
 // assuming:
 eff : Int !! State[Double] with Choice
 
+// Step 1.
 val handler = StateHandler(1.377) +! ChoiceHandler
 
+// Step 2.
 handler.run(eff)     // returns: (Vector[Int], Double)
 eff.runWith(handler) // alternative method
 ```
