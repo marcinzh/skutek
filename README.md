@@ -62,10 +62,10 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.0"
     - `Concurrency` effect is a hack.
 
 
-#User Manual
+# User Manual
 
 In progress.‥
 
-Meanwhile, see [cheatsheet](CHEATSHEET.md).
+Meanwhile, see [cheatsheet](./CHEATSHEET.md).
 
 
