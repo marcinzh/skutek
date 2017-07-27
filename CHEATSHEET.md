@@ -35,6 +35,10 @@ Return(a)  // Equivalent of Pure(_), Some(_), Right(_), Success(_) in other mona
            // Common for all effects in Skutek.
            // Effect stack is empty (Any).
 
+// assuming:
+eff1 : A !! U1
+eff2 : B !! U2
+
 eff1.flatMap(x => eff2)  // Effect stacks of eff1 and eff2 can be different.
                          // Scala's type inference combines them to get the final effect stack.
                          // Conceptually, it's an union of 2 sets of effects, but in Skutek's 
@@ -50,11 +54,89 @@ eff1 *>! eff2  // Same, but projects the resulting pair to its right component
 
 # Operations
 
-TBD
+An operation is an elementary computation, provided in definition of an effect.
+Operations are defined as simple case classes, indirectly inheriting 
+from `Effectful[_, _]` trait.
+
+Examples:
+
+|expression | its effect </br> (single element effect stack) | its supertype|
+|---|---|---|
+|`Get[Double]`        |`State[Double]`   | `Double !! State[Double]`| 
+|`Put(1.337)`         | same as above    | `Unit !! State[Double]`| 
+|`Tell("Hello")`      |`Writer[String]`  | `Unit !! Writer[String]`|
+|`Choose(1 to 10)`    |`Choice`          | `Int !! Choice`|
+
+Nullary operations require explicit type parameter, like in `Get[]`.
 
 # Handlers
 
+Handler is an object, which has ability to handle effect (or effects). 
+
+Handling an effect (or effects), is an act of removing some effect (or effects) from 
+the computation's effect stack. Possibly, also transforming computation's result 
+type in the process.
+
+Handling effects is also the point, where **the order of effects** starts to matter.
+
+After all effects are handled, computation's effect stack is empty (i.e. provable to be `=:= Any`)
+Then, the computation is ready to be executed:
+```scala
+// assuming:
+eff : A !! Any
+
+eff.run   // returns A
+```
+
+
+
+### Elementary handlers
+Every effect definiton provides a handler for its own effect. Examples:
+
+| expression creating <br> handler instance | effect it handles  </br> (single element effect stack) | how handler transforms </br> computation's result type `A` |
+|---|---|---|
+|`StateHandler(42.0)`|`State[Double]`| `(A, Double)` |
+|`ErrorHandler[String]`|`Error[String]`|`Either[String, A]`|
+|`ChoiceHandler`|`Choice`|`Vector[A]`|
+
+### Composing handlers
+Multiple handlers can be associatively composed using `+!` operator, forming handlers 
+that can handle bigger sets of effects. For example:
+
+```scala
+StateHandler(42.0) +! ErrorHandler[String] +! ChoiceHandler
+
+// can handle effects:
+
+State[Double] with Error[String] with Choice
+```
+### Full handling
+
+The **easiest** way of using handlers, is to handle all effects at once: 
+1. Create composed handler, covering all effects in the computation's effect stack.
+2. Handle and execute the computation, all in one call.
+
+Example:
+```scala
+// assuming:
+eff : Int !! State[Double] with Choice
+
+// Step 1.
+val handler = StateHandler(1.377) +! ChoiceHandler
+
+// Step 2.
+handler.run(eff)     // returns: (Vector[Int], Double)
+eff.runWith(handler) // alternative method
+```
+
+### Local handling
+In practical programs, it's often desirable to handle only a subset of
+computation's effect stack, leaving the rest to be handled elsewhere.
+This allows to encapsulate usage of local effect(s) in a module.
+
 TBD
+
+
 
 # Traversing
 
