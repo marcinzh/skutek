@@ -41,7 +41,7 @@ eff1.flatMap(x => eff2)  // Effect stacks of eff1 and eff2 can be different.
                          // representation, it's an intersection of 2 types. Weird, isn't it?
 
 eff1 *! eff2   // Potentially parallel composition of 2 computations, retuning a pair.
-               // Actual parallelism depends on a handler stack used later.
+               // Actual parallelism depends on the handler stack used later to run it.
                // Effects stacks of eff1 and eff2 are joined, just like it happens with flatMap.
 
 eff1 *<! eff2  // Same, but projects the resulting pair to its left component
