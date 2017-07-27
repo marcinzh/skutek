@@ -84,7 +84,9 @@ eff : A !! Any
 eff.run   // returns A
 ```
 
-Handler is an object, which has ability to handle effects. Examples:
+Handler is an object, which has ability to handle effect (or effects). 
+
+Every effect definiton provides elementary handler for its own effect. Examples:
 
 | expression creating <br> handler instance | effect it handles  </br> (single element effect stack) | how handler transforms </br> computation's result type `A` |
 |---|---|---|
@@ -103,16 +105,22 @@ StateHandler(42.0) +! ErrorHandler[String] +! ChoiceHandler
 State[Double] with Error[String] with Choice
 ```
 
-```scala
-handler.run(eff)
+The easiest way of using handlers, is to handle all effects at once: 
+1. Create composed handler, covering all effects in the computation's stack.
+2. Handle and execute computation, all in one call.
 
-eff.runWith(handler) // same result as above
+Example:
+```scala
+// assuming:
+eff : Int !! State[Double] with Choice
+
+val handler = StateHandler(1.377) +! ChoiceHandler
+
+handler.run(eff)  // returns: (Vector[Int], Double)
+
+eff.runWith(handler) // alternative method
 ```
 
-```scala
-handler.run(eff)
-eff.runWith(handler)
-```
 
 
 
