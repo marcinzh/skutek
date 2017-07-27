@@ -54,7 +54,7 @@ eff1 *>! eff2  // Same, but projects the resulting pair to its right component
 
 # Operations
 
-An operation is an elementary computation, provided in definition of an effect.
+An operation is an elementary computation, soecific for an effect.
 Operations are defined as simple case classes, indirectly inheriting 
 from `Effectful[_, _]` trait.
 
@@ -67,7 +67,7 @@ Examples:
 |`Tell("Hello")`      |`Writer[String]`  | `Unit !! Writer[String]`|
 |`Choose(1 to 10)`    |`Choice`          | `Int !! Choice`|
 
-Nullary operations require explicit type parameter, like in `Get[]`.
+Nullary operations require explicit type parameter, like in the case of `Get[]`.
 
 # Handlers
 
