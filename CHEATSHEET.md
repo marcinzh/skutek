@@ -20,7 +20,7 @@ Choice
                
 
 type Eff = Foo !! State[Double] with Error[String] with Choice
-// Same as above, but uses `!!` type alias of Effectful[_, _].
+// Same as above, but uses `!!`, an infix type alias of Effectful[_, _].
 // Precedence of `!!` is lower than of `with`
 // but with higher than of `=>`.
 ```
@@ -56,7 +56,7 @@ TBD
 # Traversing
 
 ```scala
-// asuming:
+// assuming:
 effs : SomeCollection[A !! U] 
 // where: SomeCollection[_] is an Iterable[_], Option[_] or Either[Foo, _]
 
@@ -69,8 +69,8 @@ effs.traverseVoid // Same, but does it only for the effects, ignoring each resul
                   
 effs.traverseLazy // Similar to .traverse, but sequences effects in a chain, even though elements 
                   // themselves are independent. Prevents parallelism.
-                  // Abortable effects, like Maybe, Error or Validation can abort the computation
-                  // on the first error/failure/etc.
+                  // Abortable effects, like Maybe, Error or Validation can abort the whole
+                  // computation, on the first error/failure/etc. encountered in the sequence.
               
 effs.traverseLazyVoid // Obvious.
                
