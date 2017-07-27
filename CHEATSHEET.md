@@ -75,7 +75,9 @@ Handling an effect (or effects), is a process of removing some effect (or effect
 computation's effect stack. Possibly, also transforming computation's result 
 type in the process.
 
-After all effects are handled (i.e. the effect stack is empty), the computation 
+Handling effects is also the point, where order of effects starts to matter.
+
+After all effects are handled (i.e. computation's effect stack is empty), the computation 
 is ready to be executed. 
 ```scala
 // assuming:
@@ -95,7 +97,7 @@ Every effect definiton provides elementary handler for its own effect. Examples:
 |`ChoiceHandler`|`Choice`|`Vector[A]`|
 
 Multiple handlers can be associatively composed using `+!` operator, forming handlers 
-that can handle greater sets of effects. For example:
+that can handle bigger sets of effects. For example:
 
 ```scala
 StateHandler(42.0) +! ErrorHandler[String] +! ChoiceHandler
@@ -104,9 +106,10 @@ StateHandler(42.0) +! ErrorHandler[String] +! ChoiceHandler
 
 State[Double] with Error[String] with Choice
 ```
+### Full handlers
 
-The easiest way of using handlers, is to handle all effects at once: 
-1. Create composed handler, covering all effects in the computation's stack.
+The **easiest** way of using handlers, is to handle all effects at once: 
+1. Create composed handler, covering all effects in the computation's effect stack.
 2. Handle and execute computation, all in one call.
 
 Example:
@@ -116,11 +119,16 @@ eff : Int !! State[Double] with Choice
 
 val handler = StateHandler(1.377) +! ChoiceHandler
 
-handler.run(eff)  // returns: (Vector[Int], Double)
-
+handler.run(eff)     // returns: (Vector[Int], Double)
 eff.runWith(handler) // alternative method
 ```
 
+### Local handlers
+In practical programs, it's often desirable to handle only a subset of
+computation's effect stack, leaving the rest to be handled elsewhere.
+This allows to encapsulate usage of local effect(s) in a module.
+
+TBD
 
 
 
