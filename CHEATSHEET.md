@@ -26,6 +26,9 @@ type Eff = Foo !! State[Double] with Error[String] with Choice
 ```
 
 # Computations
+
+Computations are values of type `Effectful[+A, -U]`
+
 ```scala
 
 Return(a)  // Equivalent of Pure(_), Some(_), Right(_), Success(_) in other monads. 
