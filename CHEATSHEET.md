@@ -88,7 +88,8 @@ eff.run   // returns A
 
 Handler is an object, which has ability to handle effect (or effects). 
 
-Every effect definiton provides elementary handler for its own effect. Examples:
+### Elementary handlers
+Every effect definiton provides a handler for its own effect. Examples:
 
 | expression creating <br> handler instance | effect it handles  </br> (single element effect stack) | how handler transforms </br> computation's result type `A` |
 |---|---|---|
@@ -96,6 +97,7 @@ Every effect definiton provides elementary handler for its own effect. Examples:
 |`ErrorHandler[String]`|`Error[String]`|`Either[String, A]`|
 |`ChoiceHandler`|`Choice`|`Vector[A]`|
 
+### Composing handlers
 Multiple handlers can be associatively composed using `+!` operator, forming handlers 
 that can handle bigger sets of effects. For example:
 
@@ -106,7 +108,7 @@ StateHandler(42.0) +! ErrorHandler[String] +! ChoiceHandler
 
 State[Double] with Error[String] with Choice
 ```
-### Full handlers
+### Full handling
 
 The **easiest** way of using handlers, is to handle all effects at once: 
 1. Create composed handler, covering all effects in the computation's effect stack.
@@ -123,7 +125,7 @@ handler.run(eff)     // returns: (Vector[Int], Double)
 eff.runWith(handler) // alternative method
 ```
 
-### Local handlers
+### Local handling
 In practical programs, it's often desirable to handle only a subset of
 computation's effect stack, leaving the rest to be handled elsewhere.
 This allows to encapsulate usage of local effect(s) in a module.
