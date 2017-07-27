@@ -35,6 +35,10 @@ Return(a)  // Equivalent of Pure(_), Some(_), Right(_), Success(_) in other mona
            // Common for all effects in Skutek.
            // Effect stack is empty (Any).
 
+// assuming:
+eff1 : A !! U1
+eff2 : B !! U2
+
 eff1.flatMap(x => eff2)  // Effect stacks of eff1 and eff2 can be different.
                          // Scala's type inference combines them to get the final effect stack.
                          // Conceptually, it's an union of 2 sets of effects, but in Skutek's 
@@ -50,11 +54,67 @@ eff1 *>! eff2  // Same, but projects the resulting pair to its right component
 
 # Operations
 
-TBD
+An operation is an elementary computation, provided in definition of an effect.
+Operations are defined as simple case classes, indirectly inheriting 
+from `Effectful[_, _]` trait.
+
+Examples:
+
+|expression | its effect </br> (single element effect stack) | its supertype|
+|---|---|---|
+|`Get[Double]`        |`State[Double]`   | `Double !! State[Double]`| 
+|`Put(1.337)`         | same as above    | `Unit !! State[Double]`| 
+|`Tell("Hello")`      |`Writer[String]`  | `Unit !! Writer[String]`|
+|`Choose(1 to 10)`    |`Choice`          | `Int !! Choice`|
+
+Nullary operations require explicit type parameter, like in `Get[]`.
 
 # Handlers
 
-TBD
+Handling an effect (or effects), is a process of removing some effect (or effects) from 
+computation's effect stack. Possibly, also transforming computation's result 
+type in the process.
+
+After all effects are handled (i.e. the effect stack is empty), the computation 
+is ready to be executed. 
+```scala
+// assuming:
+eff : A !! Any
+
+eff.run   // returns A
+```
+
+Handler is an object, which has ability to handle effects. Examples:
+
+| expression creating <br> handler instance | effect it handles  </br> (single element effect stack) | how handler transforms </br> computation's result type `A` |
+|---|---|---|
+|`StateHandler(42.0)`|`State[Double]`| `(A, Double)` |
+|`ErrorHandler[String]`|`Error[String]`|`Either[String, A]`|
+|`ChoiceHandler`|`Choice`|`Vector[A]`|
+
+Multiple handlers can be associatively composed using `+!` operator, forming handlers 
+that can handle greater sets of effects. For example:
+
+```scala
+StateHandler(42.0) +! ErrorHandler[String] +! ChoiceHandler
+
+// can handle effects:
+
+State[Double] with Error[String] with Choice
+```
+
+```scala
+handler.run(eff)
+
+eff.runWith(handler) // same result as above
+```
+
+```scala
+handler.run(eff)
+eff.runWith(handler)
+```
+
+
 
 # Traversing
 
