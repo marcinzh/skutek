@@ -71,14 +71,16 @@ Nullary operations require explicit type parameter, like in `Get[]`.
 
 # Handlers
 
-Handling an effect (or effects), is a process of removing some effect (or effects) from 
-computation's effect stack. Possibly, also transforming computation's result 
+Handler is an object, which has ability to handle effect (or effects). 
+
+Handling an effect (or effects), is an act of removing some effect (or effects) from 
+the computation's effect stack. Possibly, also transforming computation's result 
 type in the process.
 
-Handling effects is also the point, where order of effects starts to matter.
+Handling effects is also the point, where **the order of effects** starts to matter.
 
-After all effects are handled (i.e. computation's effect stack is empty), the computation 
-is ready to be executed. 
+After all effects are handled, computation's effect stack is empty (i.e. provable to be `=:= Any`)
+Then, the computation is ready to be executed:
 ```scala
 // assuming:
 eff : A !! Any
@@ -86,7 +88,7 @@ eff : A !! Any
 eff.run   // returns A
 ```
 
-Handler is an object, which has ability to handle effect (or effects). 
+
 
 ### Elementary handlers
 Every effect definiton provides a handler for its own effect. Examples:
