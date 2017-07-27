@@ -58,7 +58,7 @@ TBD
 ```scala
 // asuming:
 effs : SomeCollection[A !! U] 
-// where SomeCollection[_] is an Iterable[_], Option[_] or Either[Foo, _]
+// where: SomeCollection[_] is an Iterable[_], Option[_] or Either[Foo, _]
 
 effs.traverse     // Potentially parallel execution of effectful computations, combining their results.
                   // Returns SomeCollection[A] !! U.
