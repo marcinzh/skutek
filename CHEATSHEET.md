@@ -54,7 +54,7 @@ eff1 *>! eff2  // Same, but projects the resulting pair to its right component
 
 # Operations
 
-An operation is an elementary computation, soecific for an effect.
+An operation is an elementary computation, specific for an effect.
 Operations are defined as simple case classes, indirectly inheriting 
 from `Effectful[_, _]` trait.
 
