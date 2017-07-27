@@ -54,7 +54,7 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.0"
 - Caveats and limitations:
     - General infancy of the project.
     - No possiblity of adopting pre-existing monads as Skutek's effects.
-    - While adding effects to the stack is easy, removing them isn't. Some explicit typing is necessary.
+    - Removing effects from the stack (local handling) isn't as easy as adding them. Some explicit typing is necessary.
     - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`...")
     - Using patterns in `for` comprehensions can trigger surprising errors (Scala's wart, not specific to Skutek)
     - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. 
@@ -62,5 +62,10 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.0"
     - `Concurrency` effect is a hack.
 
 
+# User Manual
+
+In progress.‥
+
+Meanwhile, see [cheatsheet](./CHEATSHEET.md).
 
 
