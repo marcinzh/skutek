@@ -146,7 +146,7 @@ Counterintuitively,
 eff : Int !! State[Double] with Reader[Boolean] with Error[String] with Choice 
 
 // Those are the effect we are going to leave unhandled:
-type UnhandledEffects = State[Double] with Reader[Boolean]
+type UnhandledEffects = Reader[Boolean] with Error[String]
 
 // Making this type alias is not necessery, but it will make 
 // our example less cluttered.
@@ -168,10 +168,10 @@ eff : ... // same as in previous example
 
 val hander = // same as in previous example 
 
-handler.fx[State[Double]].fx[Reader[Boolean]].handle(eff) 
+handler.fx[Error[String]].fx[Reader[Boolean]].handle(eff) 
 // returns: same as in previous example 
 
-eff.fx[State[Double]].fx[Reader[Boolean]].handleWith(handler) 
+eff.fx[Error[String]].fx[Reader[Boolean]].handleWith(handler) 
 // alternative syntax
 ```
 
