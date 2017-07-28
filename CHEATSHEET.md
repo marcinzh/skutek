@@ -133,7 +133,8 @@ eff.runWith(handler) // alternative syntax
 ### Local handling
 In practical programs, it's often desirable to handle only a subset of
 computation's effect stack, leaving the rest to be handled elsewhere.
-This allows to encapsulate usage of local effect(s) in a module.
+This allows to encapsulate usage of local effect(s) in a module, while 
+still exporting effectful API with other, public effect(s).
 
 must be augmented by explicit type.
 
@@ -147,7 +148,6 @@ eff : Int !! State[Double] with Reader[Boolean] with Error[String] with Choice
 
 // Those are the effect we are going to leave unhandled:
 type UnhandledEffects = Reader[Boolean] with Error[String]
-
 // Making this type alias is not necessery, but it will make 
 // our example less cluttered.
 
