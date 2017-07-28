@@ -1,6 +1,11 @@
 # Skutek: extensible effects without (heavy) lifting
 
-TBD
+Skutek (pronounced: *skoo-tech*) is a framework implementing a monad of extensible effects (a.k.a *"One monad to rule them all"*), based on [Freer Monad](http://okmij.org/ftp/Haskell/extensible/more.pdf), adopted to leverage specifics of Scala's type system, with main differences being:
+
+- Use of intersection types in lieu of union types (which Scala doesn't have), to model sets of effects.
+
+- Use of classic OOP inheritence to provide effect extensiblity.
+
 
 # Example
 ```scala
@@ -36,8 +41,7 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.0"
 
 - Simplicity of use:
     - No need of defining the effect stack upfront. 
-    - No need of "lifting into the monad".
-    - Effect extensiblity is provided by classic OOP inheritance.
+    - No need of lifting of operations into the monad.
     - Effect subtyping.
     
 - Simplicity of implementation:
@@ -47,7 +51,7 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.0"
 - Practical stuff:
     - Predefined set of basic effects (`Reader`, `Writer`, etc.).
     - Ability to annotate effects with tags
-    - Potentially parallel execution of effects, without breaking monad laws.
+    - Potentially parallel execution of effects.
     - Support for `for` comprehension guards, for effects compatible with filtering (e.g. `Maybe`, `Choice`).
     - Tested stack safety.    
     
