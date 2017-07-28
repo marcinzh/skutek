@@ -114,7 +114,7 @@ State[Double] with Error[String] with Choice
 
 The **easiest** way of using handlers, is to handle all effects at once: 
 1. Create composed handler, covering all effects in the computation's effect stack.
-2. Handle and execute the computation, all in one call.
+2. Handle effects and execute the computation, all in one call.
 
 Example:
 ```scala
@@ -126,13 +126,54 @@ val handler = StateHandler(1.377) +! ChoiceHandler
 
 // Step 2.
 handler.run(eff)     // returns: (Vector[Int], Double)
-eff.runWith(handler) // alternative method
+
+eff.runWith(handler) // alternative syntax
 ```
 
 ### Local handling
 In practical programs, it's often desirable to handle only a subset of
 computation's effect stack, leaving the rest to be handled elsewhere.
 This allows to encapsulate usage of local effect(s) in a module.
+
+must be augmented by explicit type.
+
+Counterintuitively,
+
+##### Shorter, but unsafe way
+
+```scala
+// assuming:
+eff : Int !! State[Double] with Reader[Boolean] with Error[String] with Choice 
+
+// Those are the effect we are going to leave unhandled:
+type UnhandledEffects = State[Double] with Reader[Boolean]
+
+// Making this type alias is not necessery, but it will make 
+// our example less cluttered.
+
+val handler = StateHandler(1.377) +! ChoiceHandler
+
+handler.handleCarefully[UnhandledEffects](eff) 
+// returns: (Vector[Int], Double) !! UnhandledEffects
+
+eff.handleCarefullyWith[UnhandledEffects](handler) 
+// alternative syntax
+```
+
+##### Safer, but more verbose way
+
+```scala
+
+eff : ... // same as in previous example 
+
+val hander = // same as in previous example 
+
+handler.fx[State[Double]].fx[Reader[Boolean]].handle(eff) 
+// returns: same as in previous example 
+
+eff.fx[State[Double]].fx[Reader[Boolean]].handleWith(handler) 
+// alternative syntax
+```
 
 TBD
 
