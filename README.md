@@ -1,7 +1,9 @@
 # Skutek: extensible effects without (heavy) lifting
 
-Skutek (pronounced: *skoo-tech*) is a framework implementing a monad of extensible effects 
-(a.k.a [*"One monad to rule them all"*](https://www.youtube.com/watch?v=KGJLeHhsZBo)), based on [Freer monad](http://okmij.org/ftp/Haskell/extensible/more.pdf), adopted to leverage specifics of Scala's type system, with main differences being:
+[![Build Status](https://travis-ci.org/marcinzh/skutek.svg?branch=master)](https://travis-ci.org/marcinzh/skutek)
+
+Skutek ([pronounced](https://translate.google.com/#pl/en/skutek): *skoo-tech*) is a framework implementing a monad of extensible effects 
+(a.k.a. [*One monad to rule them all*](https://www.youtube.com/watch?v=KGJLeHhsZBo)), based on [Freer monad](http://okmij.org/ftp/Haskell/extensible/more.pdf), adopted to leverage specifics of Scala's type system, with main differences being:
 
 - Use of intersection types in lieu of union types (which Scala doesn't have), to model sets of effects.
 
