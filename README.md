@@ -7,7 +7,7 @@ Skutek ([pronounced](https://translate.google.com/#pl/en/skutek): *skoo-tech*) i
 
 - Use of intersection types in lieu of union types (which Scala doesn't have), to model sets of effects.
 
-- Use of classic OOP inheritence to provide effect extensiblity.
+- Use of classic OOP inheritence as the way of extending the monad with new operations.
 
 
 # Example
