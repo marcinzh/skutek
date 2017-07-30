@@ -49,6 +49,7 @@ lazy val core = project
   .settings(commonSettings: _*)
   .settings(libraryDependencies += "org.specs2" %% "specs2-core" % "3.9.1" % "test")
   .settings(libraryDependencies += "org.specs2" %% "specs2-matcher-extra" % "3.9.1" % "test")
+  .settings(parallelExecution in Test := false) // let's try‥
   .settings(scalacOptions in Test += "-Yrangepos")
 
 lazy val examples = project
