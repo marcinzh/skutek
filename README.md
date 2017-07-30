@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/marcinzh/skutek.svg?branch=master)](https://travis-ci.org/marcinzh/skutek)
 
 Skutek ([pronounced](https://translate.google.com/#pl/en/skutek): *skoo-tech*) is a framework implementing a monad of extensible effects 
-(a.k.a. [*One monad to rule them all*](https://www.youtube.com/watch?v=KGJLeHhsZBo)), based on [Freer monad](http://okmij.org/ftp/Haskell/extensible/more.pdf), adopted to leverage specifics of Scala's type system, with main differences being:
+(a.k.a. [*One monad to rule them all*](https://www.youtube.com/watch?v=KGJLeHhsZBo)), based on [Freer monad](http://okmij.org/ftp/Haskell/extensible/more.pdf), adapted to leverage specifics of Scala's type system, with main differences being:
 
 - Use of intersection types in lieu of union types (which Scala doesn't have), to model sets of effects.
 
@@ -60,7 +60,7 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.0"
     
 - Caveats and limitations:
     - General infancy of the project.
-    - No possiblity of adopting pre-existing monads as Skutek's effects.
+    - No possiblity of adapting pre-existing monads as Skutek's effects.
     - Removing effects from the stack (local handling) isn't as easy as adding them. Some explicit typing is necessary.
     - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`...")
     - Using patterns in `for` comprehensions can trigger surprising errors (Scala's wart, not specific to Skutek)
