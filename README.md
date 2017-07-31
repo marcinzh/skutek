@@ -158,9 +158,9 @@ The latter is more readable, as long as you remember that:
 ### 3\.2\. Computation values
 
 ##### 3\.2\.1\. Return
-The simplest *Computation* is constructed by `Return(x)`, where `x` is any value.  
+The simplest *Computation* is constructed by `Return(x)` case class, where `x` is any value.  
 
-This is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` in other monads. Except in Skutek, `Return(_)` is shared for all possible *Effects*.
+`Return(_)` is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` in other monads. Except in Skutek, `Return(_)` is shared for all possible *Effects*.
 
 This *Computation* has empty *Effect Stack*:
 ```scala
@@ -265,5 +265,38 @@ Can handle all the *Effects* in the following *Effects Stack*:
 State[Double] with Error[String] with Choice
 ```
 
+The order of composition matters. *Handlers* are applied from right to left.
+
+### 5\.3\. Full handling
+
+The **easiest** way of using *Handlers*, is to handle all *Effects* at once: 
+1. Create composed *Handler*, covering all *Effects* in the *Computation's* *Effect Stack*.
+2. Handle *Effects* and execute the *Computation*, both in one call.
+
+Example:
+```scala
+// assuming:
+eff : Int !! State[Double] with Choice = ???
+
+// Step 1.
+val handler = StateHandler(1.377) +! ChoiceHandler
+
+// Step 2.
+val result = handler.run(eff) 
+
+val result = eff.runWith(handler)   // alternative syntax
+
+// we get:
+result : (Vector[Int], Double)
+```
+TBD.
+
+# Traversing
+
+Traversing is a transformation of a collection-of-*Computations* into a *Computation*-of-collection.
+
+TBD.
+
+# Tag Conflicts
 
 TBD.
