@@ -73,7 +73,7 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.0"
 
 In progress.‥
 
-Meanwhile, see [cheatsheet](./CHEATSHEET.md).
+Meanwhile, see ~~[cheatsheet](./CHEATSHEET.md).~~
 
 # Core concepts in Skutek
 
@@ -132,8 +132,54 @@ A curious reader may wonder, what happens if there are two occurences of the sam
 ```scala
 State[Int] with State[String]
 ```
-It will be discussed it the section about **Tag Conflicts**.
+It will be discussed in the section about **Tag Conflicts**.
 
 # Computation
 
+### Computation types
 
+A *Computation* is value of a type derived from `Effectful[+A, -U]` trait.  
+Parameter `A` is the result type of the *Computation*.  
+Parameter `U` is the *Effect Stack* of the *Computation*.
+
+Example:
+```scala
+type MyComputation = Effectful[Foo, State[Double] with Error[String] with Choice]
+```
+Same example, but using `!!`, an infix type alias for `Effectful`:
+```scala
+type MyComputation = Foo !! State[Double] with Error[String] with Choice
+```
+
+The latter is more readable, as long as you remember that:
+* Precedence of `!!` is lower than of `with`, so: `A !! U with V` == `A !! (U with V)`
+* Precedence of `!!` is higher than of `=>`, so: `A => B !! U` == `A => (B !! U)`
+
+### Computation values
+
+##### Return
+The simplest *Computation* is constructed by `Return(x)`, where `x` is any value. 
+This is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` in other monads. Except in Skutek, `Return(_)` is shared for all possible `Effects`.
+
+This *Computation* has empty *Effect Stack*:
+```scala
+// assuming: 
+a : A
+
+// we get:
+Return(a) : A !! Any
+```
+
+Also, `Return()` is an abbreviation of `Return(())`.
+
+##### Composed Computations
+
+*Computation* is a monad, so standard `map`, `flatMap` and `flatten` methods are available.
+
+# Operation
+
+TBD
+
+### Handler
+
+TBD
