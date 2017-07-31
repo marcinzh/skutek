@@ -78,14 +78,14 @@ Meanwhile, see [cheatsheet](./CHEATSHEET.md).
 # Core concepts in Skutek
 
 1. **Effect**
-1. **Effect stack**
+1. **Effect Stack**
 1. **Computation** (the monad)
 1. **Operation**
 1. **Handler**
 
 # Effect
 
-In Skutek, an *Effect* is an abstract **type**, serving as a unique, type-level name. Such type is never instantiated or extended. *Effects* are only useful as type-arguments for other types or methods. Most notably, for types of *Computations* and *Handlers*.
+In Skutek, an *Effect* is an abstract **type**, serving as a unique, type-level name. Such type is never instantiated or extended. *Effects* are only useful as type-arguments for other types or methods. Most notably, for types of *Computations* and *Handler* constructors.
 
 Effects can be:
 * parameterless, e.g. `Maybe`, `Choice`
@@ -105,7 +105,7 @@ TBD.
     ```
     Therefore, they all represent the same *Effect Stack*.
 
-1. Order of occurence of *Effects* in the *Effect Stack* doesn't matter. In Scala, the following types are equivalent:
+1. The order of occurence of *Effects* in the *Effect Stack* doesn't matter. In Scala, the following types are equivalent:
     ```scala
     State[Int] with Maybe
     Maybe with State[Int]
