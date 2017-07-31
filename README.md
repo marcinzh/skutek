@@ -158,23 +158,48 @@ The latter is more readable, as long as you remember that:
 ### Computation values
 
 ##### Return
-The simplest *Computation* is constructed by `Return(x)`, where `x` is any value. 
-This is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` in other monads. Except in Skutek, `Return(_)` is shared for all possible `Effects`.
+The simplest *Computation* is constructed by `Return(x)`, where `x` is any value.  
+
+This is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` in other monads. Except in Skutek, `Return(_)` is shared for all possible *Effects*.
 
 This *Computation* has empty *Effect Stack*:
 ```scala
 // assuming: 
-a : A
+val a : A = ???
+
+// let:
+val eff = Return(a)
 
 // we get:
-Return(a) : A !! Any
+eff : A !! Any
 ```
 
 Also, `Return()` is an abbreviation of `Return(())`.
 
-##### Composed Computations
+##### Composing Computations
 
 *Computation* is a monad, so standard `map`, `flatMap` and `flatten` methods are available.
+
+When 2 *Computations* are composed using `flatMap`, their *Effect Stacks* are automatically merged, by type intersection:
+```scala
+// assuming:
+val eff1 : A !! U1 = ???
+val eff2 : B !! U2 = ???
+
+// let:
+val eff3 = eff1.flatMap(_ => eff2)
+
+// we get:
+eff3 : B !! U1 with U2 
+```
+
+*Computations* can also be composed parallely, using product operator: `*!`
+
+The parallellism is potential only: it may or may not be actually happening, depending on *Handler* used to execute the *Computation*.
+
+Just like in case of `flatMap`, the *Effect Stack* of product equals *Effect Stack* is are automatically merged, by type intersection:
+
+
 
 # Operation
 
