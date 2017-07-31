@@ -85,13 +85,55 @@ Meanwhile, see [cheatsheet](./CHEATSHEET.md).
 
 # Effect
 
-In Skutek, an *Effect* is an abstract **type**, serving as a unique, type-level name. Such type is never instantiated or extended. *Effects* are only useful as type-arguments for other types. Most notably, for types of *Computations* and *Handlers*.
+In Skutek, an *Effect* is an abstract **type**, serving as a unique, type-level name. Such type is never instantiated or extended. *Effects* are only useful as type-arguments for other types or methods. Most notably, for types of *Computations* and *Handlers*.
 
 Effects can be:
-* parameterless, e.g. `Maybe` or `Choice`
-* or parametrized, e.g. `State[Int]` or `Error[String]`
+* parameterless, e.g. `Maybe`, `Choice`
+* or parametrized, e.g. `State[Int]`, `Error[String]`
 
 # Effect Stack
 
+TBD.
+
+1. Type `Any` represents **empty** *Effect Stack*
+
+1. Type `Any` is the neutral element of type intersection operator. In Scala, the following types are equivalent:
+    ```scala
+    State[Int]
+    State[Int] with Any
+    Any with State[Int]
+    ```
+    Therefore, they all represent the same *Effect Stack*.
+
+1. Order of occurence of *Effects* in the *Effect Stack* doesn't matter. In Scala, the following types are equivalent:
+    ```scala
+    State[Int] with Maybe
+    Maybe with State[Int]
+    ```
+    Therefore, they all represent the same *Effect stack*.
+
+1. Multiple occurences of the same *Effect* in the *Effect Stack*, are equivalent to just one occurence. In Scala, the following types are equivalent:
+    ```scala
+    State[Int]
+    State[Int] with State[Int]
+    ```
+    Therefore, they all represent the same *Effect Stack*.
+
+1. Bigger *Effect Stack* is a subtype of a smaller *Effect Stack*. For example:
+    ```scala
+    State[Int] with Maybe <: State[Int]
+    State[Int] with Maybe <: Maybe
+    ```
+    This will have consequences for types of *Computations* and *Handlers* (contravariance).
+
+Redundancies and reorderings shown in points 2, 3 and 4, may appear in error messages, when the *Effect Stack* of a *Computation* is inferred by Scala's compiler. It's ugly, but normal.
+
+A curious reader may wonder, what happens if there are two occurences of the same, parametrised *Effect* in the *Effect Stack*, but each one is applied with different type-argument. For example:
+```scala
+State[Int] with State[String]
+```
+It will be discussed it the section about **Tag Conflicts**.
+
+# Computation
 
 
