@@ -203,7 +203,21 @@ Just like in case of `flatMap`, the *Effect Stack* of product equals *Effect Sta
 
 # Operation
 
-TBD
+TBD.
+
+An *Operation* is an elementary *Computation*, specific for an *Effect*.  
+*Operations* are defined as dumb case classes, indirectly inheriting from `Effectful` trait.
+
+Examples:
+
+|Construction expression | *Effect* of the *Operation* | Type of *Computation*|
+|---|---|---|
+|`Get[Double]`        |`State[Double]`   | `Double !! State[Double]`| 
+|`Put(1.337)`         | same as above    | `Unit !! State[Double]`| 
+|`Tell("Hello")`      |`Writer[String]`  | `Unit !! Writer[String]`|
+|`Choose(1 to 10)`    |`Choice`          | `Int !! Choice`|
+
+Nullary *Operation* require explicit type parameter, like in the case of `Get[Double]`.
 
 ### Handler
 
