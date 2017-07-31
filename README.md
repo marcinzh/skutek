@@ -83,7 +83,7 @@ Meanwhile, see ~~[cheatsheet](./CHEATSHEET.md).~~
 1. **Operation**
 1. **Handler**
 
-# Effect
+# 1\. Effect
 
 In Skutek, an *Effect* is an abstract **type**, serving as a unique, type-level name. Such type is never instantiated or extended. *Effects* are only useful as type-arguments for other types or methods. Most notably, for types of *Computations* and *Handler* constructors.
 
@@ -91,7 +91,7 @@ Effects can be:
 * parameterless, e.g. `Maybe`, `Choice`
 * or parametrized, e.g. `State[Int]`, `Error[String]`
 
-# Effect Stack
+# 2\. Effect Stack
 
 TBD.
 
@@ -134,9 +134,9 @@ State[Int] with State[String]
 ```
 It will be discussed in the section about **Tag Conflicts**.
 
-# Computation
+# 3\. Computation
 
-### Computation types
+### 3\.1\. Computation types
 
 A *Computation* is value of a type derived from `Effectful[+A, -U]` trait.  
 Parameter `A` is the result type of the *Computation*.  
@@ -155,9 +155,9 @@ The latter is more readable, as long as you remember that:
 * Precedence of `!!` is lower than of `with`, so: `A !! U with V` == `A !! (U with V)`
 * Precedence of `!!` is higher than of `=>`, so: `A => B !! U` == `A => (B !! U)`
 
-### Computation values
+### 3\.2\. Computation values
 
-##### Return
+##### 3\.2\.1\. Return
 The simplest *Computation* is constructed by `Return(x)`, where `x` is any value.  
 
 This is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` in other monads. Except in Skutek, `Return(_)` is shared for all possible *Effects*.
@@ -176,7 +176,7 @@ eff : A !! Any
 
 Also, `Return()` is an abbreviation of `Return(())`.
 
-##### Composing Computations
+##### 3\.2\.2\. Composing Computations
 
 *Computation* is a monad, so standard `map`, `flatMap` and `flatten` methods are available.
 
@@ -201,7 +201,7 @@ Just like in case of `flatMap`, the *Effect Stack* of product equals *Effect Sta
 
 
 
-# Operation
+# 4\. Operation
 
 TBD.
 
@@ -210,7 +210,7 @@ An *Operation* is an elementary *Computation*, specific for an *Effect*.
 
 Examples:
 
-|Construction expression | *Effect* of the *Operation* | Type of *Computation*|
+|Constructor of *Operation* | *Effect* of the *Operation* | Type of the *Computation*|
 |---|---|---|
 |`Get[Double]`        |`State[Double]`   | `Double !! State[Double]`| 
 |`Put(1.337)`         | same as above    | `Unit !! State[Double]`| 
@@ -219,6 +219,51 @@ Examples:
 
 Nullary *Operation* require explicit type parameter, like in the case of `Get[Double]`.
 
-### Handler
+# 5\. Handler
 
-TBD
+*Handler* is an object, that has ability to handle an *Effect* (or *Effects*). 
+
+Handling an *Effect* (or *Effects*), is an act of removing some *Effect* (or *Effects*) from 
+the *Computation's* *Effect Stack*. Possibly, also transforming *Computation's* result 
+type in the process.
+
+Handling *Effects* is also the point, where **the order of effects** starts to matter.
+
+After all *Effects* are handled, *Computation's* *Effect Stack* is empty (i.e. provable to be `=:= Any`).
+Then, the *Computation* is ready to be executed. Obtained value is finally liberated from the monadic context:
+```scala
+// assuming:
+eff : A !! Any
+
+// let:
+val a = eff.run   
+
+// we get:
+a : A
+```
+### 5\.1\. Elementary handlers
+Every effect definiton provides a handler for its own *Effect*. Examples:
+
+| Constructor of *Handler* | *Effect* it handles | How the *Handler* transforms </br> *Computation's* result type `A` |
+|---|---|---|
+|`StateHandler(42.0)`|`State[Double]`| `(A, Double)` |
+|`ErrorHandler[String]`|`Error[String]`|`Either[String, A]`|
+|`ChoiceHandler`|`Choice`|`Vector[A]`|
+
+### 5\.2\. Composing handlers
+Multiple *Handlers* can be associatively composed using `+!` operator, forming *Handler*
+that can handle bigger sets of *Effects*. 
+
+For example, *Handler*:
+```scala
+val handler = StateHandler(42.0) +! ErrorHandler[String] +! ChoiceHandler
+```
+
+Can handle all the *Effects* in the following *Effects Stack*:
+
+```scala
+State[Double] with Error[String] with Choice
+```
+
+
+TBD.
