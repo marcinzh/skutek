@@ -136,8 +136,6 @@ It will be discussed in the section about **Tag Conflicts**.
 
 # 3\. Computation
 
-### 3\.1\. Computation types
-
 A *Computation* is value of a type derived from `Effectful[+A, -U]` trait.  
 Parameter `A` is the result type of the *Computation*.  
 Parameter `U` is the *Effect Stack* of the *Computation*.
@@ -152,12 +150,10 @@ type MyComputation = Foo !! State[Double] with Error[String] with Choice
 ```
 
 The latter is more readable, as long as you remember that:
-* Precedence of `!!` is lower than of `with`, so: `A !! U with V` == `A !! (U with V)`
-* Precedence of `!!` is higher than of `=>`, so: `A => B !! U` == `A => (B !! U)`
+* Precedence of `!!` is lower than of `with`, so `A !! U with V` means `A !! (U with V)`
+* Precedence of `!!` is higher than of `=>`, so `A => B !! U` means `A => (B !! U)`
 
-### 3\.2\. Computation values
-
-##### 3\.2\.1\. Return
+### 3\.1\. Return
 The simplest *Computation* is constructed by `Return(x)` case class, where `x` is any value.  
 
 `Return(_)` is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` from other monads. Except in Skutek, `Return(_)` is shared for all possible *Effects*.
@@ -176,7 +172,7 @@ eff : A !! Any
 
 Also, `Return()` is an abbreviation of `Return(())`.
 
-##### 3\.2\.2\. Composing Computations
+##### 3\.2\. Composing Computations
 
 *Computation* is a monad, so standard `map`, `flatMap` and `flatten` methods are available.
 
