@@ -295,19 +295,33 @@ This allows to encapsulate usage of local *Effect(s)* in a module, while
 still exporting effectful API that uses other, public *Effect(s)*.
 
 Such situation (although on small scale) can be seen in [Queens example](./examples/src/main/scala/skutek_examples/Queens.scala).
-* The `State` *Effect* is [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L39) internally.
-* The `Choice` *Effect* is [exported](./examples/src/main/scala/skutek_examples/Queens.scala#L28) in function's signature.
-* The `Choice` *Effect* is finally [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L10) by the client. By having control of the *Handler*, the client can decide whether it wants to enumerate all solutions, or just get the first one which comes.
+* The `State` *Effect* is used and [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L39) internally.
+* The `Choice` *Effect* is used and [exported](./examples/src/main/scala/skutek_examples/Queens.scala#L28) in function's result.
+* The `Choice` *Effect* is finally [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L10) by the client. By having control of the *Handler*, the client can decide whether it wants to enumerate all solutions, or just get the first one that is found.
 
+There are 2 ways of handling *Effects* locally: one is simpler, the other is safer. The safety issue is explained in the [Tag Conflicts](./README.md#tag-conflicts) section.
 
 # Traversing
 
 Traversing is a transformation of a collection-of-*Computations* into a *Computation*-of-collection.
 
+```scala
+// assuming:
+val effs : SomeCollection[A !! U] = ???
+
+// let:
+val eff = effs.parallelly // or:
+val eff = effs.serially
+
+// we get:
+eff : SomeCollection[A] !! U
+```
+
 TBD.
 
 # Tagging
 
+TBD.
 
 # Tag Conflicts
 
