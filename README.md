@@ -161,32 +161,32 @@ The simplest *Computation* is constructed by `Return(x)` case class, where `x` i
 This *Computation* has empty *Effect Stack*:
 ```scala
 // assuming: 
-val a : A = ???
+val a: A = ???
 
 // let:
 val eff = Return(a)
 
 // we get:
-eff : A !! Any
+eff: A !! Any
 ```
 
 Also, `Return()` is an abbreviation of `Return(())`.
 
-##### 3\.2\. Composing Computations
+### 3\.2\. Composing Computations
 
 *Computation* is a monad, so standard `map`, `flatMap` and `flatten` methods are available.
 
 When 2 *Computations* are composed using `flatMap`, their *Effect Stacks* are automatically merged, by type intersection:
 ```scala
 // assuming:
-val eff1 : A !! U1 = ???
-val eff2 : B !! U2 = ???
+val eff1: A !! U1 = ???
+val eff2: B !! U2 = ???
 
 // let:
 val eff3 = eff1.flatMap(_ => eff2)
 
 // we get:
-eff3 : B !! U1 with U2 
+eff3: B !! U1 with U2 
 ```
 
 *Computations* can also be composed parallely, using product operator: `*!`
@@ -230,13 +230,13 @@ After all *Effects* are handled, *Computation's* *Effect Stack* is empty (i.e. p
 Then, the *Computation* is ready to be executed. Obtained value is finally liberated from the monadic context:
 ```scala
 // assuming:
-eff : A !! Any
+eff: A !! Any
 
 // let:
 val a = eff.run   
 
 // we get:
-a : A
+a: A
 ```
 ### 5\.1\. Elementary handlers
 Every effect definiton provides a handler for its own *Effect*. Examples:
@@ -273,7 +273,7 @@ The **easiest** way of using *Handlers*, is to handle all *Effects* at once:
 Example:
 ```scala
 // assuming:
-eff : Int !! State[Double] with Choice = ???
+eff: Int !! State[Double] with Choice = ???
 
 // Step 1.
 val handler = StateHandler(1.377) +! ChoiceHandler
@@ -284,7 +284,7 @@ val result = handler.run(eff)
 val result = eff.runWith(handler)   // alternative syntax
 
 // we get:
-result : (Vector[Int], Double)
+result: (Vector[Int], Double)
 ```
 TBD.
 
@@ -300,6 +300,42 @@ Such situation (although on small scale) can be seen in [Queens example](./examp
 * The `Choice` *Effect* is finally [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L10) by the client. By having control of the *Handler*, the client can decide whether it wants to enumerate all solutions, or just get the first one that is found.
 
 There are 2 ways of handling *Effects* locally: one is simpler, the other is safer. The safety issue is explained in the [Tag Conflicts](./README.md#tag-conflicts) section.
+
+There is another complication. Unfortunately, in both cases you won't be able to rely on type inference. It will be necessery to explicitly pass an *Effect Stack* as type parameter to handling methods. 
+
+Moreover, this explicit *Effect Stack* has to consist of *Effects* that are going to **remain unhandled**, not the ones that are being **handled** in the call. That's rather inconvenient, but we can do nothing about it.
+
+##### 5\.4\.1\. The simpler way
+
+```scala
+// assuming:
+val eff: Int !! State[Double] with Reader[Boolean] with Error[String] with Choice = ???
+```
+We are going to handle *Effects* `State[Double]` and `Choice`.  
+We are going to leave *Effects* `Reader[Boolean]` and `Error[String]` unhandled.
+
+```scala
+// ...continued
+// let:
+val handler = StateHandler(1.377) +! ChoiceHandler
+
+type UnhandledEffects = Reader[Boolean] with Error[String]
+```
+Creation of the `UnhandledEffects` type alias is not necessary, but it makes the example less cluttered.
+
+```scala
+// ...continued
+val eff2 = handler.handleCarefully[UnhandledEffects](eff) 
+
+val eff2 = eff.handleCarefullyWith[UnhandledEffects](handler)  // alternative syntax
+
+// we get:
+eff2: (Vector[Int], Double) !! UnhandledEffects
+```
+
+
+
+##### 5\.4\.2\. The safer way
 
 # Traversing
 
