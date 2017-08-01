@@ -344,9 +344,12 @@ val eff2 = eff.fx[Error[String]].fx[Reader[Boolean]].handleWith(handler)  // alt
 // we get:
 eff2: ... // same as in previous example
 ```
-The chain of `fx` method calls is a Builder Pattern. It has to be used to enumerate **at least** every *Effects* that will remain unhandled, before closing the chain with `handle/handleWith` call. Otherwise it won't typecheck.
-
 The `fx` method is defined for both *Effect* and *Handler*. 
+
+The chain of `fx` method calls is a Builder Pattern. It has to be used to enumerate **at least** every *Effect* that is supposed to remain unhandled, before terminating the chain with `handle/handleWith` call. Otherwise it won't typecheck.
+
+Also, the type passed to `fx` has to be single `Effect`. Passing an *Effect Stack* of length other than `1`, won't work.
+
 
 # Traversing
 
