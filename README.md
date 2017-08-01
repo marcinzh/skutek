@@ -288,11 +288,26 @@ result : (Vector[Int], Double)
 ```
 TBD.
 
+### 5\.4\. Local handling
+In practical programs, it's often desirable to handle only a subset of
+*Computation's* *Effect Stack*, leaving the rest to be handled elsewhere.
+This allows to encapsulate usage of local *Effect(s)* in a module, while 
+still exporting effectful API that uses other, public *Effect(s)*.
+
+Such situation (although on small scale) can be seen in [Queens example](./examples/src/main/scala/skutek_examples/Queens.scala).
+* The `State` *Effect* is [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L39) internally.
+* The `Choice` *Effect* is [exported](./examples/src/main/scala/skutek_examples/Queens.scala#L28) in function's signature.
+* The `Choice` *Effect* is finally [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L10) by the client. By having control of the *Handler*, the client can decide whether it wants to enumerate all solutions, or just get the first one which comes.
+
+
 # Traversing
 
 Traversing is a transformation of a collection-of-*Computations* into a *Computation*-of-collection.
 
 TBD.
+
+# Tagging
+
 
 # Tag Conflicts
 
