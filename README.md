@@ -281,7 +281,7 @@ val handler = StateHandler(1.377) +! ChoiceHandler
 // Step 2.
 val result = handler.run(eff) 
 
-val result = eff.runWith(handler)   // alternative syntax
+val result = eff.runWith(handler)   // alternative syntax, with eff and handler flipped
 
 // we get:
 result: (Vector[Int], Double)
@@ -322,13 +322,31 @@ val handler = StateHandler(1.377) +! ChoiceHandler
 
 val eff2 = handler.handleCarefully[Reader[Boolean] with Error[String]](eff) 
 
-val eff2 = eff.handleCarefullyWith[Reader[Boolean] with Error[String]](handler)  // alternative syntax
+val eff2 = eff.handleCarefullyWith[Reader[Boolean] with Error[String]](handler)  // alternative syntax, with eff and handler flipped
 
 // we get:
 eff2: (Vector[Int], Double) !! Reader[Boolean] with Error[String]
 ```
 
 ##### 5\.4\.2\. The safer way
+
+```scala
+// assuming:
+val eff = ... // same as in previous example 
+
+// let:
+val hander = // same as in previous example 
+
+val eff2 = handler.fx[Error[String]].fx[Reader[Boolean]].handle(eff) 
+
+val eff2 = eff.fx[Error[String]].fx[Reader[Boolean]].handleWith(handler)  // alternative syntax, with eff and handler flipped
+
+// we get:
+eff2: ... // same as in previous example
+```
+The chain of `fx` method calls is a Builder Pattern. It has to be used to enumerate **at least** every *Effects* that will remain unhandled, before closing the chain with `handle/handleWith` call. Otherwise it won't typecheck.
+
+The `fx` method is defined for both *Effect* and *Handler*. 
 
 # Traversing
 
