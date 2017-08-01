@@ -160,7 +160,7 @@ The latter is more readable, as long as you remember that:
 ##### 3\.2\.1\. Return
 The simplest *Computation* is constructed by `Return(x)` case class, where `x` is any value.  
 
-`Return(_)` is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` in other monads. Except in Skutek, `Return(_)` is shared for all possible *Effects*.
+`Return(_)` is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` from other monads. Except in Skutek, `Return(_)` is shared for all possible *Effects*.
 
 This *Computation* has empty *Effect Stack*:
 ```scala
@@ -221,11 +221,12 @@ Nullary *Operation* require explicit type parameter, like in the case of `Get[Do
 
 # 5\. Handler
 
-*Handler* is an object, that has ability to handle an *Effect* (or *Effects*). 
+*Handler* is an object, that has ability to handle an *Effect Stack*. 
 
-Handling an *Effect* (or *Effects*), is an act of removing some *Effect* (or *Effects*) from 
-the *Computation's* *Effect Stack*. Possibly, also transforming *Computation's* result 
-type in the process.
+Handling an *Effect Stack*, is an act of removing those *Effects* from the *Computation's* *Effect Stack*. Possibly, also transforming *Computation's* result type in the process.
+
+`C₂ := C₁ \ H`
+
 
 Handling *Effects* is also the point, where **the order of effects** starts to matter.
 
