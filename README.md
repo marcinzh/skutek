@@ -310,6 +310,7 @@ Moreover, this explicit *Effect Stack* has to consist of *Effects* that are goin
 ```scala
 // assuming:
 val eff: Int !! State[Double] with Reader[Boolean] with Error[String] with Choice = ???
+// continued...
 ```
 We are going to handle *Effects* `State[Double]` and `Choice`.  
 We are going to leave *Effects* `Reader[Boolean]` and `Error[String]` unhandled.
@@ -319,21 +320,13 @@ We are going to leave *Effects* `Reader[Boolean]` and `Error[String]` unhandled.
 // let:
 val handler = StateHandler(1.377) +! ChoiceHandler
 
-type UnhandledEffects = Reader[Boolean] with Error[String]
-```
-Creation of the `UnhandledEffects` type alias is not necessary, but it makes the example less cluttered.
+val eff2 = handler.handleCarefully[Reader[Boolean] with Error[String]](eff) 
 
-```scala
-// ...continued
-val eff2 = handler.handleCarefully[UnhandledEffects](eff) 
-
-val eff2 = eff.handleCarefullyWith[UnhandledEffects](handler)  // alternative syntax
+val eff2 = eff.handleCarefullyWith[Reader[Boolean] with Error[String]](handler)  // alternative syntax
 
 // we get:
-eff2: (Vector[Int], Double) !! UnhandledEffects
+eff2: (Vector[Int], Double) !! Reader[Boolean] with Error[String]
 ```
-
-
 
 ##### 5\.4\.2\. The safer way
 
@@ -343,14 +336,14 @@ Traversing is a transformation of a collection-of-*Computations* into a *Computa
 
 ```scala
 // assuming:
-val effs : SomeCollection[A !! U] = ???
+val effs: SomeCollection[A !! U] = ???
 
 // let:
 val eff = effs.parallelly // or:
 val eff = effs.serially
 
 // we get:
-eff : SomeCollection[A] !! U
+eff: SomeCollection[A] !! U
 ```
 
 TBD.
