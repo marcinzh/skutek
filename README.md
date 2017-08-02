@@ -89,10 +89,10 @@ Meanwhile, see ~~[cheatsheet](./CHEATSHEET.md).~~
 
 *Effect Definition*, is a fragment of program, that extends functionality of `Effectful` monad. The monad, which is all that Skutek is about.
 
-An *Effect Definition* contains:
-* Definition of an *Effect*.
-* Definition of *Operation(s)* of that *Effect*.
-* Definition of *Handler(s)* of that *Effect*.
+An *Effect Definition* contains definitions of 3 kinds of entities:
+* An *Effect*.
+* *Operation(s)* of that *Effect*.
+* *Handler(s)* of that *Effect*.
 
 Skutek comes with [predefined](#predefined) effects. User can [define new effects](#def) as well.
 
@@ -450,9 +450,6 @@ eff: Unit !! Validation[String]
 ```
 
 
-
-
-
 TBD.
 
 # Tagging
@@ -462,3 +459,15 @@ TBD.
 # Tag Conflicts
 
 TBD.
+
+# Predefined Effects
+
+TBD.
+
+# Defining your own Effects
+
+TBD.
+
+This part is the most likely to be modified in future versions of Skutek.
+
+
