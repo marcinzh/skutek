@@ -80,14 +80,22 @@ Meanwhile, see ~~[cheatsheet](./CHEATSHEET.md).~~
 1. **Effect Definition**
 1. **Effect**
 1. **Effect Stack**
-1. **Computation** (the monad)
+1. **Computation**
 1. **Operation**
 1. **Handler**
 1. **Handling Effects**
 
 # 1\. Effect Definition
 
-TBD.
+*Effect Definition*, is a fragment of program, that extends functionality of `Effectful` monad. The monad, which is all that Skutek is about.
+
+An *Effect Definition* contains:
+* Definition of an *Effect*.
+* Definition of *Operation(s)* of that *Effect*.
+* Definition of *Handler(s)* of that *Effect*.
+
+Skutek comes with [predefined](#predefined) effects. User can [define new effects](#def) as well.
+
 
 # 2\. Effect
 
@@ -99,9 +107,30 @@ In Skutek, an *Effect* is an **abstract type** (a trait), serving as a unique, t
 
 # 3\. Effect Stack
 
-TBD.
+An *Effect Stack* in Skutek, is a set of *Effects*.  
 
-1. Type `Any` represents **empty** *Effect Stack*
+It's a misnomer to call it a "stack", as it wrongfully (in Skutek) suggests significance of the order of elements. We're going to use this term anyway, for traditon and convenience.
+
+Skutek uses **intersection types** as the representation of *Effect Stacks*.
+
+For example:
+```scala
+State[Double] with Error[String] with Choice
+```
+represents 3-element *Effect Stack*, comprising 3 *Effects*:
+```scala
+State[Double] 
+Error[String] 
+Choice
+```
+
+The nature of intersection types gives raise to the following properties of *Effect Stacks*:
+
+1. An *Effect* is also a single element *Effect Stack*.
+
+1. Type `Any` represents **empty** *Effect Stack*.
+
+   This might be counterintuitive. Had Scala have union types, we could have used them for *Effect Stacks* instead. Empty *Effect Stack* would have been `Nothing` type. The `Effectful` trait would have to have flipped the variance direction on its [second type parameter](#4-computation). Those two representations (tha actual and the hypothetical) are dual of each other, and would have similar properties. 
 
 1. Type `Any` is the neutral element of type intersection operator. In Scala, the following types are equivalent:
     ```scala
@@ -130,15 +159,26 @@ TBD.
     State[Int] with Maybe <: State[Int]
     State[Int] with Maybe <: Maybe
     ```
-    This will have consequences for types of *Computations* and *Handlers* (contravariance).
+    This will have consequences for types of *Computations* and *Handlers* (effect subtyping).
 
-Redundancies and reorderings shown in points 2, 3 and 4, may appear in error messages, when the *Effect Stack* of a *Computation* is inferred by Scala's compiler. It's ugly, but normal.
+There are caveats related to intersection types:
+* A curious reader may wonder, what happens if there are two occurences of the same, parametrised *Effect* in the *Effect Stack*, but each one is applied with different type-argument. For example:
+  ```scala
+  State[Int] with State[String]
+  ```
+  It will be discussed in [Tag Conflicts](#tag-conflicts) section.
 
-A curious reader may wonder, what happens if there are two occurences of the same, parametrised *Effect* in the *Effect Stack*, but each one is applied with different type-argument. For example:
-```scala
-State[Int] with State[String]
-```
-It will be discussed in [Tag Conflicts](#tag-conflicts) section.
+* Redundancies and reorderings shown in points 3, 4 and 5, may appear in error messages, when the *Effect Stack* of a *Computation* is inferred by Scala's compiler. It's ugly, but normal.
+
+* Occasionally, when using empty *Effect Stacks*, Scala compiler's linter may complain with message:
+  ```
+  a type was inferred to be `Any`, which usually indicates programming error
+  ```
+  This is a false positive. The solution is to either:
+  - Add explicit types here and there, until the linter shuts up.
+  - Selectively disable this specific feature of linter (and if it works for you, let me know).
+  - Disable the linter entirely.
+  
 
 # 4\. Computation
 
@@ -263,7 +303,7 @@ However, the order of actual handling is **reverse** of that: the innermost effe
 
 Handling an *Effect Stack*, is an act of using a *Handler* to transform a *Computation* to another one. 
 During this transformation, following things are observed:
-* *Computation's* *Effect Stack* is reduced. 
+* *Computation's* *Effect Stack* is reduced.  
   Precisely, a set difference is being performed: from *Computation's* *Effect Stack*, the *Handler's* *Effect Stack* is subtracted. Possibly, leaving empty set in the outcome.
 * *Computation's* result type is transformed by `Handler#Result[_]` type-level function.
 
