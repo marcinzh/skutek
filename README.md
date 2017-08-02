@@ -213,7 +213,7 @@ Examples:
 |`Tell("Hello")`      |`Writer[String]`  | `Unit !! Writer[String]`|
 |`Choose(1 to 10)`    |`Choice`          | `Int !! Choice`|
 
-Nullary *Operation* require explicit type parameter, like in the case of `Get[Double]`.
+Nullary *Operations* require explicit type parameter, like in the case of `Get[Double]`.
 
 # 5\. Handler
 
@@ -238,7 +238,7 @@ val a = eff.run
 // we get:
 a: A
 ```
-### 5\.1\. Elementary handlers
+## 5\.1\. Elementary handlers
 Every effect definiton provides a handler for its own *Effect*. Examples:
 
 | Constructor of *Handler* | *Effect* it handles | How the *Handler* transforms </br> *Computation's* result type `A` |
@@ -247,7 +247,7 @@ Every effect definiton provides a handler for its own *Effect*. Examples:
 |`ErrorHandler[String]`|`Error[String]`|`Either[String, A]`|
 |`ChoiceHandler`|`Choice`|`Vector[A]`|
 
-### 5\.2\. Composing handlers
+## 5\.2\. Composing handlers
 Multiple *Handlers* can be associatively composed using `+!` operator, forming *Handler*
 that can handle bigger sets of *Effects*. 
 
@@ -264,11 +264,11 @@ State[Double] with Error[String] with Choice
 
 The order of composition matters. *Handlers* are applied from right to left.
 
-### 5\.3\. Full handling
+## 5\.3\. Full handling
 
-The **easiest** way of using *Handlers*, is to handle all *Effects* at once: 
+The **easiest** way of using *Handlers*, is to handle entire *Effect Stack* at once: 
 1. Create composed *Handler*, covering all *Effects* in the *Computation's* *Effect Stack*.
-2. Handle *Effects* and execute the *Computation*, both in one call.
+2. Handle *Effects* and execute the *Computation*, all in one call.
 
 Example:
 ```scala
@@ -288,13 +288,13 @@ result: (Vector[Int], Double)
 ```
 TBD.
 
-### 5\.4\. Local handling
+## 5\.4\. Local handling
 In practical programs, it's often desirable to handle only a subset of
 *Computation's* *Effect Stack*, leaving the rest to be handled elsewhere.
 This allows to encapsulate usage of local *Effect(s)* in a module, while 
 still exporting effectful API that uses other, public *Effect(s)*.
 
-Such situation (although on small scale) can be seen in [Queens example](./examples/src/main/scala/skutek_examples/Queens.scala).
+Such situation (although on small scale) can be seen in the [Queens](./examples/src/main/scala/skutek_examples/Queens.scala) example:
 * The `State` *Effect* is used and [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L39) internally.
 * The `Choice` *Effect* is used and [exported](./examples/src/main/scala/skutek_examples/Queens.scala#L28) in function's result.
 * The `Choice` *Effect* is finally [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L10) by the client. By having control of the *Handler*, the client can decide whether it wants to enumerate all solutions, or just get the first one that is found.
@@ -305,7 +305,7 @@ There is another complication. Unfortunately, in both cases you won't be able to
 
 Moreover, this explicit *Effect Stack* has to consist of *Effects* that are going to **remain unhandled**, not the ones that are being **handled** in the call. That's rather inconvenient, but we can do nothing about it.
 
-##### 5\.4\.1\. The simpler way
+### 5\.4\.1\. The simpler way
 
 ```scala
 // assuming:
@@ -328,7 +328,7 @@ val eff2 = eff.handleCarefullyWith[Reader[Boolean] with Error[String]](handler) 
 eff2: (Vector[Int], Double) !! Reader[Boolean] with Error[String]
 ```
 
-##### 5\.4\.2\. The safer way
+### 5\.4\.2\. The safer way
 
 ```scala
 // assuming:
@@ -346,7 +346,7 @@ eff2: ... // same as in previous example
 ```
 The `fx` method is defined for both *Effect* and *Handler*. 
 
-The chain of `fx` method calls is a Builder Pattern. It has to be used to enumerate **at least** every *Effect* that is supposed to remain unhandled, before terminating the chain with `handle/handleWith` call. Otherwise it won't typecheck.
+The chain of `fx` method calls is a Builder Pattern. It has to be used to enumerate each *Effect* that is supposed to remain unhandled, before terminating the chain with `handle/handleWith` call. Otherwise it won't typecheck.
 
 Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stack* of length other than `1`, won't work.
 
