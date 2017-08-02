@@ -77,11 +77,13 @@ Meanwhile, see ~~[cheatsheet](./CHEATSHEET.md).~~
 
 # Core concepts in Skutek
 
+1. **Effect Definition**
 1. **Effect**
 1. **Effect Stack**
 1. **Computation** (the monad)
 1. **Operation**
 1. **Handler**
+1. **Handling Effects**
 
 # 1\. Effect
 
@@ -217,17 +219,53 @@ Nullary *Operations* require explicit type parameter, like in the case of `Get[D
 
 # 5\. Handler
 
-*Handler* is an object, that has ability to handle an *Effect Stack*. 
+*Handler* is an object, that has ability to handle an *Effect* (or multiple *Effects*).
 
-Handling an *Effect Stack*, is an act of removing those *Effects* from the *Computation's* *Effect Stack*. Possibly, also transforming *Computation's* result type in the process.
+Trait `Handler` is the supertype of all *Handlers*. It's dependent on 2 member types:
+* `Handler#Effects` - The set of *Effects* that can be handled by the *Handler* (an *Effect Stack*, essentially)
+* `Handler#Result[X]` - A type-level function, describing how *Computation's* result type is transformed during handling the *Effect Stack*.
 
-`C₂ := C₁ \ H`
+There are 2 kinds of *Handlers*:
+
+## 5\.1\. Elementary handlers
+
+Those are the original *Handlers*, each one dedicated to handling **single** specific *Effect*. Examples:
+
+| Constructor of *Handler* | `Handler#Effects` | `Handler#Result[A]` |
+|---|---|---|
+|`StateHandler(42.0)`|`State[Double]`| `(A, Double)` |
+|`ErrorHandler[String]`|`Error[String]`|`Either[String, A]`|
+|`ChoiceHandler`|`Choice`|`Vector[A]`|
+
+## 5\.2\. Composed handlers
+Multiple *Handlers* can be associatively composed using `+!` operator, forming *Handler*
+that can handle bigger *Effect Stack*. 
+
+For example, *Handler*:
+```scala
+val handler = StateHandler(42.0) +! ErrorHandler[String] +! ChoiceHandler
+```
+Can handle the following *Effects Stack*:
+
+```scala
+State[Double] with Error[String] with Choice
+```
+
+The order of composition matters.  
+The order of occurence of the operands is: outermost effect first, the innermost effect last.  
+However, the order of actual handling is **reverse** of that: the innermost effect is handled first, the outermost effect is handled last.
 
 
-Handling *Effects* is also the point, where **the order of effects** starts to matter.
+## 6\. Handling Effects
+
+Handling an *Effect Stack*, is an act of using a *Handler* to transform a *Computation* to another one. 
+During this transformation, following things are observed:
+* *Computation's* *Effect Stack* is reduced. 
+  Precisely, a set difference is being performed: from *Computation's* *Effect Stack*, the *Handler's* *Effect Stack* is subtracted. Possibly, leaving empty set in the outcome.
+* *Computation's* result type is transformed by `Handler#Result[_]` type-level function.
 
 After all *Effects* are handled, *Computation's* *Effect Stack* is empty (i.e. provable to be `=:= Any`).
-Then, the *Computation* is ready to be executed. Obtained value is finally liberated from the monadic context:
+Then, the *Computation* is ready to be executed. The obtained value is finally liberated from the monadic context:
 ```scala
 // assuming:
 eff: A !! Any
@@ -238,37 +276,11 @@ val a = eff.run
 // we get:
 a: A
 ```
-## 5\.1\. Elementary handlers
-Every effect definiton provides a handler for its own *Effect*. Examples:
-
-| Constructor of *Handler* | *Effect* it handles | How the *Handler* transforms </br> *Computation's* result type `A` |
-|---|---|---|
-|`StateHandler(42.0)`|`State[Double]`| `(A, Double)` |
-|`ErrorHandler[String]`|`Error[String]`|`Either[String, A]`|
-|`ChoiceHandler`|`Choice`|`Vector[A]`|
-
-## 5\.2\. Composing handlers
-Multiple *Handlers* can be associatively composed using `+!` operator, forming *Handler*
-that can handle bigger sets of *Effects*. 
-
-For example, *Handler*:
-```scala
-val handler = StateHandler(42.0) +! ErrorHandler[String] +! ChoiceHandler
-```
-
-Can handle all the *Effects* in the following *Effects Stack*:
-
-```scala
-State[Double] with Error[String] with Choice
-```
-
-The order of composition matters. *Handlers* are applied from right to left.
-
-## 5\.3\. Full handling
+## 6\.1\. Full handling
 
 The **easiest** way of using *Handlers*, is to handle entire *Effect Stack* at once: 
 1. Create composed *Handler*, covering all *Effects* in the *Computation's* *Effect Stack*.
-2. Handle *Effects* and execute the *Computation*, all in one call.
+2. Handle the *Effects* and execute the *Computation*, all in one call.
 
 Example:
 ```scala
@@ -286,9 +298,8 @@ val result = eff.runWith(handler)   // alternative syntax, with eff and handler 
 // we get:
 result: (Vector[Int], Double)
 ```
-TBD.
 
-## 5\.4\. Local handling
+## 6\.2\. Local handling
 In practical programs, it's often desirable to handle only a subset of
 *Computation's* *Effect Stack*, leaving the rest to be handled elsewhere.
 This allows to encapsulate usage of local *Effect(s)* in a module, while 
@@ -372,13 +383,14 @@ By "collection", we mean `Option`, `Either` or any subclass of `Iterable`.
 Skutek defines extension methods for traversing them: 
 * `parallelly` - Essentially, it's a fold with `*!`. The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
 * `serially` - Essentially, it's a **lazy** fold with `flatMap`. By "lazyness" here, we mean that abortable *Effects* (e.g. `Maybe`, `Error` or `Validation`) may abort executing the whole computation on the first error/failure/etc. encountered in the sequence.
+
 Obviously, for `Option` and `Either`, the difference between `serially` and `parallely` vanishes.
   
 In case we want to traverse collection only for the *Effects*, and discard result of each element of the collection, there are more efficient alternatives:
 * `parallellyVoid` 
 * `seriallyVoid`
 
-They are more efficient, because they avoid construction of useless collection of Unit values.
+They are more efficient, because they avoid construction of useless collection of `()` values. Also, the result type of the *Computation* is overriden as `Unit`.
 
 ```scala
 // assuming:
