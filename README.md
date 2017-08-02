@@ -93,7 +93,7 @@ TBD.
 
 In Skutek, an *Effect* is an **abstract type** (a trait), serving as a unique, type-level name. Such type is supposed to be never instantiated or inherited. *Effects* are only useful as type-arguments for other types or methods. Most notably, for types of *Computations* and *Handler* constructors.
 
-Effects can be:
+*Effects* can be:
 * parameterless, e.g. `Maybe`, `Choice`
 * or parametrized, e.g. `State[Int]`, `Error[String]`
 
@@ -138,7 +138,7 @@ A curious reader may wonder, what happens if there are two occurences of the sam
 ```scala
 State[Int] with State[String]
 ```
-It will be discussed in the section about **Tag Conflicts**.
+It will be discussed in [Tag Conflicts](#tag-conflicts) section.
 
 # 4\. Computation
 
