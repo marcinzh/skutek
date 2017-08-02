@@ -94,7 +94,7 @@ An *Effect Definition* contains definitions of 3 kinds of entities:
 * *Operation(s)* of that *Effect*.
 * *Handler(s)* of that *Effect*.
 
-Skutek comes with [predefined](#predefined) effects. User can [define new effects](#def) as well.
+Skutek comes with [predefined](#predefined-effects) effects. User can [define new effects](#defining-your-own-effect) as well.
 
 
 # 2\. Effect
@@ -464,7 +464,7 @@ TBD.
 
 TBD.
 
-# Defining your own Effects
+# Defining your own Effect
 
 TBD.
 
