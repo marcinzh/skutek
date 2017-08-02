@@ -160,7 +160,7 @@ The simplest *Computation* is constructed by `Return(x)` case class, where `x` i
 
 `Return(_)` is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` from other monads. Except in Skutek, `Return(_)` is shared for all possible *Effects*.
 
-This *Computation* has empty *Effect Stack*:
+A `Return(x)` has empty *Effect Stack*:
 ```scala
 // assuming: 
 val a: A = ???
@@ -197,18 +197,17 @@ The parallellism is potential only: it may or may not be actually happening, dep
 
 Just like in case of `flatMap`, the *Effect Stack* of product equals *Effect Stack* is are automatically merged, by type intersection:
 
-
+TBD.
 
 # 4\. Operation
 
-TBD.
 
 An *Operation* is an elementary *Computation*, specific for an *Effect*.  
 *Operations* are defined as dumb case classes, indirectly inheriting from `Effectful` trait.
 
 Examples:
 
-|Constructor of *Operation* | *Effect* of the *Operation* | Type of the *Computation*|
+|Constructor of *Operation* | It's *Effect Stack* | Type of the *Computation*|
 |---|---|---|
 |`Get[Double]`        |`State[Double]`   | `Double !! State[Double]`| 
 |`Put(1.337)`         | same as above    | `Unit !! State[Double]`| 
@@ -355,9 +354,9 @@ val eff2 = eff.fx[Error[String]].fx[Reader[Boolean]].handleWith(handler)  // alt
 // we get:
 eff2: ... // same as in previous example
 ```
-The `fx` method is defined for both *Effect* and *Handler*. 
+The `fx` method is defined for both `Effectful` and `Handler` traits. 
 
-The chain of `fx` method calls is a Builder Pattern. It has to be used to enumerate each *Effect* that is supposed to remain unhandled, before terminating the chain with `handle/handleWith` call. Otherwise it won't typecheck.
+The chain of `fx` method calls is a Builder Pattern. It has to be used to enumerate each *Effect* that is supposed to remain unhandled, before terminating the chain with `handle/handleWith` call. Otherwise, it's not supposed to typecheck.
 
 Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stack* of length other than `1`, won't work.
 
@@ -381,8 +380,10 @@ eff: List[Int] !! Validation[String]
 
 By "collection", we mean `Option`, `Either` or any subclass of `Iterable`.  
 Skutek defines extension methods for traversing them: 
-* `parallelly` - Essentially, it's a fold with `*!`. The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
-* `serially` - Essentially, it's a **lazy** fold with `flatMap`. By "lazyness" here, we mean that abortable *Effects* (e.g. `Maybe`, `Error` or `Validation`) may abort executing the whole computation on the first error/failure/etc. encountered in the sequence.
+* `parallelly` - Essentially, it's a fold with `*!`.  
+  The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
+* `serially` - Essentially, it's a **lazy** fold with `flatMap`.  
+  By "lazyness" here, we mean that abortable *Effects* (e.g. `Maybe`, `Error` or `Validation`) may abort executing the whole computation on the first error/failure/etc. encountered in the sequence.
 
 Obviously, for `Option` and `Either`, the difference between `serially` and `parallely` vanishes.
   
