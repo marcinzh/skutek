@@ -75,7 +75,7 @@ In progress.‥
 
 Meanwhile, see ~~[cheatsheet](./CHEATSHEET.md).~~
 
-# Core concepts in Skutek
+# Part I: Core concepts in Skutek
 
 1. **Effect Definition**
 1. **Effect**
@@ -117,13 +117,9 @@ For example:
 ```scala
 State[Double] with Error[String] with Choice
 ```
-represents 3-element *Effect Stack*, comprising 3 *Effects*:
-```scala
-State[Double] 
-Error[String] 
-Choice
-```
+represents 3-element *Effect Stack*, comprising 3 *Effects*: `State[Double]`, `Error[String]` and `Choice`.
 
+## 3\.1\. Properties
 The nature of intersection types gives raise to the following properties of *Effect Stacks*:
 
 1. An *Effect* is also a single element *Effect Stack*.
@@ -159,8 +155,12 @@ The nature of intersection types gives raise to the following properties of *Eff
     State[Int] with Maybe <: State[Int]
     State[Int] with Maybe <: Maybe
     ```
-    This will have consequences for types of *Computations* and *Handlers* (effect subtyping).
+    This has useful consequences for types of *Computations* and *Handlers* - effect subtyping:
+    * *Computation* with bigger *Effect Stack* can be substituted by a *Computation* with smaller *Effect Stack*.
+    * *Handler* with smaller *Effect Stack* can be substituted by a *Handler* with bigger *Effect Stack*.
+    
 
+## 3\.2\. Caveats
 There are caveats related to intersection types:
 * A curious reader may wonder, what happens if there are two occurences of the same, parametrised *Effect* in the *Effect Stack*, but each one is applied with different type-argument. For example:
   ```scala
@@ -182,7 +182,7 @@ There are caveats related to intersection types:
 
 # 4\. Computation
 
-A *Computation* is value of a type derived from `Effectful[+A, -U]` trait.  
+A *Computation* is any value of a type derived from `Effectful[+A, -U]` trait.  
 Parameter `A` is the result type of the *Computation*.  
 Parameter `U` is the *Effect Stack* of the *Computation*.
 
@@ -204,7 +204,7 @@ The simplest *Computation* is constructed by `Return(x)` case class, where `x` i
 
 `Return(_)` is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` from other monads. Except in Skutek, `Return(_)` is shared for all possible *Effects*.
 
-A `Return(x)` has empty *Effect Stack*:
+A `Return` has empty *Effect Stack*:
 ```scala
 // assuming: 
 val a: A = ???
@@ -246,7 +246,7 @@ TBD.
 # 5\. Operation
 
 
-An *Operation* is an elementary *Computation*, specific for an *Effect*.  
+An *Operation* is an elementary *Computation*, specific for an *Effect*.
 *Operations* are defined as dumb case classes, indirectly inheriting from `Effectful` trait.
 
 Examples:
@@ -296,7 +296,8 @@ State[Double] with Error[String] with Choice
 
 The order of composition matters.  
 The order of occurence of the operands is: outermost effect first, the innermost effect last.  
-However, the order of actual handling is **reverse** of that: the innermost effect is handled first, the outermost effect is handled last.
+However, the order of actual handling is **reverse** of that: the innermost effect is handled first, the outermost effect is handled last. This reversed order reflects the order of applications of `Handler#Result[X]` from each operand.
+
 
 
 ## 7\. Handling Effects
@@ -449,8 +450,8 @@ val eff = effs.seriallyVoid
 eff: Unit !! Validation[String]
 ```
 
+# Part II.
 
-TBD.
 
 # Tagging
 
