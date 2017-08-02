@@ -85,15 +85,19 @@ Meanwhile, see ~~[cheatsheet](./CHEATSHEET.md).~~
 1. **Handler**
 1. **Handling Effects**
 
-# 1\. Effect
+# 1\. Effect Definition
 
-In Skutek, an *Effect* is an abstract **type**, serving as a unique, type-level name. Such type is never instantiated or extended. *Effects* are only useful as type-arguments for other types or methods. Most notably, for types of *Computations* and *Handler* constructors.
+TBD.
+
+# 2\. Effect
+
+In Skutek, an *Effect* is an **abstract type** (a trait), serving as a unique, type-level name. Such type is supposed to be never instantiated or inherited. *Effects* are only useful as type-arguments for other types or methods. Most notably, for types of *Computations* and *Handler* constructors.
 
 Effects can be:
 * parameterless, e.g. `Maybe`, `Choice`
 * or parametrized, e.g. `State[Int]`, `Error[String]`
 
-# 2\. Effect Stack
+# 3\. Effect Stack
 
 TBD.
 
@@ -136,7 +140,7 @@ State[Int] with State[String]
 ```
 It will be discussed in the section about **Tag Conflicts**.
 
-# 3\. Computation
+# 4\. Computation
 
 A *Computation* is value of a type derived from `Effectful[+A, -U]` trait.  
 Parameter `A` is the result type of the *Computation*.  
@@ -155,7 +159,7 @@ The latter is more readable, as long as you remember that:
 * Precedence of `!!` is lower than of `with`, so `A !! U with V` means `A !! (U with V)`
 * Precedence of `!!` is higher than of `=>`, so `A => B !! U` means `A => (B !! U)`
 
-### 3\.1\. Return
+### 4\.1\. Return
 The simplest *Computation* is constructed by `Return(x)` case class, where `x` is any value.  
 
 `Return(_)` is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` from other monads. Except in Skutek, `Return(_)` is shared for all possible *Effects*.
@@ -174,7 +178,7 @@ eff: A !! Any
 
 Also, `Return()` is an abbreviation of `Return(())`.
 
-### 3\.2\. Composing Computations
+### 4\.2\. Composing Computations
 
 *Computation* is a monad, so standard `map`, `flatMap` and `flatten` methods are available.
 
@@ -199,7 +203,7 @@ Just like in case of `flatMap`, the *Effect Stack* of product equals *Effect Sta
 
 TBD.
 
-# 4\. Operation
+# 5\. Operation
 
 
 An *Operation* is an elementary *Computation*, specific for an *Effect*.  
@@ -216,7 +220,7 @@ Examples:
 
 Nullary *Operations* require explicit type parameter, like in the case of `Get[Double]`.
 
-# 5\. Handler
+# 6\. Handler
 
 *Handler* is an object, that has ability to handle an *Effect* (or multiple *Effects*).
 
@@ -226,7 +230,7 @@ Trait `Handler` is the supertype of all *Handlers*. It's dependent on 2 member t
 
 There are 2 kinds of *Handlers*:
 
-## 5\.1\. Elementary handlers
+## 6\.1\. Elementary handlers
 
 Those are the original *Handlers*, each one dedicated to handling **single** specific *Effect*. Examples:
 
@@ -236,7 +240,7 @@ Those are the original *Handlers*, each one dedicated to handling **single** spe
 |`ErrorHandler[String]`|`Error[String]`|`Either[String, A]`|
 |`ChoiceHandler`|`Choice`|`Vector[A]`|
 
-## 5\.2\. Composed handlers
+## 6\.2\. Composed handlers
 Multiple *Handlers* can be associatively composed using `+!` operator, forming *Handler*
 that can handle bigger *Effect Stack*. 
 
@@ -255,7 +259,7 @@ The order of occurence of the operands is: outermost effect first, the innermost
 However, the order of actual handling is **reverse** of that: the innermost effect is handled first, the outermost effect is handled last.
 
 
-## 6\. Handling Effects
+## 7\. Handling Effects
 
 Handling an *Effect Stack*, is an act of using a *Handler* to transform a *Computation* to another one. 
 During this transformation, following things are observed:
@@ -275,7 +279,7 @@ val a = eff.run
 // we get:
 a: A
 ```
-## 6\.1\. Full handling
+## 7\.1\. Full handling
 
 The **easiest** way of using *Handlers*, is to handle entire *Effect Stack* at once: 
 1. Create composed *Handler*, covering all *Effects* in the *Computation's* *Effect Stack*.
@@ -298,7 +302,7 @@ val result = eff.runWith(handler)   // alternative syntax, with eff and handler 
 result: (Vector[Int], Double)
 ```
 
-## 6\.2\. Local handling
+## 7\.2\. Local handling
 In practical programs, it's often desirable to handle only a subset of
 *Computation's* *Effect Stack*, leaving the rest to be handled elsewhere.
 This allows to encapsulate usage of local *Effect(s)* in a module, while 
@@ -315,7 +319,7 @@ There is another complication. Unfortunately, in both cases you won't be able to
 
 Moreover, this explicit *Effect Stack* has to consist of *Effects* that are going to **remain unhandled**, not the ones that are being **handled** in the call. That's rather inconvenient, but we can do nothing about it.
 
-### 5\.4\.1\. The simpler way
+### 7\.2\.1\. The simpler way
 
 ```scala
 // assuming:
@@ -338,7 +342,7 @@ val eff2 = eff.handleCarefullyWith[Reader[Boolean] with Error[String]](handler) 
 eff2: (Vector[Int], Double) !! Reader[Boolean] with Error[String]
 ```
 
-### 5\.4\.2\. The safer way
+### 7\.2\.2\. The safer way
 
 ```scala
 // assuming:
