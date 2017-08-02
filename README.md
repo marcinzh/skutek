@@ -353,18 +353,25 @@ Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stac
 
 # Traversing
 
-Traversing is a transformation of a collection-of-*Computations* into a *Computation*-of-collection.
+Traversing is transforming a collection-of-*Computations* into a *Computation*-of-collection.
 
+By "collection", we mean any `Iterable`, `Option` or `Either`. Skutek defines extension methods for traversing them:
+* `.parallelly` 
+* `.serially`
+
+Essentially, `parallelly` is a `fold` with `*!`, and `serially` is a **lazy** fold with `flatMap`.
+
+Example:
 ```scala
 // assuming:
-val effs: SomeCollection[A !! U] = ???
+val effs: List[Int !! Validation[String]] = ???
 
 // let:
 val eff = effs.parallelly // or:
 val eff = effs.serially
 
 // we get:
-eff: SomeCollection[A] !! U
+eff: List[Int] !! Validation[String]
 ```
 
 TBD.
