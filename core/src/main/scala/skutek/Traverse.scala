@@ -7,9 +7,9 @@ protected trait Traverse_exports {
 
   implicit class IterableOfEffs_extension[+A, -U, S[+X] <: Iterable[X]](thiz: S[A !! U]) {
 
-    def traverseVoid: Unit !! U = thiz.foldLeft(Return().upCast[U])(_ *<! _)
+    def parallellyVoid: Unit !! U = thiz.foldLeft(Return().upCast[U])(_ *<! _)
 
-    def traverseLazyVoid: Unit !! U = {
+    def seriallyVoid: Unit !! U = {
       def loop(todos: Iterable[A !! U]): Unit !! U =
         if (todos.isEmpty)
           Return()
@@ -23,12 +23,12 @@ protected trait Traverse_exports {
 
   implicit class IterableOfEffsCBF_extension[+A, -U, S[+X] <: Iterable[X]](thiz: S[A !! U])(implicit cbf: CanBuildFrom[S[A !! U], A, S[A]]) {
 
-    def traverse: S[A] !! U = {
+    def parallelly: S[A] !! U = {
       thiz.foldLeft(Return(Vector.empty[A]).upCast[U]) { case (as_!, a_!) => (as_! *! a_!).map2(_ :+ _) }
       .map(as => (cbf() ++= as).result())
     }
 
-    def traverseLazy: S[A] !! U = {
+    def serially: S[A] !! U = {
       def loop(todos: Iterable[A !! U], accum: Vector[A]): Vector[A] !! U =
         if (todos.isEmpty)
           Return(accum)
@@ -42,23 +42,23 @@ protected trait Traverse_exports {
 
 
   implicit class OptionOfEff_extension[+A, -U](thiz: Option[A !! U]) {
-    def traverse: Option[A] !! U = thiz match {
+    def parallelly: Option[A] !! U = thiz match {
       case Some(eff) => eff.map(Some(_))
       case None => Return(None)
     }
-    def traverseVoid = traverse.map(_.map(_ => ()))
-    def traverseLazy = traverse
-    def traverseLazyVoid = traverseVoid
+    def parallellyVoid = parallelly.map(_.map(_ => ()))
+    def serially = parallelly
+    def seriallyVoid = parallellyVoid
   }
 
 
   implicit class EitherOfEff_extension[+A, +T, -U](thiz: Either[T, A !! U]) {
-    def traverse: Either[T, A] !! U = thiz match {
+    def parallelly: Either[T, A] !! U = thiz match {
       case Right(eff) => eff.map(Right(_))
       case Left(x) => Return(Left(x))
     }
-    def traverseVoid = traverse.map(_.right.map(_ => ()))
-    def traverseLazy = traverse
-    def traverseLazyVoid = traverseVoid
+    def parallellyVoid = parallelly.map(_.right.map(_ => ()))
+    def serially = parallelly
+    def seriallyVoid = parallellyVoid
   }
 }

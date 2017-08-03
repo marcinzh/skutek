@@ -58,7 +58,7 @@ class StackSafetyTests extends Specification {
           def apply[A, U](eff: A !! U) = many(eff).reduce((a, b) => a.flatMap(_ => b)) 
         },
         new Mapper("traversed") { 
-          def apply[A, U](eff: A !! U) = many(eff).traverse 
+          def apply[A, U](eff: A !! U) = many(eff).parallelly 
         }
       )
     }
