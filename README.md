@@ -73,8 +73,6 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.0"
 
 In progress.‥
 
-Meanwhile, see ~~[cheatsheet](./CHEATSHEET.md).~~
-
 # Part I: Core concepts in Skutek
 
 1. **Effect Definition**
