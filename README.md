@@ -238,7 +238,7 @@ val eff3 = eff1.flatMap(_ => eff2)
 eff3: B !! U1 with U2 
 ```
 
-Two *Computations* can also be composed parallely, using product operator: `*!`. *Computation's* result type is a pair of result types of the operands.  
+Two *Computations* can also be composed parallelly, using product operator: `*!`. *Computation's* result type is a pair of result types of the operands.  
 
 The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
 
@@ -423,11 +423,16 @@ eff2: ... // same as in previous example
 ```
 The `fx` method is defined for both `Effectful` and `Handler` traits. 
 
-The chain of `fx` method calls is a Builder Pattern. It has to be used to enumerate each *Effect* that is supposed to remain unhandled, before terminating the chain with `handle/handleWith` call. Otherwise, it's not supposed to typecheck.
+The chain of `fx` method calls is a Builder Pattern. It has to be used to enumerate each *Effect* that is has to remain unhandled, before terminating the chain with `handle/handleWith` call. Otherwise, it's not supposed to typecheck.
 
 Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stack* of length other than `1`, won't work.
 
 # Part II.
+1. Traversing
+1. Tagging
+1. Tag Conflicts
+1. Predefined Effects
+1. Defining you own Effect
 
 # Traversing
 
