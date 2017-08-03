@@ -141,7 +141,7 @@ The nature of intersection types gives raise to the following properties of *Eff
     State[Int] with Maybe
     Maybe with State[Int]
     ```
-    Therefore, they all represent the same *Effect stack*.
+    Therefore, they all represent the same *Effect Stack*.
 
 1. Multiple occurences of the same *Effect* in the *Effect Stack*, are equivalent to just one occurence. In Scala, the following types are equivalent:
     ```scala
