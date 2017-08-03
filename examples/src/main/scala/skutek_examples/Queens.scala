@@ -35,7 +35,7 @@ object Queens {
         _ <- Put(solution :+ p)
       } yield ()
     )
-    .traverseVoid
+    .seriallyVoid
     .handleCarefullyWith(StateHandler(Vector.empty[Placement]).exec)
   }
 

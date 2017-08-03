@@ -57,12 +57,12 @@ class TraverseTests extends Specification with CanLaunchTheMissiles {
 
     val h = ValidationHandler[String]
 
-    def testEager = (h run effs.traverse)     must_== Left(Vector(x, y, z))
-    def testLazy  = (h run effs.traverseLazy) must_== Left(Vector(x))
+    def testParallel = (h run effs.parallelly) must_== Left(Vector(x, y, z))
+    def testSerial   = (h run effs.serially)   must_== Left(Vector(x))
 
     def is = 
-      br ^ "Eager traverse of Validation should be parallelizable"    ! testEager ^
-      br ^ "Lazy traverse of Validation should not be parallelizable" ! testLazy
+      br ^ "Parallel traverse of Validation" ! testParallel ^
+      br ^ "Serial traverse of Validation"   ! testSerial
   }
 
 
@@ -87,10 +87,10 @@ class TraverseTests extends Specification with CanLaunchTheMissiles {
       val missiles = Missiles()
       val effs = (Tell(true) :: Naught :: missiles.launch_! :: Nil)
       val eff = (useVoid, useLazy) match {
-        case (false, false) => effs.traverse
-        case (false, true) => effs.traverseLazy
-        case (true, false) => effs.traverseVoid
-        case (true, true) => effs.traverseLazyVoid
+        case (false, false) => effs.parallelly
+        case (false, true) => effs.serially
+        case (true, false) => effs.parallellyVoid
+        case (true, true) => effs.seriallyVoid
       }
 
       val m = MaybeHandler
@@ -101,11 +101,11 @@ class TraverseTests extends Specification with CanLaunchTheMissiles {
         (w +! m) run eff
 
       val descr = {
-        val sLazy = if (useLazy) "" else "Lazy"
+        val sLazy = if (useLazy) "parallelly" else "serially"
         val sLazy2 = if (useLazy) "eager" else "lazy"
         val sVoid = if (useVoid) "" else "Void"
         val sTop = if (onTop) "top" else "bottom"
-              s"traverse$sLazy$sVoid when abortable effect is on the $sTop of the handler stack should be $sLazy2"
+              s"$sLazy$sVoid, when abortable effect is on the $sTop of the handler stack, should be $sLazy2"
           }
 
       br ^ descr ! { missiles.launchedOnce must_== !useLazy }
