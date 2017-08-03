@@ -184,7 +184,7 @@ There are caveats related to intersection types:
 
 A *Computation* is any value of a type derived from `Effectful[+A, -U]` trait.  
 Parameter `A` is the result type of the *Computation*.  
-Parameter `U` is the *Effect Stack* of the *Computation*. It's meaning is to act as a registry of *Effects* will have to be handled, before the result of the *Computation* can be obtained.
+Parameter `U` is the *Effect Stack* of the *Computation*. It's meaning is to act as a registry of *Effects* that will have to be handled, before the result of the *Computation* can be obtained.
 
 Example:
 ```scala
@@ -278,7 +278,9 @@ There are 2 kinds of *Handlers*:
 
 ## 6\.1\. Elementary handlers
 
-Those are the original *Handlers*, each one dedicated to handling **single** specific *Effect*. Examples:
+Those are the original *Handlers*, provided by *Effect Definitions*. Each one is dedicated to handling **single** specific *Effect*. 
+
+Examples:
 
 | Constructor of *Handler* | `Handler#Effects` | `Handler#Result[A]` |
 |---|---|---|
