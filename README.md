@@ -184,7 +184,7 @@ There are caveats related to intersection types:
 
 A *Computation* is any value of a type derived from `Effectful[+A, -U]` trait.  
 Parameter `A` is the result type of the *Computation*.  
-Parameter `U` is the *Effect Stack* of the *Computation*.
+Parameter `U` is the *Effect Stack* of the *Computation*. It's meaning is to act as a registry of *Effects* will have to be handled, before the result of the *Computation* can be obtained.
 
 Example:
 ```scala
@@ -240,6 +240,12 @@ eff3: B !! U1 with U2
 The parallellism is potential only: it may or may not be actually happening, depending on *Handler* used to execute the *Computation*.
 
 Just like in case of `flatMap`, the *Effect Stack* of product equals *Effect Stack* is are automatically merged, by type intersection:
+
+TBD.
+
+TBD.
+
+TBD.
 
 TBD.
 
