@@ -325,7 +325,7 @@ Handling an *Effect Stack*, is an act of using a *Handler* to transform a *Compu
 
 During this transformation, following things are observed:
 * *Computation's* *Effect Stack* is reduced.  
-  Precisely, a set difference is being performed: from *Computation's* *Effect Stack*, the *Handler's* *Effect Stack* is subtracted. Possibly even leaving empty set in the outcome.
+  Precisely, **a set difference** is performed: from *Computation's* *Effect Stack*, the *Handler's* *Effect Stack* is subtracted. Possibly even leaving empty set in the outcome.
 * *Computation's* result type is transformed by `Handler#Result[_]` type-level function.
 
 After all *Effects* are handled, *Computation's* *Effect Stack* is empty (i.e. provable to be `=:= Any`).
