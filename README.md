@@ -107,7 +107,7 @@ In Skutek, an *Effect* is an **abstract type** (a trait), serving as a unique, t
 
 # 3\. Effect Stack
 
-An *Effect Stack* in Skutek, is a set of *Effects*.  
+An *Effect Stack* in Skutek, is a type-level set of *Effects*.  
 
 It's a misnomer to call it a "stack", as it wrongfully (in Skutek) suggests significance of the order of elements. We're going to use this term anyway, for traditon and convenience.
 
