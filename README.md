@@ -99,7 +99,7 @@ Skutek comes with [predefined](#predefined-effects) effects. User can [define ne
 
 # 2\. Effect
 
-In Skutek, an *Effect* is an **abstract type** (a trait), serving as a unique, type-level name. Such type is supposed to be never instantiated or inherited. *Effects* are only useful as type-arguments for other types or methods. Most notably, for types of *Computations* and *Handler* constructors.
+In Skutek, an *Effect* is an **abstract type** (a trait), serving as a unique, type-level **name**. Such type is supposed to be never instantiated or inherited. *Effects* are only useful as type-arguments for other types or methods. Most notably, for types of *Computations* and *Handler* constructors.
 
 *Effects* can be:
 * parameterless, e.g. `Maybe`, `Choice`
@@ -107,9 +107,9 @@ In Skutek, an *Effect* is an **abstract type** (a trait), serving as a unique, t
 
 # 3\. Effect Stack
 
-An *Effect Stack* in Skutek, is a type-level set of *Effects*.  
+An *Effect Stack* in Skutek, is a type-level **set** of *Effects*.  
 
-It's a misnomer to call it a "stack", as it wrongfully (in Skutek) suggests significance of the order of elements. We're going to use this term anyway, for traditon and convenience.
+It's a misnomer to call it a "stack", as it wrongfully (in case of Skutek) suggests significance of the order of elements. Despite that, we're going to use this term, for traditon and convenience.
 
 Skutek uses **intersection types** as the representation of *Effect Stacks*.
 
@@ -157,8 +157,9 @@ The nature of intersection types gives raise to the following properties of *Eff
     ```
     This has useful consequences for types of *Computations* and *Handlers* - effect subtyping:
     * *Computation* with bigger *Effect Stack* can be substituted by a *Computation* with smaller *Effect Stack*.
-    * *Handler* with smaller *Effect Stack* can be substituted by a *Handler* with bigger *Effect Stack*.
+    * *Handler* of smaller *Effect Stack* can be substituted by a *Handler* of bigger *Effect Stack*.
     
+    Clarification: when mentioning "bigger" and "smaller" *Effect Stacks*, we refer to pair of sets of *Effect*, in subset/superset relation.
 
 ## 3\.2\. Caveats
 There are caveats related to intersection types:
@@ -183,14 +184,14 @@ There are caveats related to intersection types:
 # 4\. Computation
 
 A *Computation* is any value of a type derived from `Effectful[+A, -U]` trait.  
-Parameter `A` is the result type of the *Computation*.  
-Parameter `U` is the *Effect Stack* of the *Computation*. It's meaning is to act as a registry of *Effects* that will have to be handled, before the result of the *Computation* can be obtained.
+* Parameter `A` is the result type of the *Computation*.  
+* Parameter `U` is the *Effect Stack* of the *Computation*. It's meaning is to act as a registry of *Effects* that will have to be handled, before the result of the *Computation* can be obtained.
 
 Example:
 ```scala
 type MyComputation = Effectful[Foo, State[Double] with Error[String] with Choice]
 ```
-Same example, but using `!!`, an infix type alias for `Effectful`:
+Same example, but using `!!`, an **infix type alias** for `Effectful`:
 ```scala
 type MyComputation = Foo !! State[Double] with Error[String] with Choice
 ```
@@ -222,38 +223,48 @@ Also, `Return()` is an abbreviation of `Return(())`.
 
 *Computation* is a monad, so standard `map`, `flatMap` and `flatten` methods are available.
 
-When 2 *Computations* are composed using `flatMap`, their *Effect Stacks* are automatically merged, by type intersection:
+When 2 *Computations* are composed using `flatMap`, their *Effect Stacks* are **automatically merged**, by type intersection.
+
+Example:
+```scala
+// assuming:
+val eff1: A !! U1 = ???
+val eff2: B !! U2 = ???  // dependency of eff2 on eff1 is ommited for the sake of clarity
+
+// let:
+val eff3 = eff1.flatMap(_ => eff2)  
+
+// we get:
+eff3: B !! U1 with U2 
+```
+
+Two *Computations* can also be composed parallely, using product operator: `*!`. *Computation's* result type is a pair of result types of the operands.  
+
+The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
+
+Just like in case of `flatMap`, *Effect Stack* of the product comes from merging *Effect Stacks* of the operands.
+
+Example:
 ```scala
 // assuming:
 val eff1: A !! U1 = ???
 val eff2: B !! U2 = ???
 
 // let:
-val eff3 = eff1.flatMap(_ => eff2)
+val eff3 = eff1 *! eff2
 
 // we get:
-eff3: B !! U1 with U2 
+eff3: (A, B) !! U1 with U2 
 ```
 
-*Computations* can also be composed parallely, using product operator: `*!`
+Additional 2 operators are provided: `*<!` and `*>!`. They work just like `*!`, with addition of projecting resulting pair to it's first and second component respectively.
 
-The parallellism is potential only: it may or may not be actually happening, depending on *Handler* used to execute the *Computation*.
-
-Just like in case of `flatMap`, the *Effect Stack* of product equals *Effect Stack* is are automatically merged, by type intersection:
-
-TBD.
-
-TBD.
-
-TBD.
-
-TBD.
 
 # 5\. Operation
 
-
 An *Operation* is an elementary *Computation*, specific for an *Effect*.
-*Operations* are defined as dumb case classes, indirectly inheriting from `Effectful` trait.
+
+*Operations* originate from *Effect Definitions*, where they are defined as dumb case classes, indirectly inheriting from `Effectful` trait.
 
 Examples:
 
@@ -268,17 +279,19 @@ Nullary *Operations* require explicit type parameter, like in the case of `Get[D
 
 # 6\. Handler
 
-*Handler* is an object, that has ability to handle an *Effect* (or multiple *Effects*).
+*Handler* is an object, that has ability to handle an *Effect* (or multiple *Effects*).  
+
+Terminology: When it is stated that a *Handler* handles an *Effect Stack*, it's done to emphasize that a *Handler* can handle **multiple** *Effects* at once. It should not be interpreted as statement, that *Handler* can handle this particular *Effect Stack* only.
 
 Trait `Handler` is the supertype of all *Handlers*. It's dependent on 2 member types:
-* `Handler#Effects` - The set of *Effects* that can be handled by the *Handler* (an *Effect Stack*, essentially)
+* `Handler#Effects` - An *Effect Stack* - set of *Effects* that can be handled by this *Handler*.
 * `Handler#Result[X]` - A type-level function, describing how *Computation's* result type is transformed during handling the *Effect Stack*.
 
 There are 2 kinds of *Handlers*:
 
 ## 6\.1\. Elementary handlers
 
-Those are the original *Handlers*, provided by *Effect Definitions*. Each one is dedicated to handling **single** specific *Effect*. 
+Those *Handlers* originate from *Effect Definitions*. Each one is dedicated to handling **single** specific *Effect*. 
 
 Examples:
 
@@ -302,18 +315,19 @@ Can handle the following *Effects Stack*:
 State[Double] with Error[String] with Choice
 ```
 
-The order of composition matters.  
-The order of occurence of the operands is: outermost effect first, the innermost effect last.  
-However, the order of actual handling is **reverse** of that: the innermost effect is handled first, the outermost effect is handled last. This reversed order reflects the order of applications of `Handler#Result[X]` from each operand.
+The order of composition matters:  
+* The order of occurence of the operands is: outermost effect first, the innermost effect last.  
+* However, the order of actual handling is **reverse** of that: the innermost effect is handled first, the outermost effect is handled last. This reversed order reflects the order of applications of `Handler#Result[X]` from each operand.
 
 
 
 ## 7\. Handling Effects
 
 Handling an *Effect Stack*, is an act of using a *Handler* to transform a *Computation* to another one. 
+
 During this transformation, following things are observed:
 * *Computation's* *Effect Stack* is reduced.  
-  Precisely, a set difference is being performed: from *Computation's* *Effect Stack*, the *Handler's* *Effect Stack* is subtracted. Possibly, leaving empty set in the outcome.
+  Precisely, a set difference is being performed: from *Computation's* *Effect Stack*, the *Handler's* *Effect Stack* is subtracted. Possibly even leaving empty set in the outcome.
 * *Computation's* result type is transformed by `Handler#Result[_]` type-level function.
 
 After all *Effects* are handled, *Computation's* *Effect Stack* is empty (i.e. provable to be `=:= Any`).
