@@ -413,6 +413,7 @@ The chain of `fx` method calls is a Builder Pattern. It has to be used to enumer
 
 Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stack* of length other than `1`, won't work.
 
+# Part II.
 
 # Traversing
 
@@ -458,7 +459,7 @@ val eff = effs.seriallyVoid
 eff: Unit !! Validation[String]
 ```
 
-# Part II.
+
 
 
 # Tagging
