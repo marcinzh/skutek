@@ -479,7 +479,7 @@ eff: Unit !! Validation[String] with Writer[String]
 
 # Tagging Effects
 
-As explained in the [beginning](.#2-effect), the role of *Effect* is to be type-level name. Tagging allows overriding that name, so that multiple instances of the same *Effect* can exist together in the same *Effect Stack*. 
+As explained in the [beginning](.#2-effect), the role of *Effect* is to be type-level name. Tagging allows overriding that name, so that multiple instances of the same *Effect* can coexist in one *Effect Stack*. 
 
 Such name-overriding is done by attaching unique *Tag*. A *Tag* is required to be unique **type**, as well as unique **value**. The easiest way of definning *Tags*, is with `case object`. For example:
 ```scala
@@ -528,6 +528,22 @@ result == (("42 * 0.25 = 10.5", 10.5), 42)
 Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. Currently, Skutek uses `ClassOf[Fx]` as the default *Tag* for *Effect* `Fx`.
 
 This makes *Effect Stacks* type-level **maps**, not sets. Sorry for the [deception](.#2-effect).
+
+Caution: you can't attach a *Tag* to a composed *Computation*. Neither to a composed *Handler* for the matter, but it wouldn't make sense anyway.
+```scala
+// assuming:
+def modify[S](f : S => S) = for { 
+  s <- Get[S]
+  _ <- Put(f(s)) 
+} yield ()
+
+val inc = (i: Int) => i + 1)
+
+// let:
+val eff = modify(inc) @! TagA
+```
+
+This won't work.
 
 # Tag Conflicts
 
