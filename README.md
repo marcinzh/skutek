@@ -52,8 +52,8 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.1"
     - No clever type-fu, no macros. Mostly immutable OOP style.
      
 - Practical stuff:
-    - Predefined set of basic effects (`Reader`, `Writer`, etc.).
-    - Ability to annotate effects with tags
+    - Predefined set of basic effects (`Reader`, `Writer`, etc.). [read more](#predefined-effects)
+    - Ability to annotate effects with tags. [read more](#tagging-effects)
     - Potentially parallel execution of effects.
     - Support for `for` comprehension guards, for effects compatible with filtering (e.g. `Maybe`, `Choice`).
     - Tested stack safety.    
@@ -61,10 +61,10 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.1"
 - Caveats and limitations:
     - General infancy of the project.
     - No possiblity of adapting pre-existing monads as Skutek's effects.
-    - Removing effects from the stack (local handling) isn't as easy as adding them. Some explicit typing is necessary.
-    - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`...")
+    - Removing effects from the stack (local handling) isn't as easy as adding them. Some explicit typing is necessary. [read more](#72-local-handling)
+    - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`...") [read more](#32-caveats)
     - Using patterns in `for` comprehensions can trigger surprising errors (Scala's wart, not specific to Skutek)
-    - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. 
+    - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. [read more](#tag-conflicts)
     - Lack of performance analysis.
     - `Concurrency` effect is a hack.
 
@@ -75,13 +75,13 @@ In progress.‥
 
 # Part I: Core concepts in Skutek
 
-1. **Effect Definition**
-1. **Effect**
-1. **Effect Stack**
-1. **Computation**
-1. **Operation**
-1. **Handler**
-1. **Handling Effects**
+1. [Effect Definition](#1-effect-definition)
+1. [Effect](#2-effect)
+1. [Effect Stack](#3-effect-stack)
+1. [Computation](#4-computation)
+1. [Operation](#5-operation)
+1. [Handler](#6-handler)
+1. [Handling Effects](#7-handling-effects)
 
 # 1\. Effect Definition
 
@@ -325,7 +325,7 @@ Handling an *Effect Stack*, is an act of using a *Handler* to transform a *Compu
 
 During this transformation, following things are observed:
 * *Computation's* *Effect Stack* is reduced.  
-  Precisely, a set difference is being performed: from *Computation's* *Effect Stack*, the *Handler's* *Effect Stack* is subtracted. Possibly even leaving empty set in the outcome.
+  Precisely, **a set difference** is performed: from *Computation's* *Effect Stack*, the *Handler's* *Effect Stack* is subtracted. Possibly even leaving empty set in the outcome.
 * *Computation's* result type is transformed by `Handler#Result[_]` type-level function.
 
 After all *Effects* are handled, *Computation's* *Effect Stack* is empty (i.e. provable to be `=:= Any`).
@@ -426,11 +426,11 @@ The chain of `fx` method calls is a Builder Pattern. It has to be used to enumer
 Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stack* of length other than `1`, won't work.
 
 # Part II.
-1. Traversing
-1. Tagging
-1. Tag Conflicts
-1. Predefined Effects
-1. Defining you own Effect
+1. [Traversing](#traversing)
+1. [Tagging Effects](#tagging-effects)
+1. [Tag Conflicts](#tag-conflicts)
+1. [Predefined Effects](#predefined-effects)
+1. [Defining you own Effect](#defining-your-own-effect)
 
 # Traversing
 
@@ -466,22 +466,86 @@ They are more efficient, because they avoid construction of useless collection o
 
 ```scala
 // assuming:
-val effs: List[Int !! Validation[String]] = ???
+val effs: List[Int !! Validation[String] with Writer[String]] = ???
 
 // let:
 val eff = effs.parallellyVoid // or:
 val eff = effs.seriallyVoid
 
 // we get:
-eff: Unit !! Validation[String]
+eff: Unit !! Validation[String] with Writer[String]
 ```
 
 
+# Tagging Effects
 
+As explained in the [beginning](#2-effect), the role of *Effect* is to be type-level name. Tagging allows overriding that name, so that multiple instances of the same *Effect* can coexist in one *Effect Stack*. 
 
-# Tagging
+Such name-overriding is done by attaching unique *Tag*. A *Tag* is required to be unique **type**, as well as unique **value**. The easiest way of definning *Tags*, is with `case object`. For example:
+```scala
+case object TagA
+case object TagB
+```
+Attaching a *Tag* to an *Effect* is done using `@!`, a **type-level** operator.
 
-TBD.
+For example, an *Effect Stack* with 2 `State` *Effects*, each given separate *Tag*, looks like this:
+```scala
+(State[Int] @! TagA) with (State[Double] @! TagB)
+```
+For such *Effects* to be usable, we need ability to also tag *Operations* and *Handlers*, so that they are compatible with the tagged *Effects*. This tagging is also done using `@!` operator. However, this time it operates on **values**, instead of types.
+
+Example of tagged *Operation*:
+```scala
+val eff = Get[Int] @! TagA
+```
+Example of tagged *Handler*:
+```scala
+val handler = StateHandler(42) @! TagA
+```
+In 2 above examples, the *Effect Stack* of `eff` and `handler` is `State[Int] @! TagA`
+
+Now, full example combining 2 tagged *Effects*:
+```scala
+case object TagA
+case object TagB
+
+val eff = for {
+  a <- Get[Int] @! TagA
+  b <- Get[Double] @! TagB
+  c = a * b
+  _ <- Put(c) @! TagB
+} yield s"$a * $b = $c"
+
+val handler = (StateHandler(42) @! TagA) +! (StateHandler(0.25) @! TagB)
+
+val result = handler.run(eff)
+
+// we get:
+result: ((String, Double), Int) 
+result == (("42 * 0.25 = 10.5", 10.5), 42)
+```
+
+Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. Currently, Skutek uses `ClassOf[Fx]` as the default *Tag* for *Effect* `Fx`.
+
+This makes *Effect Stacks* type-level **maps**, not sets. Sorry for the [deception](#2-effect).
+
+Caution: you can't attach a *Tag* to a composed *Computation*. Neither to a composed *Handler* for the matter, but it wouldn't make sense anyway.
+
+Example:
+```scala
+// assuming:
+def modify[S](f : S => S) = for { 
+  s <- Get[S]
+  _ <- Put(f(s)) 
+} yield ()
+
+val inc = (i: Int) => i + 1)
+
+// let:
+val eff = modify(inc) @! TagA
+```
+
+The last line won't compile.
 
 # Tag Conflicts
 
