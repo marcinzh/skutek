@@ -75,13 +75,13 @@ In progress.‥
 
 # Part I: Core concepts in Skutek
 
-1. **Effect Definition**
-1. **Effect**
-1. **Effect Stack**
-1. **Computation**
-1. **Operation**
-1. **Handler**
-1. **Handling Effects**
+1. [Effect Definition](#1-effect-definition)
+1. [Effect](#2-effect)
+1. [Effect Stack](#3-effect-stack)
+1. [Computation](#4-computation)
+1. [Operation](#5-operation)
+1. [Handler](#6-handler)
+1. [Handling Effects](#7-handling-effects)
 
 # 1\. Effect Definition
 
