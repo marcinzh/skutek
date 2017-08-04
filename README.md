@@ -426,11 +426,11 @@ The chain of `fx` method calls is a Builder Pattern. It has to be used to enumer
 Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stack* of length other than `1`, won't work.
 
 # Part II.
-1. Traversing
-1. Tagging Effects
-1. Tag Conflicts
-1. Predefined Effects
-1. Defining you own Effect
+1. [Traversing](.#traversing)
+1. [Tagging Effects](.#tagging-effects)
+1. [Tag Conflicts](.#tag-conflicts)
+1. [Predefined Effects](.#predefined-effects)
+1. [Defining you own Effect](.#defining-your-own-effect)
 
 # Traversing
 
@@ -492,7 +492,7 @@ For example, an *Effect Stack* with 2 `State` *Effects*, each given separate *Ta
 ```scala
 (State[Int] @! TagA) with (State[Double] @! TagB)
 ```
-For such *Effects* to be usable, we need ability to also tag *Operations* and *Handlers*, so that they are compatible with the tagged *Effects*. This tagging is also done using `@!` operator. Hoewver, this time it operates on **values**, instead of types.
+For such *Effects* to be usable, we need ability to also tag *Operations* and *Handlers*, so that they are compatible with the tagged *Effects*. This tagging is also done using `@!` operator. However, this time it operates on **values**, instead of types.
 
 Example of tagged *Operation*:
 ```scala
