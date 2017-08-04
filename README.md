@@ -52,7 +52,7 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.0"
     - No clever type-fu, no macros. Mostly immutable OOP style.
      
 - Practical stuff:
-    - Predefined set of basic effects (`Reader`, `Writer`, etc.). [read more](.#predefined-effects)
+    - Predefined set of basic effects (`Reader`, `Writer`, etc.). [read more](#predefined-effects)
     - Ability to annotate effects with tags. [read more](#tagging-effects)
     - Potentially parallel execution of effects.
     - Support for `for` comprehension guards, for effects compatible with filtering (e.g. `Maybe`, `Choice`).
@@ -61,10 +61,10 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.0"
 - Caveats and limitations:
     - General infancy of the project.
     - No possiblity of adapting pre-existing monads as Skutek's effects.
-    - Removing effects from the stack (local handling) isn't as easy as adding them. Some explicit typing is necessary. [read more](.#72-local-handling)
-    - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`...") [read more](.#32-caveats)
+    - Removing effects from the stack (local handling) isn't as easy as adding them. Some explicit typing is necessary. [read more](#72-local-handling)
+    - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`...") [read more](#32-caveats)
     - Using patterns in `for` comprehensions can trigger surprising errors (Scala's wart, not specific to Skutek)
-    - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. [read more](.#tag-conflicts)
+    - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. [read more](#tag-conflicts)
     - Lack of performance analysis.
     - `Concurrency` effect is a hack.
 
@@ -426,11 +426,11 @@ The chain of `fx` method calls is a Builder Pattern. It has to be used to enumer
 Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stack* of length other than `1`, won't work.
 
 # Part II.
-1. [Traversing](.#traversing)
-1. [Tagging Effects](.#tagging-effects)
-1. [Tag Conflicts](.#tag-conflicts)
-1. [Predefined Effects](.#predefined-effects)
-1. [Defining you own Effect](.#defining-your-own-effect)
+1. [Traversing](#traversing)
+1. [Tagging Effects](#tagging-effects)
+1. [Tag Conflicts](#tag-conflicts)
+1. [Predefined Effects](#predefined-effects)
+1. [Defining you own Effect](#defining-your-own-effect)
 
 # Traversing
 
@@ -479,7 +479,7 @@ eff: Unit !! Validation[String] with Writer[String]
 
 # Tagging Effects
 
-As explained in the [beginning](.#2-effect), the role of *Effect* is to be type-level name. Tagging allows overriding that name, so that multiple instances of the same *Effect* can coexist in one *Effect Stack*. 
+As explained in the [beginning](#2-effect), the role of *Effect* is to be type-level name. Tagging allows overriding that name, so that multiple instances of the same *Effect* can coexist in one *Effect Stack*. 
 
 Such name-overriding is done by attaching unique *Tag*. A *Tag* is required to be unique **type**, as well as unique **value**. The easiest way of definning *Tags*, is with `case object`. For example:
 ```scala
@@ -527,7 +527,7 @@ result == (("42 * 0.25 = 10.5", 10.5), 42)
 
 Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. Currently, Skutek uses `ClassOf[Fx]` as the default *Tag* for *Effect* `Fx`.
 
-This makes *Effect Stacks* type-level **maps**, not sets. Sorry for the [deception](.#2-effect).
+This makes *Effect Stacks* type-level **maps**, not sets. Sorry for the [deception](#2-effect).
 
 Caution: you can't attach a *Tag* to a composed *Computation*. Neither to a composed *Handler* for the matter, but it wouldn't make sense anyway.
 ```scala
