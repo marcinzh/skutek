@@ -530,6 +530,8 @@ Actually, *Tags* were always there. What appeared as untagged entities (*Effects
 This makes *Effect Stacks* type-level **maps**, not sets. Sorry for the [deception](#2-effect).
 
 Caution: you can't attach a *Tag* to a composed *Computation*. Neither to a composed *Handler* for the matter, but it wouldn't make sense anyway.
+
+Example:
 ```scala
 // assuming:
 def modify[S](f : S => S) = for { 
@@ -543,7 +545,7 @@ val inc = (i: Int) => i + 1)
 val eff = modify(inc) @! TagA
 ```
 
-This won't work.
+The last line won't compile.
 
 # Tag Conflicts
 
