@@ -539,7 +539,7 @@ def modify[S](f : S => S) = for {
   _ <- Put(f(s)) 
 } yield ()
 
-val inc = (i: Int) => i + 1)
+val inc = (i: Int) => i + 1
 
 // let:
 val eff = modify(inc) @! TagA
