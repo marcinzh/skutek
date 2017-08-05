@@ -571,14 +571,14 @@ In short, construction of *Computations* with invalid *Effect Stacks* may go unn
 For example, construction of handlers:
 
 ```scala
-val handler1 = StateHandler(42) with StateHandler("Hello")
+val handler1 = StateHandler(42) +! StateHandler("Hello")
 
-val handler2 = (ReaderHandler(42) @! TagA) with (StateHandler("Hello") @! TagA)
+val handler2 = (ReaderHandler(42) @! TagA) +! (StateHandler("Hello") @! TagA)
 ```
 will fail at runtime.
 
-This safety problem is the reason, why 2 ways of [](#72-local-handling) are provided in Skutek:
-* [The safer way](#722-the-safer-way) **compile-time** forces the user to decompose his *Effect Stack* into individual *Effects*, so that tag uniquness can be verified at **run-time**.
+This safety problem is the reason, why 2 ways of [local handling](#72-local-handling) are provided in Skutek:
+* [The safer way](#722-the-safer-way) **compile-time** forces the user to decompose his *Effect Stack* into individual *Effects* (using Builder Pattern), so that tag uniqueness can be verified by Skutek at **run-time**.
 * [The simpler way](#721-the-simpler-way) doesn't use such discipline, so it may leak invalid *Effect Stacks* undetected. Hence the name: `handleCarefully`.
 
 # Predefined Effects
