@@ -525,9 +525,7 @@ result: ((String, Double), Int)
 result == (("42 * 0.25 = 10.5", 10.5), 42)
 ```
 
-Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. Currently, Skutek uses `ClassOf[Fx]` as the default *Tag* for *Effect* `Fx`.
-
-This makes *Effect Stacks* type-level **maps**, not sets. Sorry for the [deception](#2-effect).
+Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. Currently, Skutek uses `scala.reflect.ClassTag[Fx]` as the default *Tag* for *Effect* `Fx`.
 
 Caution: you can't attach a *Tag* to a composed *Computation*. Neither to a composed *Handler* for the matter, but it wouldn't make sense anyway.
 
@@ -549,7 +547,39 @@ The last line won't compile.
 
 # Tag Conflicts
 
-TBD.
+Not all *Effect Stacks* are valid. Skutek requires that each *Effect* in an *Effect Stack* has unique tag. 
+
+For example, the following *Effect Stack* is invalid, because `TagA` is used to tag 2 different *Effects*:
+```scala
+(Reader[String] @! TagA) with (State[Int] @! TagA)
+```
+For untagged *Effects*, this rule is applied to their **implicit** tags.
+
+For example, the following *Effect Stack* is invalid:
+
+```scala
+State[Int] with State[String]
+```
+because the implicit tag of those 2 *Effects* is the same (currently: `scala.reflect.ClassTag[State[_]]`).
+
+Unfortunately, Skutek is unable to detect invalid *Effect Stacks* at **compile-time**. Attempt to run a computation with invalid *Effect Stacks* would result in `asInstanceOf` error, or filed `match`, somewhere deep inside effect interpreter loop.
+
+The only defense mechanism Skutek has, is employed at **run-time**. Type information is utilised to make detection of invalid *Effect Stacks* at predictable, static spots of the program: where **handlers** are put to work. 
+
+In short, construction of *Computations* with invalid *Effect Stacks* may go unnoticed by the compiler. However, it will be impossible to construct a proper, typechecking *Handler* to run it.
+
+For example, construction of handlers:
+
+```scala
+val handler1 = StateHandler(42) +! StateHandler("Hello")
+
+val handler2 = (ReaderHandler(42) @! TagA) +! (StateHandler("Hello") @! TagA)
+```
+will fail at runtime.
+
+This safety problem is the reason, why 2 ways of [local handling](#72-local-handling) are provided in Skutek:
+* [The safer way](#722-the-safer-way) **compile-time** forces the user to decompose his *Effect Stack* into individual *Effects* (using Builder Pattern), so that tag uniqueness can be verified by Skutek at **run-time**.
+* [The simpler way](#721-the-simpler-way) doesn't use such discipline, so it may leak invalid *Effect Stacks* undetected. Hence the name: `handleCarefully`.
 
 # Predefined Effects
 
