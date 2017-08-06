@@ -374,7 +374,7 @@ Such situation (although on small scale) can be seen in the [Queens](./examples/
 * The `Choice` *Effect* is used and [exported](./examples/src/main/scala/skutek_examples/Queens.scala#L28) in function's result.
 * The `Choice` *Effect* is finally [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L10) by the client. By having control of the *Handler*, the client can decide whether it wants to enumerate all solutions, or just get the first one that is found.
 
-There are 2 ways of handling *Effects* locally: one is simpler, the other is safer. The safety issue is explained in the [Tag Conflicts](./README.md#tag-conflicts) section.
+There are 2 ways of handling *Effects* locally: one is simpler, the other is safer. The safety issue is explained in the [§. Tag Conflicts](./README.md#tag-conflicts).
 
 There is another complication. Unfortunately, in both cases you won't be able to rely on type inference. It will be necessery to explicitly pass an *Effect Stack* as type parameter to handling methods. 
 
@@ -562,6 +562,8 @@ State[Int] with State[String]
 ```
 because implicit tags of those 2 *Effects* are the same (currently: `scala.reflect.ClassTag[State[_]]`).
 
+---
+
 Unfortunately, Skutek is unable to detect invalid *Effect Stacks* at **compile-time**. Attempt to run a computation with invalid *Effect Stacks* would result in `asInstanceOf` error, or filed `match`, somewhere deep inside effect interpreter loop.
 
 The only defense mechanism Skutek has, is employed at **run-time**. Type information is utilised to make detection of invalid *Effect Stacks* at predictable, static spots of the program: where **handlers** are put to work. 
@@ -576,6 +578,8 @@ val handler1 = StateHandler(42) +! StateHandler("Hello")
 val handler2 = (ReaderHandler(42) @! TagA) +! (StateHandler("Hello") @! TagA)
 ```
 will fail at runtime.
+
+---
 
 This safety problem is the reason, why 2 ways of [§. local handling](#72-local-handling) are provided in Skutek:
 * [§. The safer way](#722-the-safer-way) **compile-time** forces the user to decompose his *Effect Stack* into individual *Effects* (using Builder Pattern), so that tag uniqueness can be verified by Skutek at **run-time**.
