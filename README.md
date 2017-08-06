@@ -235,7 +235,7 @@ val eff3 = eff1.flatMap(_ => eff2)
 // we get:
 eff3: B !! U1 with U2 
 ```
-
+---
 Two *Computations* can also be composed parallelly, using product operator: `*!`. *Computation's* result type is a pair of result types of the operands.  
 
 The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
@@ -327,7 +327,7 @@ During this transformation, following things are observed:
 * *Computation's* *Effect Stack* is reduced.  
   Precisely, **a set difference** is performed: from *Computation's* *Effect Stack*, the *Handler's* *Effect Stack* is subtracted. Possibly even leaving empty set in the outcome.
 * *Computation's* result type is transformed by `Handler#Result[_]` type-level function.
-
+---
 After all *Effects* are handled, *Computation's* *Effect Stack* is empty (i.e. provable to be `=:= Any`).
 Then, the *Computation* is ready to be **executed**. The obtained value is finally liberated from the monadic context:
 ```scala
@@ -373,7 +373,7 @@ Such situation (although on small scale) can be seen in the [Queens](./examples/
 * The `State` *Effect* is used and [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L39) internally.
 * The `Choice` *Effect* is used and [exported](./examples/src/main/scala/skutek_examples/Queens.scala#L28) in function's result.
 * The `Choice` *Effect* is finally [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L10) by the client. By having control of the *Handler*, the client can decide whether it wants to enumerate all solutions, or just get the first one that is found.
-
+---
 There are 2 ways of handling *Effects* locally: one is simpler, the other is safer. The safety issue is explained in the [§. Tag Conflicts](./README.md#tag-conflicts).
 
 There is another complication. Unfortunately, in both cases you won't be able to rely on type inference. It will be necessery to explicitly pass an *Effect Stack* as type parameter to handling methods. 
@@ -547,7 +547,7 @@ The last line won't compile.
 
 # Tag Conflicts
 
-Not all *Effect Stacks* are valid. Skutek requires that each *Effect* in an *Effect Stack* has unique tag. 
+Not all *Effect Stacks* are valid. Skutek requires that each *Effect* in an *Effect Stack* has unique [§. tag](#tagging-effects). 
 
 For example, the following *Effect Stack* is invalid, because `TagA` is used to tag 2 different *Effects*:
 ```scala
