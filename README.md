@@ -322,18 +322,18 @@ An elementary *Handler* can be transformed to another *Handler*, by using a [pol
 
 Mapped handler handles the same *Effect* as the original, but typically have different `Handler#Result[X]` type.
 
-For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of which constructs mapped *Handler*. The postprocessing function, in this case is projection of pair to its first and second element respectively:
+For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of which constructs mapped *Handler*. The postprocessing function, in this case, is projection of pair to its first and second element respectively:
 
-| Handler construcion | `Handler#Result[A]` | |
+| Handler construcion | `Handler#Result[A]` | Comment |
 |---|---|---|
-|`StateHandler(42.0)`      | `(A, Double)`| the original *Handler* |
-|`StateHandler(42.0).eval` | `A`| mapped *Handler* |
-|`StateHandler(42.0).exec` | `Double`| mapped *Handler* |
+|`StateHandler(42.0)`      | `(A, Double)`| The original *Handler* |
+|`StateHandler(42.0).eval` | `A`| Mapped *Handler* that forgets the final state |
+|`StateHandler(42.0).exec` | `Double`| Mapped *Handler* that keeps the final state only |
 
 
 ## 7\. Handling Effects
 
-Handling an *Effect* (or *Effect Stack*, is an act of using a *Handler* to transform a *Computation* to another one. 
+Handling an *Effect* (or *Effect Stack*), is an act of using a *Handler* to transform a *Computation* to another one. 
 
 During this transformation, following things are observed:
 * *Computation's* *Effect Stack* is reduced.  
@@ -515,7 +515,7 @@ Example of tagged *Handler*:
 val handler = StateHandler(42) @! TagA
 ```
 In 2 above examples, the *Effect Stack* of `eff` and `handler` is `State[Int] @! TagA`
-
+---
 Now, full example combining 2 tagged *Effects*:
 ```scala
 case object TagA
