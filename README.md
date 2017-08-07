@@ -538,7 +538,7 @@ result == (("42 * 0.25 = 10.5", 10.5), 42)
 ```
 ---
 
-Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. Currently, Skutek uses `scala.reflect.ClassTag[Fx]` as the default *Tag* for *Effect* `Fx`.
+Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. In current implementation, Skutek uses `scala.reflect.ClassTag[Fx]` as the default *Tag* for *Effect* `Fx`.
 
 ---
 Caution: you can't attach a *Tag* to a composed *Computation*. Neither to a composed *Handler* for the matter, but it wouldn't make sense anyway.
@@ -574,11 +574,11 @@ For example, the following *Effect Stack* is invalid:
 ```scala
 State[Int] with State[String]
 ```
-because implicit tags of those 2 *Effects* are the same (currently: `scala.reflect.ClassTag[State[_]]`).
+because implicit tags of those 2 *Effects* are the same (in current implementation: `scala.reflect.ClassTag[State[_]]`).
 
 ---
 
-Unfortunately, Skutek is unable to detect invalid *Effect Stacks* at **compile-time**. Attempt to run a computation with invalid *Effect Stacks* would result in `asInstanceOf` error, or filed `match`, somewhere deep inside effect interpreter loop.
+Unfortunately, Skutek is unable to detect invalid *Effect Stacks* at **compile-time**. Attempt to run a computation with invalid *Effect Stack* would result in `asInstanceOf` error, or filed `match`, somewhere deep inside effect interpreter loop.
 
 The only defense mechanism Skutek has, is employed at **run-time**. Type information is utilised to make detection of invalid *Effect Stacks* at predictable, static spots of the program: where **handlers** are put to work. 
 
@@ -587,9 +587,9 @@ In short, construction of *Computations* with invalid *Effect Stacks* may go unn
 For example, construction of handlers:
 
 ```scala
-val handler1 = StateHandler(42) +! StateHandler("Hello")
+val invalidHandler1 = StateHandler(42) +! StateHandler("Hello")
 
-val handler2 = (ReaderHandler(42) @! TagA) +! (StateHandler("Hello") @! TagA)
+val invalidHandler2 = (ReaderHandler(42) @! TagA) +! (StateHandler("Hello") @! TagA)
 ```
 will fail at runtime.
 
