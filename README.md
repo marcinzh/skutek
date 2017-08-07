@@ -255,7 +255,7 @@ val eff3 = eff1 *! eff2
 eff3: (A, B) !! U1 with U2 
 ```
 
-Additional 2 operators are provided: `*<!` and `*>!`. They work just like `*!`, with addition of projecting resulting pair to it's first and second component respectively.
+Additional 2 operators are provided: `*<!` and `*>!`. They work just like `*!`, with addition of projecting resulting pair to its first and second component respectively.
 
 
 # 5\. Operation
@@ -320,7 +320,7 @@ The order of composition matters:
 ## 6\.3\. Mapped handlers
 An elementary *Handler* can be transformed to another *Handler*, by using a [polymorphic function](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#polymorphic-function-values) (a.k.a. [natural transformation](https://apocalisp.wordpress.com/2010/07/02/higher-rank-polymorphism-in-scala/)), that will be applied to postprocess the value obtained from [§. handling](7-handling-effects). 
 
-Mapped handler handles the same *Effect Stack* as the original, but may have different `Handler#Result[X]` type.
+Mapped handler handles the same *Effect* as the original, but typically have different `Handler#Result[X]` type.
 
 For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of which constructs mapped *Handler*. The postprocessing function, in this case is projection of pair to its first and second element respectively:
 
@@ -536,9 +536,11 @@ val result = handler.run(eff)
 result: ((String, Double), Int) 
 result == (("42 * 0.25 = 10.5", 10.5), 42)
 ```
+---
 
 Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. Currently, Skutek uses `scala.reflect.ClassTag[Fx]` as the default *Tag* for *Effect* `Fx`.
 
+---
 Caution: you can't attach a *Tag* to a composed *Computation*. Neither to a composed *Handler* for the matter, but it wouldn't make sense anyway.
 
 Example:
