@@ -62,7 +62,7 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.1"
     - General infancy of the project.
     - No possiblity of adapting pre-existing monads as Skutek's effects.
     - Removing effects from the stack (local handling) isn't as easy as adding them. Some explicit typing is necessary. [read more](#72-local-handling)
-    - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`...") [read more](#32-caveats)
+    - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`"). [read more](#32-caveats)
     - Using patterns in `for` comprehensions can trigger surprising errors (Scala's wart, not specific to Skutek)
     - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. [read more](#tag-conflicts)
     - Lack of performance analysis.
@@ -92,7 +92,7 @@ An *Effect Definition* contains definitions of 3 kinds of entities:
 * *Operation(s)* of that *Effect*.
 * *Handler(s)* of that *Effect*.
 
-Skutek comes with [predefined](#predefined-effects) effects. User can [define new effects](#defining-your-own-effect) as well.
+Skutek comes with [§. predefined](#predefined-effects) effects. User can define [§. new effects](#defining-your-own-effect) as well.
 
 
 # 2\. Effect
@@ -124,7 +124,7 @@ The nature of intersection types gives raise to the following properties of *Eff
 
 1. Type `Any` represents **empty** *Effect Stack*.
 
-   This might be counterintuitive. Had Scala have union types, we could have used them for *Effect Stacks* instead. Empty *Effect Stack* would have been `Nothing` type. The `Effectful` trait would have to have flipped the variance direction on its [second type parameter](#4-computation). Those two representations (tha actual and the hypothetical) are dual of each other, and would have similar properties. 
+   This might be counterintuitive. Had Scala have union types, we could have used them for *Effect Stacks* instead. Empty *Effect Stack* would have been `Nothing` type. The `Effectful` trait would have to have flipped the variance direction on its [§. second type parameter](#4-computation). Those two representations (tha actual and the hypothetical) are dual of each other, and would have similar properties. 
 
 1. Type `Any` is the neutral element of type intersection operator. In Scala, the following types are equivalent:
     ```scala
@@ -165,7 +165,7 @@ There are caveats related to intersection types:
   ```scala
   State[Int] with State[String]
   ```
-  It will be discussed in [Tag Conflicts](#tag-conflicts) section.
+  It will be discussed in [§. Tag Conflicts](#tag-conflicts).
 
 * Redundancies and reorderings shown in points 3, 4 and 5, may appear in error messages, when the *Effect Stack* of a *Computation* is inferred by Scala's compiler. It's ugly, but normal.
 
@@ -194,7 +194,7 @@ Same example, but using `!!`, an **infix type alias** for `Effectful`:
 type MyComputation = Foo !! State[Double] with Error[String] with Choice
 ```
 
-The latter is more readable, as long as you remember that:
+The latter is more readable, as long as one remembers that:
 * Precedence of `!!` is lower than of `with`, so `A !! U with V` means `A !! (U with V)`
 * Precedence of `!!` is higher than of `=>`, so `A => B !! U` means `A => (B !! U)`
 
@@ -235,7 +235,7 @@ val eff3 = eff1.flatMap(_ => eff2)
 // we get:
 eff3: B !! U1 with U2 
 ```
-
+---
 Two *Computations* can also be composed parallelly, using product operator: `*!`. *Computation's* result type is a pair of result types of the operands.  
 
 The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
@@ -255,7 +255,7 @@ val eff3 = eff1 *! eff2
 eff3: (A, B) !! U1 with U2 
 ```
 
-Additional 2 operators are provided: `*<!` and `*>!`. They work just like `*!`, with addition of projecting resulting pair to it's first and second component respectively.
+Additional 2 operators are provided: `*<!` and `*>!`. They work just like `*!`, with addition of projecting resulting pair to its first and second component respectively.
 
 
 # 5\. Operation
@@ -317,19 +317,31 @@ The order of composition matters:
 * The order of occurence of the operands is: outermost effect first, the innermost effect last.  
 * However, the order of actual handling is **reverse** of that: the innermost effect is handled first, the outermost effect is handled last. This reversed order reflects the order of applications of `Handler#Result[X]` from each operand.
 
+## 6\.3\. Mapped handlers
+An elementary *Handler* can be transformed to another *Handler*, by using a [polymorphic function](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#polymorphic-function-values) (a.k.a. [natural transformation](https://apocalisp.wordpress.com/2010/07/02/higher-rank-polymorphism-in-scala/)), that will be applied to postprocess the value obtained from [§. handling](7-handling-effects). 
+
+Mapped handler handles the same *Effect* as the original, but typically have different `Handler#Result[X]` type.
+
+For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of which constructs mapped *Handler*. The postprocessing function, in this case is projection of pair to its first and second element respectively:
+
+| Handler construcion | `Handler#Result[A]` | |
+|---|---|---|
+|`StateHandler(42.0)`      | `(A, Double)`| the original *Handler* |
+|`StateHandler(42.0).eval` | `A`| mapped *Handler* |
+|`StateHandler(42.0).exec` | `Double`| mapped *Handler* |
 
 
 ## 7\. Handling Effects
 
-Handling an *Effect Stack*, is an act of using a *Handler* to transform a *Computation* to another one. 
+Handling an *Effect* (or *Effect Stack*, is an act of using a *Handler* to transform a *Computation* to another one. 
 
 During this transformation, following things are observed:
 * *Computation's* *Effect Stack* is reduced.  
   Precisely, **a set difference** is performed: from *Computation's* *Effect Stack*, the *Handler's* *Effect Stack* is subtracted. Possibly even leaving empty set in the outcome.
 * *Computation's* result type is transformed by `Handler#Result[_]` type-level function.
-
+---
 After all *Effects* are handled, *Computation's* *Effect Stack* is empty (i.e. provable to be `=:= Any`).
-Then, the *Computation* is ready to be executed. The obtained value is finally liberated from the monadic context:
+Then, the *Computation* is ready to be **executed**. The obtained value is finally liberated from the monadic context:
 ```scala
 // assuming:
 eff: A !! Any
@@ -373,8 +385,8 @@ Such situation (although on small scale) can be seen in the [Queens](./examples/
 * The `State` *Effect* is used and [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L39) internally.
 * The `Choice` *Effect* is used and [exported](./examples/src/main/scala/skutek_examples/Queens.scala#L28) in function's result.
 * The `Choice` *Effect* is finally [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L10) by the client. By having control of the *Handler*, the client can decide whether it wants to enumerate all solutions, or just get the first one that is found.
-
-There are 2 ways of handling *Effects* locally: one is simpler, the other is safer. The safety issue is explained in the [Tag Conflicts](./README.md#tag-conflicts) section.
+---
+There are 2 ways of handling *Effects* locally: one is simpler, the other is safer. The safety issue is explained in the [§. Tag Conflicts](./README.md#tag-conflicts).
 
 There is another complication. Unfortunately, in both cases you won't be able to rely on type inference. It will be necessery to explicitly pass an *Effect Stack* as type parameter to handling methods. 
 
@@ -479,7 +491,7 @@ eff: Unit !! Validation[String] with Writer[String]
 
 # Tagging Effects
 
-As explained in the [beginning](#2-effect), the role of *Effect* is to be type-level name. Tagging allows overriding that name, so that multiple instances of the same *Effect* can coexist in one *Effect Stack*. 
+As explained in the [§. beginning](#2-effect), the role of *Effect* is to be type-level name. Tagging allows overriding that name, so that multiple instances of the same *Effect* can coexist in one *Effect Stack*. 
 
 Such name-overriding is done by attaching unique *Tag*. A *Tag* is required to be unique **type**, as well as unique **value**. The easiest way of definning *Tags*, is with `case object`. For example:
 ```scala
@@ -524,9 +536,11 @@ val result = handler.run(eff)
 result: ((String, Double), Int) 
 result == (("42 * 0.25 = 10.5", 10.5), 42)
 ```
+---
 
-Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. Currently, Skutek uses `scala.reflect.ClassTag[Fx]` as the default *Tag* for *Effect* `Fx`.
+Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. In current implementation, Skutek uses `scala.reflect.ClassTag[Fx]` as the default *Tag* for *Effect* `Fx`.
 
+---
 Caution: you can't attach a *Tag* to a composed *Computation*. Neither to a composed *Handler* for the matter, but it wouldn't make sense anyway.
 
 Example:
@@ -547,7 +561,7 @@ The last line won't compile.
 
 # Tag Conflicts
 
-Not all *Effect Stacks* are valid. Skutek requires that each *Effect* in an *Effect Stack* has unique tag. 
+Not all *Effect Stacks* are valid. Skutek requires that each *Effect* in an *Effect Stack* has unique [§. tag](#tagging-effects). 
 
 For example, the following *Effect Stack* is invalid, because `TagA` is used to tag 2 different *Effects*:
 ```scala
@@ -560,9 +574,11 @@ For example, the following *Effect Stack* is invalid:
 ```scala
 State[Int] with State[String]
 ```
-because the implicit tag of those 2 *Effects* is the same (currently: `scala.reflect.ClassTag[State[_]]`).
+because implicit tags of those 2 *Effects* are the same (in current implementation: `scala.reflect.ClassTag[State[_]]`).
 
-Unfortunately, Skutek is unable to detect invalid *Effect Stacks* at **compile-time**. Attempt to run a computation with invalid *Effect Stacks* would result in `asInstanceOf` error, or filed `match`, somewhere deep inside effect interpreter loop.
+---
+
+Unfortunately, Skutek is unable to detect invalid *Effect Stacks* at **compile-time**. Attempt to run a computation with invalid *Effect Stack* would result in `asInstanceOf` error, or filed `match`, somewhere deep inside effect interpreter loop.
 
 The only defense mechanism Skutek has, is employed at **run-time**. Type information is utilised to make detection of invalid *Effect Stacks* at predictable, static spots of the program: where **handlers** are put to work. 
 
@@ -571,15 +587,17 @@ In short, construction of *Computations* with invalid *Effect Stacks* may go unn
 For example, construction of handlers:
 
 ```scala
-val handler1 = StateHandler(42) +! StateHandler("Hello")
+val invalidHandler1 = StateHandler(42) +! StateHandler("Hello")
 
-val handler2 = (ReaderHandler(42) @! TagA) +! (StateHandler("Hello") @! TagA)
+val invalidHandler2 = (ReaderHandler(42) @! TagA) +! (StateHandler("Hello") @! TagA)
 ```
 will fail at runtime.
 
-This safety problem is the reason, why 2 ways of [local handling](#72-local-handling) are provided in Skutek:
-* [The safer way](#722-the-safer-way) **compile-time** forces the user to decompose his *Effect Stack* into individual *Effects* (using Builder Pattern), so that tag uniqueness can be verified by Skutek at **run-time**.
-* [The simpler way](#721-the-simpler-way) doesn't use such discipline, so it may leak invalid *Effect Stacks* undetected. Hence the name: `handleCarefully`.
+---
+
+This safety problem is the reason, why 2 ways of [§. local handling](#72-local-handling) are provided in Skutek:
+* [§. The safer way](#722-the-safer-way) **compile-time** forces the user to decompose his *Effect Stack* into individual *Effects* (using Builder Pattern), so that tag uniqueness can be verified by Skutek at **run-time**.
+* [§. The simpler way](#721-the-simpler-way) doesn't use such discipline, so it may leak invalid *Effect Stacks* undetected. Hence the name: `handleCarefully`.
 
 # Predefined Effects
 
