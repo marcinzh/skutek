@@ -514,8 +514,11 @@ Example of tagged *Handler*:
 ```scala
 val handler = StateHandler(42) @! TagA
 ```
+
 In 2 above examples, the *Effect Stack* of `eff` and `handler` is `State[Int] @! TagA`
+
 ---
+
 Now, full example combining 2 tagged *Effects*:
 ```scala
 case object TagA
@@ -536,11 +539,13 @@ val result = handler.run(eff)
 result: ((String, Double), Int) 
 result == (("42 * 0.25 = 10.5", 10.5), 42)
 ```
+
 ---
 
 Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. In current implementation, Skutek uses `scala.reflect.ClassTag[Fx]` as the default *Tag* for *Effect* `Fx`.
 
 ---
+
 Caution: you can't attach a *Tag* to a composed *Computation*. Neither to a composed *Handler* for the matter, but it wouldn't make sense anyway.
 
 Example:
