@@ -317,6 +317,18 @@ The order of composition matters:
 * The order of occurence of the operands is: outermost effect first, the innermost effect last.  
 * However, the order of actual handling is **reverse** of that: the innermost effect is handled first, the outermost effect is handled last. This reversed order reflects the order of applications of `Handler#Result[X]` from each operand.
 
+## 6\.3\. Mapped handlers
+An elementary *Handler* can be transformed to another *Handler*, by using a [polymorphic function](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#polymorphic-function-values) (a.k.a. [natural transformation](https://apocalisp.wordpress.com/2010/07/02/higher-rank-polymorphism-in-scala/)), that will be applied to postprocess the value obtained from [§. handling](7-handling-effects). 
+
+Mapped handler handles the same *Effect Stack* as the original, but may have different `Handler#Result[X]` type.
+
+For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of which constructs mapped *Handler*. The postprocessing function, in this case is projection of pair to its first and second element respectively:
+
+| Handler construcion | `Handler#Result[A]` | |
+|---|---|---|
+|`StateHandler(42.0)`      | `(A, Double)`| the original *Handler* |
+|`StateHandler(42.0).eval` | `A`| mapped *Handler* |
+|`StateHandler(42.0).exec` | `Double`| mapped *Handler* |
 
 
 ## 7\. Handling Effects
