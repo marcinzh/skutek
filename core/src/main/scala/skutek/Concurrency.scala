@@ -13,6 +13,12 @@ object Run {
   def apply[A](run : => A) = new Run(() => run)
 }
 
+case class RunEff[A, U](val eff: A !! U) extends SyntheticOperation.Deep[A, Concurrency, U] {
+  def synthesize[T <: SyntheticTagger](implicit tagger: T): A !! tagger.Tagged[Concurrency] with U = 
+    Run(eff).tagged.flatten
+}
+
+
 case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends BaseHandlerWithSelfDriver[Concurrency] {
   type Secret[A, -U] = Future[A]
   type Result[A] = Future[A]

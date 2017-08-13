@@ -9,7 +9,7 @@ case class Get[S]() extends StateOperation[S, S]
 case class Put[S](value: S) extends StateOperation[Unit, S]
 
 case class Modify[S](fun: S => S) extends SyntheticOperation.Shallow[Unit, State[S]] {
-  def synthesize[T <: SyntheticTagger](implicit tagger: T) = 
+  def synthesize[T <: SyntheticTagger](implicit tagger: T): Unit !! tagger.Tagged[State[S]] = 
     for {
       s <- Get[S].tagged
       _ <- Put(fun(s)).tagged

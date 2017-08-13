@@ -56,20 +56,20 @@ sealed trait SyntheticOperation[+A, -U] extends Effectful[A, U] {
 
 object SyntheticOperation {
 
-  sealed trait Base[+A, Fx, Ap[_]] extends SyntheticOperation[A, Ap[Fx]] {
+  sealed trait Base[+A, Fx, -U] extends SyntheticOperation[A, Fx with U] {
 
-    protected def synthesize[T <: SyntheticTagger](implicit tagger: T): A !! Ap[tagger.Tagged[Fx]]
+    protected def synthesize[T <: SyntheticTagger](implicit tagger: T): A !! tagger.Tagged[Fx] with U
 
-    final def tagless: A !! Ap[Fx] = synthesize(SyntheticTagger.Implicit)
-    final def @![Tag](tag: Tag): A !! Ap[Fx @! Tag] = synthesize(SyntheticTagger.Explicit(tag))
+    final def tagless: A !! Fx with U = synthesize(SyntheticTagger.Implicit)
+    final def @![Tag](tag: Tag): A !! (Fx @! Tag) with U = synthesize(SyntheticTagger.Explicit(tag))
 
     implicit class Syntax[B](op: Operation[B, Fx]) {
       def tagged[T <: SyntheticTagger](implicit tagger: T): B !! tagger.Tagged[Fx] = tagger(op)
     }
   }
 
-  abstract class Shallow[+A, Fx] extends Base[A, Fx, Lambda[X => X]] 
-  abstract class Deep[+A, Fx, U] extends Base[A, Fx, Lambda[X => X with U]]
+  abstract class Shallow[+A, Fx] extends Base[A, Fx, Any] 
+  abstract class Deep[+A, Fx, -U] extends Base[A, Fx, U]
 }
 
 

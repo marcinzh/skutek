@@ -9,7 +9,7 @@ case class Ask[S]() extends ReaderOperation[S, S]
 private case class DontTell[S](s: S) extends ReaderOperation[Unit, S]
 
 case class Local[A, S, U](f: S => S)(eff: A !! U) extends SyntheticOperation.Deep[A, Reader[S], U] {
-  def synthesize[T <: SyntheticTagger](implicit tagger: T) = 
+  def synthesize[T <: SyntheticTagger](implicit tagger: T): A !! tagger.Tagged[Reader[S]] with U = 
     for {
       s <- Ask[S].tagged
       _ <- DontTell(f(s)).tagged
