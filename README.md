@@ -37,7 +37,7 @@ More in [examples](https://github.com/marcinzh/skutek/tree/master/examples/src/m
 ```scala
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.4.1"
+libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.5.0"
 ```
 
 # Features
@@ -75,13 +75,24 @@ In progress.‥
 
 # Part I: Core concepts in Skutek
 
-1. [Effect Definition](#1-effect-definition)
-1. [Effect](#2-effect)
-1. [Effect Stack](#3-effect-stack)
-1. [Computation](#4-computation)
-1. [Operation](#5-operation)
-1. [Handler](#6-handler)
-1. [Handling Effects](#7-handling-effects)
+* [1. **Effect Definition**](#1-effect-definition)
+* [2. **Effect**](#2-effect)
+* [3. **Effect Stack**](#3-effect-stack)
+  * [3.1. Properties](#31-properties)
+  * [3.2. Caveats](#32-caveats)
+* [4. **Computation**](#4-computation)
+  * [4.1. Return](#41-return)
+  * [4.2. Operations](#42-operations)
+  * [4.3. Composing Computations](#43-composing-computations)
+* [5. **Handler**](#5-handler)
+  * [5.1. Elementary Handlers](#51-elementary-handlers)
+  * [5.2. Composed Handlers](#52-composed-handlers)
+  * [5.3. Mapped Handlers](#53-mapped-handlers)
+* [6. **Handling Effects**](#6-handling-effects)
+  * [6.1. Full handling](#61-full-handling)
+  * [6.2. Local handling](#62-local-handling)
+    * [6.2.1. The simpler way](#621-the-simpler-way)
+    * [6.2.2. The safer way](#622-the-safer-way)
 
 # 1\. Effect Definition
 
@@ -118,6 +129,7 @@ State[Double] with Error[String] with Choice
 represents 3-element *Effect Stack*, comprising 3 *Effects*: `State[Double]`, `Error[String]` and `Choice`.
 
 ## 3\.1\. Properties
+
 The nature of intersection types gives raise to the following properties of *Effect Stacks*:
 
 1. An *Effect* is also a single element *Effect Stack*.
@@ -160,6 +172,7 @@ The nature of intersection types gives raise to the following properties of *Eff
     Clarification: when mentioning "bigger" and "smaller" *Effect Stacks*, we refer to pair of sets of *Effect*, in subset/superset relation.
 
 ## 3\.2\. Caveats
+
 There are caveats related to intersection types:
 * A curious reader may wonder, what happens if there are two occurences of the same, parametrised *Effect* in the *Effect Stack*, but each one is applied with different type-argument. For example:
   ```scala
@@ -198,7 +211,8 @@ The latter is more readable, as long as one remembers that:
 * Precedence of `!!` is lower than of `with`, so `A !! U with V` means `A !! (U with V)`
 * Precedence of `!!` is higher than of `=>`, so `A => B !! U` means `A => (B !! U)`
 
-### 4\.1\. Return
+## 4\.1\. Return
+
 The simplest *Computation* is constructed by `Return(x)` case class, where `x` is any value.  
 
 `Return(_)` is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` from other monads. Except in Skutek, `Return(_)` is shared for all possible *Effects*.
@@ -217,7 +231,25 @@ eff: A !! Any
 
 Also, `Return()` is an abbreviation of `Return(())`.
 
-### 4\.2\. Composing Computations
+## 4\.2\. Operations
+
+An *Operation* is an elementary *Computation*, specific for an *Effect*.
+
+*Operations* originate from *Effect Definitions*, where they are defined as **dumb case classes**, indirectly inheriting from `Effectful` trait.
+
+Examples:
+
+|Constructor of *Operation* | It's *Effect Stack* | Type of the *Computation*|
+|---|---|---|
+|`Get[Double]`        |`State[Double]`   | `Double !! State[Double]`| 
+|`Put(1.337)`         | same as above    | `Unit !! State[Double]`| 
+|`Tell("Hello")`      |`Writer[String]`  | `Unit !! Writer[String]`|
+|`Choose(1 to 10)`    |`Choice`          | `Int !! Choice`|
+
+Nullary *Operations* require explicit type parameter, like in the case of `Get[Double]`.
+
+
+## 4\.3\. Composing Computations
 
 *Computation* is a monad, so standard `map`, `flatMap` and `flatten` methods are available.
 
@@ -235,7 +267,9 @@ val eff3 = eff1.flatMap(_ => eff2)
 // we get:
 eff3: B !! U1 with U2 
 ```
+
 ---
+
 Two *Computations* can also be composed parallelly, using product operator: `*!`. *Computation's* result type is a pair of result types of the operands.  
 
 The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
@@ -257,25 +291,7 @@ eff3: (A, B) !! U1 with U2
 
 Additional 2 operators are provided: `*<!` and `*>!`. They work just like `*!`, with addition of projecting resulting pair to its first and second component respectively.
 
-
-# 5\. Operation
-
-An *Operation* is an elementary *Computation*, specific for an *Effect*.
-
-*Operations* originate from *Effect Definitions*, where they are defined as dumb case classes, indirectly inheriting from `Effectful` trait.
-
-Examples:
-
-|Constructor of *Operation* | It's *Effect Stack* | Type of the *Computation*|
-|---|---|---|
-|`Get[Double]`        |`State[Double]`   | `Double !! State[Double]`| 
-|`Put(1.337)`         | same as above    | `Unit !! State[Double]`| 
-|`Tell("Hello")`      |`Writer[String]`  | `Unit !! Writer[String]`|
-|`Choose(1 to 10)`    |`Choice`          | `Int !! Choice`|
-
-Nullary *Operations* require explicit type parameter, like in the case of `Get[Double]`.
-
-# 6\. Handler
+# 5\. Handler
 
 *Handler* is an object, that has ability to handle an *Effect* (or multiple *Effects*).  
 
@@ -285,9 +301,8 @@ Trait `Handler` is the supertype of all *Handlers*. It's dependent on 2 member t
 * `Handler#Effects` - An *Effect Stack* - set of *Effects* that can be handled by this *Handler*.
 * `Handler#Result[X]` - A type-level function, describing how *Computation's* result type is transformed during handling the *Effect Stack*.
 
-There are 2 kinds of *Handlers*:
 
-## 6\.1\. Elementary handlers
+## 5\.1\. Elementary handlers
 
 Those *Handlers* originate from *Effect Definitions*. Each one is dedicated to handling **single** specific *Effect*. 
 
@@ -299,7 +314,8 @@ Examples:
 |`ErrorHandler[String]`|`Error[String]`|`Either[String, A]`|
 |`ChoiceHandler`|`Choice`|`Vector[A]`|
 
-## 6\.2\. Composed handlers
+## 5\.2\. Composed handlers
+
 Multiple *Handlers* can be associatively composed using `+!` operator, forming *Handler*
 that can handle bigger *Effect Stack*. 
 
@@ -317,23 +333,24 @@ The order of composition matters:
 * The order of occurence of the operands is: outermost effect first, the innermost effect last.  
 * However, the order of actual handling is **reverse** of that: the innermost effect is handled first, the outermost effect is handled last. This reversed order reflects the order of applications of `Handler#Result[X]` from each operand.
 
-## 6\.3\. Mapped handlers
-An elementary *Handler* can be transformed to another *Handler*, by using a [polymorphic function](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#polymorphic-function-values) (a.k.a. [natural transformation](https://apocalisp.wordpress.com/2010/07/02/higher-rank-polymorphism-in-scala/)), that will be applied to postprocess the value obtained from [§. handling](7-handling-effects). 
+## 5\.3\. Mapped handlers
+
+An elementary *Handler* can be transformed to another *Handler*, by using a [polymorphic function](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#polymorphic-function-values) (a.k.a. [natural transformation](https://apocalisp.wordpress.com/2010/07/02/higher-rank-polymorphism-in-scala/)), that will be applied to postprocess the value obtained from [§. handling](6-handling-effects). 
 
 Mapped handler handles the same *Effect* as the original, but typically have different `Handler#Result[X]` type.
 
-For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of which constructs mapped *Handler*. The postprocessing function, in this case is projection of pair to its first and second element respectively:
+For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of which constructs mapped *Handler*. The postprocessing function, in this case, is projection of pair to its first and second element respectively:
 
-| Handler construcion | `Handler#Result[A]` | |
+| Handler construcion | `Handler#Result[A]` | Comment |
 |---|---|---|
-|`StateHandler(42.0)`      | `(A, Double)`| the original *Handler* |
-|`StateHandler(42.0).eval` | `A`| mapped *Handler* |
-|`StateHandler(42.0).exec` | `Double`| mapped *Handler* |
+|`StateHandler(42.0)`      | `(A, Double)`| The original *Handler* |
+|`StateHandler(42.0).eval` | `A`| Mapped *Handler* that forgets the final state |
+|`StateHandler(42.0).exec` | `Double`| Mapped *Handler* that keeps the final state only |
 
 
-## 7\. Handling Effects
+## 6\. Handling Effects
 
-Handling an *Effect* (or *Effect Stack*, is an act of using a *Handler* to transform a *Computation* to another one. 
+Handling an *Effect* (or *Effect Stack*), is an act of using a *Handler* to transform a *Computation* to another one. 
 
 During this transformation, following things are observed:
 * *Computation's* *Effect Stack* is reduced.  
@@ -352,7 +369,7 @@ val a = eff.run
 // we get:
 a: A
 ```
-## 7\.1\. Full handling
+## 6\.1\. Full handling
 
 The **easiest** way of using *Handlers*, is to handle entire *Effect Stack* at once: 
 1. Create composed *Handler*, covering all *Effects* in the *Computation's* *Effect Stack*.
@@ -375,7 +392,8 @@ val result = eff.runWith(handler)   // alternative syntax, with eff and handler 
 result: (Vector[Int], Double)
 ```
 
-## 7\.2\. Local handling
+## 6\.2\. Local handling
+
 In practical programs, it's often desirable to handle only a subset of
 *Computation's* *Effect Stack*, leaving the rest to be handled elsewhere.
 This allows to encapsulate usage of local *Effect(s)* in a module, while 
@@ -392,7 +410,7 @@ There is another complication. Unfortunately, in both cases you won't be able to
 
 Moreover, this explicit *Effect Stack* has to consist of *Effects* that are going to **remain unhandled**, not the ones that are being **handled** in the call. That's rather inconvenient, but we can do nothing about it.
 
-### 7\.2\.1\. The simpler way
+### 6\.2\.1\. The simpler way
 
 ```scala
 // assuming:
@@ -415,7 +433,7 @@ val eff2 = eff.handleCarefullyWith[Reader[Boolean] with Error[String]](handler) 
 eff2: (Vector[Int], Double) !! Reader[Boolean] with Error[String]
 ```
 
-### 7\.2\.2\. The safer way
+### 6\.2\.2\. The safer way
 
 ```scala
 // assuming:
@@ -514,7 +532,10 @@ Example of tagged *Handler*:
 ```scala
 val handler = StateHandler(42) @! TagA
 ```
+
 In 2 above examples, the *Effect Stack* of `eff` and `handler` is `State[Int] @! TagA`
+
+---
 
 Now, full example combining 2 tagged *Effects*:
 ```scala
@@ -536,11 +557,13 @@ val result = handler.run(eff)
 result: ((String, Double), Int) 
 result == (("42 * 0.25 = 10.5", 10.5), 42)
 ```
+
 ---
 
 Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. In current implementation, Skutek uses `scala.reflect.ClassTag[Fx]` as the default *Tag* for *Effect* `Fx`.
 
 ---
+
 Caution: you can't attach a *Tag* to a composed *Computation*. Neither to a composed *Handler* for the matter, but it wouldn't make sense anyway.
 
 Example:
@@ -595,9 +618,9 @@ will fail at runtime.
 
 ---
 
-This safety problem is the reason, why 2 ways of [§. local handling](#72-local-handling) are provided in Skutek:
-* [§. The safer way](#722-the-safer-way) **compile-time** forces the user to decompose his *Effect Stack* into individual *Effects* (using Builder Pattern), so that tag uniqueness can be verified by Skutek at **run-time**.
-* [§. The simpler way](#721-the-simpler-way) doesn't use such discipline, so it may leak invalid *Effect Stacks* undetected. Hence the name: `handleCarefully`.
+This safety problem is the reason, why 2 ways of [§. local handling](#62-local-handling) are provided in Skutek:
+* [§. The safer way](#622-the-safer-way) **compile-time** forces the user to decompose his *Effect Stack* into individual *Effects* (using Builder Pattern), so that tag uniqueness can be verified by Skutek at **run-time**.
+* [§. The simpler way](#621-the-simpler-way) doesn't use such discipline, so it may leak invalid *Effect Stacks* undetected. Hence the name: `handleCarefully`.
 
 # Predefined Effects
 
