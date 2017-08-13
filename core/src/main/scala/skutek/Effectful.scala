@@ -57,8 +57,6 @@ sealed trait SyntheticOperation[+A, -U] extends Effectful[A, U] {
 object SyntheticOperation {
 
   sealed trait Base[+A, Fx, Ap[_]] extends SyntheticOperation[A, Ap[Fx]] {
-    type Effect = Fx
-    type Warp[X] = Ap[X]
 
     protected def synthesize[T <: SyntheticTagger](implicit tagger: T): A !! Ap[tagger.Tagged[Fx]]
 
