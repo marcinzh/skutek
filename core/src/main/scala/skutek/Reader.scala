@@ -1,16 +1,44 @@
 package skutek
 import _internals._
 
-sealed trait Reader[E]
+sealed trait Reader[S]
 object Reader extends UnaryEffectCompanion[Reader[?]]
 
-sealed trait ReaderOperation[A, E] extends Operation[A, Reader[E]]
-case class Ask[E]() extends ReaderOperation[E, E]
+sealed trait ReaderOperation[A, S] extends Operation[A, Reader[S]]
+case class Ask[S]() extends ReaderOperation[S, S]
+private case class DontTell[S](s: S) extends ReaderOperation[Unit, S]
 
-case class ReaderHandler[E](env: E) extends SimpleStatelessHandler[Reader[E]] {
-  type Op[A] = ReaderOperation[A, E]
+case class Local[A, S, U](f: S => S)(eff: A !! U) extends SyntheticOperation.Deep[A, Reader[S], U] {
+  def synthesize[T <: SyntheticTagger](implicit tagger: T) = 
+    for {
+      s <- Ask[S].tagged
+      _ <- DontTell(f(s)).tagged
+      a <- eff
+      _ <- DontTell(s).tagged
+    } yield a
+}
 
-  def onOperation[A](op: Op[A]): A = op match {
-    case _: Ask[_] => env
+
+case class ReaderHandler[S](val initial: S) extends UnaryHandler[Reader[S]] {
+  type Op[A] = ReaderOperation[A, S]
+  type Result[A] = A
+  type Stan = S
+
+  final def onReturn[A](a: A) = _ => Return(a)
+
+  final def onOperation[A, B, U](op: Op[A], k: A => S => B !! U): S => B !! U = op match {
+    case _: Ask[_] => s => k(s)(s)
+    case DontTell(s) => _ => k(())(s)
   }
+
+  final def onProduct[A, B, C, U](
+    x: S => A !! U, 
+    y: S => B !! U, 
+    k: ((A, B)) => S => C !! U
+  ): S => C !! U = 
+    (s: S) => 
+      (x(s) *! y(s)).flatMap { 
+        case (a, b) => k((a, b))(s)
+      }
+
 }

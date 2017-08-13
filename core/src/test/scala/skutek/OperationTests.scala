@@ -4,7 +4,7 @@ import org.specs2._
 
 class OperationTests extends Specification with CanLaunchTheMissiles {
 
-  def is = List(writer, state, choice, validation, maybe, except).reduce(_^_)
+  def is = List(reader, writer, state, choice, validation, maybe, except).reduce(_^_)
 
   def state = br ^ "State operations should work" ! {
     (for {
@@ -33,6 +33,38 @@ class OperationTests extends Specification with CanLaunchTheMissiles {
       eff.runWith(ChoiceHandler) must_== Vector("1a", "1b", "1c", "3a", "3b", "3c"),
       eff.runWith(ChoiceHandler.FindFirst) must_== Some("1a")
     ).reduce(_ and _)
+  }
+
+
+  def reader = br ^ "Reader operations should work" ! {
+    def loop(str: String): Unit !! Reader[Int] with Writer[String] = {
+      if (str.isEmpty)
+        Return()
+      else 
+        str.head match {
+          case '[' => Local((_: Int) + 1)(loop(str.tail))
+          case ']' => Local((_: Int) - 1)(loop(str.tail))
+          case x => for { 
+            indent <- Ask[Int]
+            _ <- Tell(("  " * indent) :+ x)
+            _ <- loop(str.tail) 
+          } yield ()
+        }
+    }
+
+    val lines1 = loop("ab[cd[e]f[]g]h").runWith(ReaderHandler(0) +! WriterHandler.strings.exec).mkString("\n")
+    val lines2 = """
+      |a
+      |b
+      |  c
+      |  d
+      |    e
+      |  f
+      |  g
+      |h
+      |""".stripMargin.tail.init
+
+    lines1 must_== lines2
   }
 
 

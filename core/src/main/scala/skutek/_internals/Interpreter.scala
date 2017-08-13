@@ -12,6 +12,7 @@ object Interpreter {
         case Return(x) => loop(k(x))
         case FlatMapped(eff, j) => loop(eff.flatMap(x => j(x).flatMap(k)))
         case Product(eff1, eff2) => loop(eff1.flatMap(a => eff2.flatMap(b => k((a, b)))))
+        case op: SyntheticOperation[_, _] => loop(op.tagless.flatMap(k))
         case _ => sys.error(s"Unhandled effect: $eff")
       }
       case _ => loop(eff.map(a => a))
@@ -31,6 +32,7 @@ object Interpreter {
         case Return(a) => h.onReturn(a)
         case FlatMapped(eff: Effectful[type_X, UV], k) => {
           type X = type_X
+
           def kk      = (x: X) => loop(k(x))
           def kkTramp = (x: X) => loopTramp(k(x))
           def suspend = h.onConceal(eff.downCast[U], kk)
@@ -39,12 +41,12 @@ object Interpreter {
             case Return(x) => loop(k(x))
             case FlatMapped(eff, j) => loop(eff.flatMap(x => j(x).flatMap(k)))
             case Product(eff1, eff2) => h.onProduct(loopTramp(eff1), loopTramp(eff2), kk)
-            case op: AnyOperation[X, UV] => {
+            case op: NaturalOperation[X, UV] =>
               if (op.tag == myTag) 
                 h.onOperation(op.stripTag.asInstanceOf[h.Op[X]], kkTramp)
               else 
                 suspend
-            }
+            case op: SyntheticOperation[X, UV] => loop(op.tagless.flatMap(k))
             case FilterFail() => h.onFilterFail match {
               case Some(op) => h.onOperation(op, kkTramp)
               case None => suspend

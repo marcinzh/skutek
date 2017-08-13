@@ -1,4 +1,5 @@
 package skutek
+import _internals.SyntheticTagger
 import scala.reflect.ClassTag
 
 
@@ -29,22 +30,48 @@ private[skutek] final case class Product[+A, +B, -U, -V](eff1: A !! U, eff2: B !
 private[skutek] final case class FilterFail[U]() extends Effectful[Nothing, U]
 
 
-protected[skutek] sealed trait AnyOperation[+A, -U] extends Effectful[A, U] {
+protected[skutek] sealed trait NaturalOperation[+A, -U] extends Effectful[A, U] {
   val tag: Any
   def stripTag: Operation[_, _]
 }
 
 
-abstract class Operation[+A, Fx](implicit implicitTag: ClassTag[Fx]) extends AnyOperation[A, Fx] { outer =>
+abstract class Operation[+A, Fx](implicit implicitTag: ClassTag[Fx]) extends NaturalOperation[A, Fx] { 
+  outer =>
   val tag = implicitTag
   def stripTag = this
 
   final def @![Tag](explicitTag: Tag): A !! (Fx @! Tag) = 
-    new AnyOperation[A, Fx @! Tag] {
+    new NaturalOperation[A, Fx @! Tag] {
       val tag = explicitTag
       def stripTag = outer
       override def toString = s"$outer @! $tag"
     }
+}
+
+
+sealed trait SyntheticOperation[+A, -U] extends Effectful[A, U] {
+  def tagless: A !! U
+}
+
+object SyntheticOperation {
+
+  sealed trait Base[+A, Fx, Ap[_]] extends SyntheticOperation[A, Ap[Fx]] {
+    type Effect = Fx
+    type Warp[X] = Ap[X]
+
+    protected def synthesize[T <: SyntheticTagger](implicit tagger: T): A !! Ap[tagger.Tagged[Fx]]
+
+    final def tagless: A !! Ap[Fx] = synthesize(SyntheticTagger.Implicit)
+    final def @![Tag](tag: Tag): A !! Ap[Fx @! Tag] = synthesize(SyntheticTagger.Explicit(tag))
+
+    implicit class Syntax[B](op: Operation[B, Fx]) {
+      def tagged[T <: SyntheticTagger](implicit tagger: T): B !! tagger.Tagged[Fx] = tagger(op)
+    }
+  }
+
+  abstract class Shallow[+A, Fx] extends Base[A, Fx, Lambda[X => X]] 
+  abstract class Deep[+A, Fx, U] extends Base[A, Fx, Lambda[X => X with U]]
 }
 
 
@@ -54,7 +81,8 @@ protected trait Effectful_exports {
 
   implicit class Eff_extension[A, U](thiz: A !! U) {
     def downCast[V >: U] = thiz.sideCast[V]
-    def withFilter(f: A => Boolean)(implicit ev: U <:< FilterableEffect): A !! U = thiz.flatMap(a => if (f(a)) Return(a) else FilterFail[U])
+    def withFilter(f: A => Boolean)(implicit ev: U <:< FilterableEffect): A !! U = 
+      thiz.flatMap(a => if (f(a)) Return(a) else FilterFail[U])
   }
 
   implicit class EffOfPair_extension[+A, +B, -U](thiz: (A, B) !! U) {
