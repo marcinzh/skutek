@@ -37,8 +37,9 @@
 - [Synthetic Operations](#synthetic-operations)
 - [Defining your own Effect](#defining-your-own-effect)
 
+# Part I: Core concepts in Skutek
 
-# 1\. Effect Definition
+## 1\. Effect Definition
 
 *Effect Definition*, is a fragment of program, that extends functionality of `Effectful` monad. The monad, which is all that Skutek is about.
 
@@ -50,7 +51,7 @@ An *Effect Definition* contains definitions of 3 kinds of entities:
 Skutek comes with [§. predefined](#part-ii---predefined-effects) effects. User can define [§. new effects](#defining-your-own-effect) as well.
 
 
-# 2\. Effect
+## 2\. Effect
 
 In Skutek, an *Effect* is an **abstract type** (a trait), serving as a unique, type-level **name**. Such type is supposed to be never instantiated or inherited. *Effects* are only useful as type-arguments for other types or methods. Most notably, for types of *Computations* and *Handler* constructors.
 
@@ -58,7 +59,7 @@ In Skutek, an *Effect* is an **abstract type** (a trait), serving as a unique, t
 * parameterless, e.g. `Maybe`, `Choice`
 * or parametrized, e.g. `State[Int]`, `Error[String]`
 
-# 3\. Effect Stack
+## 3\. Effect Stack
 
 An *Effect Stack* in Skutek, is a type-level **set** of *Effects*.  
 
@@ -72,7 +73,7 @@ State[Double] with Error[String] with Choice
 ```
 represents 3-element *Effect Stack*, comprising 3 *Effects*: `State[Double]`, `Error[String]` and `Choice`.
 
-## 3\.1\. Properties
+### 3\.1\. Properties
 
 The nature of intersection types gives raise to the following properties of *Effect Stacks*:
 
@@ -115,7 +116,7 @@ The nature of intersection types gives raise to the following properties of *Eff
     
     Clarification: when mentioning "bigger" and "smaller" *Effect Stacks*, we refer to pair of sets of *Effect*, in subset/superset relation.
 
-## 3\.2\. Caveats
+### 3\.2\. Caveats
 
 There are caveats related to intersection types:
 * A curious reader may wonder, what happens if there are two occurences of the same, parametrised *Effect* in the *Effect Stack*, but each one is applied with different type-argument. For example:
@@ -136,7 +137,7 @@ There are caveats related to intersection types:
   - Disable the linter entirely.
   
 
-# 4\. Computation
+## 4\. Computation
 
 A *Computation* is any value of a type derived from `Effectful[+A, -U]` trait.  
 * Parameter `A` is the result type of the *Computation*.  
@@ -155,7 +156,7 @@ The latter is more readable, as long as one remembers that:
 * Precedence of `!!` is lower than of `with`, so `A !! U with V` means `A !! (U with V)`
 * Precedence of `!!` is higher than of `=>`, so `A => B !! U` means `A => (B !! U)`
 
-## 4\.1\. Return
+### 4\.1\. Return
 
 The simplest *Computation* is constructed by `Return(x)` case class, where `x` is any value.  
 
@@ -175,7 +176,7 @@ eff: A !! Any
 
 Also, `Return()` is an abbreviation of `Return(())`.
 
-## 4\.2\. Operations
+### 4\.2\. Operations
 
 An *Operation* is an elementary *Computation*, specific for an *Effect*.
 
@@ -193,7 +194,7 @@ Examples:
 Nullary *Operations* require explicit type parameter, like in the case of `Get[Double]`.
 
 
-## 4\.3\. Composing Computations
+### 4\.3\. Composing Computations
 
 *Computation* is a monad, so standard `map`, `flatMap` and `flatten` methods are available.
 
@@ -235,7 +236,7 @@ eff3: (A, B) !! U1 with U2
 
 Additional 2 operators are provided: `*<!` and `*>!`. They work just like `*!`, with addition of projecting resulting pair to its first and second component respectively.
 
-# 5\. Handler
+## 5\. Handler
 
 *Handler* is an object, that has ability to [§. handle](#6-handling-effects) an *Effect* (or multiple *Effects*).  
 
@@ -246,7 +247,7 @@ Trait `Handler` is the supertype of all *Handlers*. It's dependent on 2 member t
 * `Handler#Result[X]` - A type-level function, describing how *Computation's* result type is transformed during handling the *Effect Stack*.
 
 
-## 5\.1\. Elementary handlers
+### 5\.1\. Elementary handlers
 
 Those are *Handlers* that originate from *Effect Definitions*. Each one is dedicated to handling **single** specific *Effect*. 
 
@@ -258,7 +259,7 @@ Examples:
 |`ErrorHandler[String]`|`Error[String]`|`Either[String, A]`|
 |`ChoiceHandler`|`Choice`|`Vector[A]`|
 
-## 5\.2\. Composed handlers
+### 5\.2\. Composed handlers
 
 Multiple *Handlers* can be associatively composed using `+!` operator, forming *Handler*
 that can handle bigger *Effect Stack*. 
@@ -298,7 +299,7 @@ val a = eff.run
 // we get:
 a: A
 ```
-## 6\.1\. Full handling
+### 6\.1\. Full handling
 
 The **easiest** way of using *Handlers*, is to handle entire *Effect Stack* at once: 
 1. Create composed *Handler*, covering all *Effects* in the *Computation's* *Effect Stack*.
@@ -321,7 +322,7 @@ val result = eff.runWith(handler)   // alternative syntax, with eff and handler 
 result: (Vector[Int], Double)
 ```
 
-## 6\.2\. Local handling
+### 6\.2\. Local handling
 
 In practical programs, it's often desirable to handle only a subset of
 *Computation's* *Effect Stack*, leaving the rest to be handled elsewhere.
@@ -339,7 +340,7 @@ There is another complication. Unfortunately, in both cases you won't be able to
 
 Moreover, this explicit *Effect Stack* has to consist of *Effects* that are going to **remain unhandled**, not the ones that are being **handled** in the call. That's rather inconvenient, but we can do nothing about it.
 
-### 6\.2\.1\. The simpler way
+#### 6\.2\.1\. The simpler way
 
 ```scala
 // assuming:
@@ -362,7 +363,7 @@ val eff2 = eff.handleCarefullyWith[Reader[Boolean] with Error[String]](handler) 
 eff2: (Vector[Int], Double) !! Reader[Boolean] with Error[String]
 ```
 
-### 6\.2\.2\. The safer way
+#### 6\.2\.2\. The safer way
 
 ```scala
 // assuming:
@@ -386,15 +387,15 @@ Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stac
 
 # Part II - Predefined Effects
 
-### Reader Effect
+## Reader Effect
 ||||
 |---|---|---|
 **Effect:** |`Reader[T]` | **Purposes:** <br/>Purely functional equivalent of **read-only** global variable. <br/>Scoped constants. Dependency injection.
-**Operation:** | `Ask[T]` |  Summons a value of type `T` out of nowhere. Let the handler worry how to get it. <br/> The summoned value (traditionally called "an environment") is always the same, unless overriden with `Local`.  
+**Operation:** | `Ask[T]` |  Summons a value of type `T` out of nowhere. Let the handler worry how to deliver it. <br/> The summoned value (traditionally called "an environment") is always the same, unless overriden with `Local`.  
 **Operation:** | `Local(f)(eff)` | Executes inner computation `eff` (of any type and with any effects), where the "environment" is locally modified by pure function `f` of type `T => T`.
 **Handler:** |`ReaderHandler(x)` | Provides the initial "environment" of type `T`. 
 
-### Writer Effect
+## Writer Effect
 ||||
 |---|---|---|
 **Effect:** | `Writer[T]` | **Purposes:** <br/>Purely functional equivalent of **write-only** global variable. <br/>Write-only accumulator. Log.
@@ -403,7 +404,7 @@ Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stac
 **Handler:** | `WriterHandler.strings` | Specialized `WriterHandler.seq[String]`.
 **Handler:** | `WriterHandler.monoid(zero, add)` | Creates handler that accumulates dumped values as if `T` was a Monoid.<br/> `zero : T` is the neutral element, `add : (T, T) => T` is the binary operator.
 
-### State Effect
+## State Effect
 ||||
 |---|---|---|
 **Effect:** | `Writer[T]` | **Purpose:** Purely functional equivalent of mutable global variable.
@@ -414,7 +415,7 @@ Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stac
 **Handler:** | `StateHandler(x).exec` | Returns the final state only.
 **Handler:** | `StateHandler(x).eval` | Forgets the final state.
 
-### Maybe Effect
+## Maybe Effect
 ||||
 |---|---|---|
 **Effect:** | `Maybe` | **Purpose:** Provides ability to stop the computation, without returning any value <br/> Similar to `Option[_]`, but composable with other effects.
@@ -425,7 +426,7 @@ There is no counterpart of `Some(x)`. `Return(x)` can be used.
 
 Use `.toEff` extension method, to convert an `Option[T]` to `T !! Maybe`.
 
-### Error Effect
+## Error Effect
 ||||
 |---|---|---|
 **Effect:** | `Error[T]` | **Purpose:** Purely functional equivalent of throwing & handling exceptions. <br/> Similar to `Either[T, _]`, but composable with other effects. <br/> Similar to `Try[_]`, but the error value doesn't have to be `Throwable`.
@@ -436,7 +437,7 @@ There is no counterpart of `Right(x)` or `Success(x)`. There is no need for any 
 
 Use `.toEff` extension method, to convert an `Either[A, B]` to `B !! A`.
 
-### Validation Effect
+## Validation Effect
 ||||
 |---|---|---|
 **Effect:** | `Validation[T]` | **Purpose:** Similar to `Error` effect, but allows accumulation of errors from mutually independent computations.
@@ -445,7 +446,7 @@ Use `.toEff` extension method, to convert an `Either[A, B]` to `B !! A`.
 
 For error accumulation to actually happen, computations must be composed parallelly. Otherwise, `Validation` will abort the computation at the first error.
 
-### Choice Effect
+## Choice Effect
 ||||
 |---|---|---|
 **Effect:** | `Choice` | **Purpose:** Seqential search with backtracking (in depth first order).
@@ -455,12 +456,12 @@ For error accumulation to actually happen, computations must be composed paralle
 **Handler:** | `ChoiceHandler` | Accumulates the results of each fork in a `Vector[_]`.
 **Handler:** | `ChoiceHandler.FindFirst` | Stops at first fork that ends with a result. Returns an `Option[_]`.
 
-### Concurrency Effect
+## Concurrency Effect
 ||||
 |---|---|---|
 **Effect:** | `Concurrency` | **Purpose:** Wrapper of `Future` from Scala's stanard library.
 **Operation:** | `Run(x)` | Evaluates `x` asynchronously. No `ExecutionContext` required :heart_eyes:.
-**Operation:** | `RunEff(eff)` | Same as `Run(eff).flatten`.
+**Operation:** | `RunEff(eff)` | Same as `Run(eff).flatten`. The `eff` can be any *Computation* with any *Effect Stack*
 **Handler:** | `ConcurrencyHandler()` | Requires implicit `ExecutionContext`. Returns a `Future[_]` of computation's result.
 **Handler:** | `ConcurrencyHandler.await(timeout)` | 
 
