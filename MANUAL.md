@@ -635,7 +635,7 @@ This safety problem is the reason, why 2 ways of [§. local handling](#62-local-
 * [§. The safer way](#622-the-safer-way) **compile-time** forces the user to decompose his *Effect Stack* into individual *Effects* (using Builder Pattern), so that tag uniqueness can be verified by Skutek at **run-time**.
 * [§. The simpler way](#621-the-simpler-way) doesn't use such discipline, so it may leak invalid *Effect Stacks* undetected. Hence the name: `handleCarefully`.
 
-# Mapped handlers
+## Mapped handlers
 
 An elementary *Handler* can be transformed to another *Handler*, by using a [polymorphic function](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#polymorphic-function-values) (a.k.a. [natural transformation](https://apocalisp.wordpress.com/2010/07/02/higher-rank-polymorphism-in-scala/)), that will be applied to postprocess the value obtained from [§. handling](#6-handling-effects). 
 
