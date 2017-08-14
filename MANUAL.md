@@ -406,7 +406,7 @@ Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stac
 ## State Effect
 ||||
 |---|---|---|
-**Effect:** | `Writer[T]` | **Purpose:** Purely functional equivalent of mutable global variable.
+**Effect:** | `State[T]` | **Purpose:** Purely functional equivalent of mutable global variable.
 **Operation:** | `Get[T]` | Gets the current value of the state.
 **Operation:** | `Put(x)` | Overwrites the current value of the state.
 **Operation:** | `Modify(f)` | Modifies the current value of the state, by applying a pure `T => T` function to it.
