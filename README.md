@@ -88,7 +88,6 @@ In progress.‥
 * [5. **Handler**](#5-handler)
   * [5.1. Elementary Handlers](#51-elementary-handlers)
   * [5.2. Composed Handlers](#52-composed-handlers)
-  * [5.3. Mapped Handlers](#53-mapped-handlers)
 * [6. **Handling Effects**](#6-handling-effects)
   * [6.1. Full handling](#61-full-handling)
   * [6.2. Local handling](#62-local-handling)
@@ -294,7 +293,7 @@ Additional 2 operators are provided: `*<!` and `*>!`. They work just like `*!`, 
 
 # 5\. Handler
 
-*Handler* is an object, that has ability to handle an *Effect* (or multiple *Effects*).  
+*Handler* is an object, that has ability to [§. handle](#6-handling-effects) an *Effect* (or multiple *Effects*).  
 
 Terminology: When it is stated that a *Handler* handles an *Effect Stack*, it's done to emphasize that a *Handler* can handle **multiple** *Effects* at once. It should not be interpreted as statement, that *Handler* can handle this particular *Effect Stack* only.
 
@@ -305,7 +304,7 @@ Trait `Handler` is the supertype of all *Handlers*. It's dependent on 2 member t
 
 ## 5\.1\. Elementary handlers
 
-Those *Handlers* originate from *Effect Definitions*. Each one is dedicated to handling **single** specific *Effect*. 
+Those are *Handlers* that originate from *Effect Definitions*. Each one is dedicated to handling **single** specific *Effect*. 
 
 Examples:
 
@@ -333,21 +332,6 @@ State[Double] with Error[String] with Choice
 The order of composition matters:  
 * The order of occurence of the operands is: outermost effect first, the innermost effect last.  
 * However, the order of actual handling is **reverse** of that: the innermost effect is handled first, the outermost effect is handled last. This reversed order reflects the order of applications of `Handler#Result[X]` from each operand.
-
-## 5\.3\. Mapped handlers
-
-An elementary *Handler* can be transformed to another *Handler*, by using a [polymorphic function](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#polymorphic-function-values) (a.k.a. [natural transformation](https://apocalisp.wordpress.com/2010/07/02/higher-rank-polymorphism-in-scala/)), that will be applied to postprocess the value obtained from [§. handling](6-handling-effects). 
-
-Mapped handler handles the same *Effect* as the original, but typically have different `Handler#Result[X]` type.
-
-For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of which constructs mapped *Handler*. The postprocessing function, in this case, is projection of pair to its first and second element respectively:
-
-| Handler construcion | `Handler#Result[A]` | Comment |
-|---|---|---|
-|`StateHandler(42.0)`      | `(A, Double)`| The original *Handler* |
-|`StateHandler(42.0).eval` | `A`| Mapped *Handler* that forgets the final state |
-|`StateHandler(42.0).exec` | `Double`| Mapped *Handler* that keeps the final state only |
-
 
 ## 6\. Handling Effects
 
@@ -706,10 +690,30 @@ This safety problem is the reason, why 2 ways of [§. local handling](#62-local-
 * [§. The simpler way](#621-the-simpler-way) doesn't use such discipline, so it may leak invalid *Effect Stacks* undetected. Hence the name: `handleCarefully`.
 
 
+# Mapped handlers
+
+An elementary *Handler* can be transformed to another *Handler*, by using a [polymorphic function](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#polymorphic-function-values) (a.k.a. [natural transformation](https://apocalisp.wordpress.com/2010/07/02/higher-rank-polymorphism-in-scala/)), that will be applied to postprocess the value obtained from [§. handling](6-handling-effects). 
+
+Mapped handler handles the same *Effect* as the original, but typically have different `Handler#Result[X]` type.
+
+For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of which constructs mapped *Handler*. The postprocessing function, in this case, is projection of pair to its first and second element respectively:
+
+| Handler construcion | `Handler#Result[A]` | Comment |
+|---|---|---|
+|`StateHandler(42.0)`      | `(A, Double)`| The original *Handler* |
+|`StateHandler(42.0).eval` | `A`| Mapped *Handler* that forgets the final state |
+|`StateHandler(42.0).exec` | `Double`| Mapped *Handler* that keeps the final state only |
+
+
+TODO *how to create your own mapped handlers*
+
 # Defining your own Effect
 
-TBD.
+TODO 
 
 This part is the most likely to be modified in future versions of Skutek.
 
+# Synthetic Operations
+
+TODO
 
