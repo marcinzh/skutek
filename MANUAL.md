@@ -28,6 +28,7 @@
 - [Validation Effect](#validation-effect)
 - [Choice Effect](#choice-effect)
 - [Concurrency Effect](#concurrency-effect)
+- [Eval & Trampoline](#concurrency-effect)
 ### Part III: Advanced Topics
 - [Traversing](#traversing)
 - [Parallellism](#parallellism)
@@ -465,7 +466,13 @@ For error accumulation to actually happen, computations must be composed paralle
 
 **Warning:** `Concurrency` must be handled as the final (outermost) *Effect* in the *Effect Stack*. Failing to do so, will result in `Unhandled Effect` error.
 
+## Eval & Trampoline
 
+These aren't true *Effects*, and they don't require any *Handler*.
+
+`Eval(x)` - Is like `Return(x)`, but the `x` is evaluated lazily. *Effect Stack* is empty.
+
+`Trampoline(eff)` - Is like standalone `eff`, but prevents stack overflow, if `eff` is recursive. *Effect Stack* is the same as of `eff`.
 
 
 # Part III. Advanced Topics
