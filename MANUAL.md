@@ -28,7 +28,7 @@
 - [Validation Effect](#validation-effect)
 - [Choice Effect](#choice-effect)
 - [Concurrency Effect](#concurrency-effect)
-- [Eval & Trampoline](#concurrency-effect)
+- [Eval & Trampoline](#eval--trampoline)
 ### Part III: Advanced Topics
 - [Traversing](#traversing)
 - [Parallellism](#parallellism)
