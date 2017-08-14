@@ -52,7 +52,7 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.5.1"
     - No clever type-fu, no macros. Mostly immutable OOP style.
      
 - Practical stuff:
-    - Predefined set of basic effects (`Reader`, `Writer`, etc.). [read more](#predefined-effects)
+    - Predefined set of basic effects (`Reader`, `Writer`, etc.). [read more](#part-ii---predefined-effects)
     - Ability to annotate effects with tags. [read more](#tagging-effects)
     - Potentially parallel execution of effects.
     - Support for `for` comprehension guards, for effects compatible with filtering (e.g. `Maybe`, `Choice`).
@@ -103,7 +103,7 @@ An *Effect Definition* contains definitions of 3 kinds of entities:
 * *Operation(s)* of that *Effect*.
 * *Handler(s)* of that *Effect*.
 
-Skutek comes with [§. predefined](#predefined-effects) effects. User can define [§. new effects](#defining-your-own-effect) as well.
+Skutek comes with [§. predefined](#part-ii---predefined-effects) effects. User can define [§. new effects](#defining-your-own-effect) as well.
 
 
 # 2\. Effect
@@ -456,14 +456,24 @@ The chain of `fx` method calls is a Builder Pattern. It has to be used to enumer
 Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stack* of length other than `1`, won't work.
 
 # Part II - Predefined Effects
-### Reader
-### Writer
-### State
-### Maybe
-### Error
-### Validation
-### Choice
-### Concurrency
+### Reader Effect
+**Purpose:** Purely functional equivalent of read-only global (or dynamically scoped) variable. Dependency injection.  
+**Effect:** `Reader[T]`  
+**Operation:** `Ask[T]` - Summons a value of type `T` (traditionally called "an environment") out of nowhere. Let the handler worry how to get it. The summoned value is always the same, unless overriden with `Local`.  
+**Operation:** `Local(modify)(inner)` - Executes `inner` computation (of any type and with any effects), where the "environment" is locally modified by pure function `modify` of type `T => T`.  
+**Handler:** `ReaderHandler(env : T)` - Provides the initial "environment".
+
+### Writer Effect
+**Purpose:** Purely functional equivalent of write-only global variable. Write-only accumulator. Log.
+
+
+
+### State Effect
+### Maybe Effect
+### Error Effect
+### Validation Effect
+### Choice Effect
+### Concurrency Effect
 
 
 
