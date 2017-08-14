@@ -41,7 +41,7 @@
 
 ## 1\. Effect Definition
 
-*Effect Definition*, is a fragment of program, that extends functionality of `Effectful` monad. The monad, which is all that Skutek is about.
+*Effect Definition*, is a fragment of program, that **extends** functionality of `Effectful` monad. The monad, which is all that Skutek is about.
 
 An *Effect Definition* contains definitions of 3 kinds of entities:
 * An *Effect*.
@@ -81,8 +81,6 @@ The nature of intersection types gives raise to the following properties of *Eff
 
 1. Type `Any` represents **empty** *Effect Stack*.
 
-   This might be counterintuitive. Had Scala have union types, we could have used them for *Effect Stacks* instead. Empty *Effect Stack* would have been `Nothing` type. The `Effectful` trait would have to have flipped the variance direction on its [§. second type parameter](#4-computation). Those two representations (tha actual and the hypothetical) are dual of each other, and would have similar properties. 
-
 1. Type `Any` is the neutral element of type intersection operator. In Scala, the following types are equivalent:
     ```scala
     State[Int]
@@ -119,12 +117,6 @@ The nature of intersection types gives raise to the following properties of *Eff
 ### 3\.2\. Caveats
 
 There are caveats related to intersection types:
-* A curious reader may wonder, what happens if there are two occurences of the same, parametrised *Effect* in the *Effect Stack*, but each one is applied with different type-argument. For example:
-  ```scala
-  State[Int] with State[String]
-  ```
-  It will be discussed in [§. Tag Conflicts](#tag-conflicts).
-
 * Redundancies and reorderings shown in points 3, 4 and 5, may appear in error messages, when the *Effect Stack* of a *Computation* is inferred by Scala's compiler. It's ugly, but normal.
 
 * Occasionally, when using empty *Effect Stacks*, Scala compiler's linter may complain with message:
@@ -136,12 +128,18 @@ There are caveats related to intersection types:
   - Selectively disable this specific feature of linter (and if it works for you, let me know).
   - Disable the linter entirely.
   
+* A curious reader may wonder, what happens if there are two occurences of the same, parametrised *Effect* in the *Effect Stack*, but each one is applied with different type-argument. For example:
+  ```scala
+  State[Int] with State[String]
+  ```
+  It will be discussed in [§. Tag Conflicts](#tag-conflicts).
+
 
 ## 4\. Computation
 
 A *Computation* is any value of a type derived from `Effectful[+A, -U]` trait.  
 * Parameter `A` is the result type of the *Computation*.  
-* Parameter `U` is the *Effect Stack* of the *Computation*. It's meaning is to act as a registry of *Effects* that will have to be handled, before the result of the *Computation* can be obtained.
+* Parameter `U` is the *Effect Stack* of the *Computation*. It's meaning is to act as a registry of *Effects* that will have to be [§. handled](#6-handling-effects), before the result of the *Computation* can be obtained.
 
 Example:
 ```scala
@@ -311,7 +309,7 @@ Example:
 eff: Int !! State[Double] with Choice = ???
 
 // Step 1.
-val handler = StateHandler(1.377) +! ChoiceHandler
+val handler = StateHandler(1.337) +! ChoiceHandler
 
 // Step 2.
 val result = handler.run(eff) 
@@ -353,7 +351,7 @@ We are going to leave *Effects* `Reader[Boolean]` and `Error[String]` unhandled.
 ```scala
 // ...continued
 // let:
-val handler = StateHandler(1.377) +! ChoiceHandler
+val handler = StateHandler(1.337) +! ChoiceHandler
 
 val eff2 = handler.handleCarefully[Reader[Boolean] with Error[String]](eff) 
 
