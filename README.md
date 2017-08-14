@@ -1,82 +1,4 @@
 
-# Part II - Predefined Effects
-### Reader Effect
-||||
-|---|---|---|
-**Effect:** |`Reader[T]` | **Purposes:** <br/>Purely functional equivalent of **read-only** global variable. <br/>Scoped constants. Dependency injection.
-**Operation:** | `Ask[T]` |  Summons a value of type `T` out of nowhere. Let the handler worry how to get it. <br/> The summoned value (traditionally called "an environment") is always the same, unless overriden with `Local`.  
-**Operation:** | `Local(f)(eff)` | Executes inner computation `eff` (of any type and with any effects), where the "environment" is locally modified by pure function `f` of type `T => T`.
-**Handler:** |`ReaderHandler(x)` | Provides the initial "environment" of type `T`. 
-
-### Writer Effect
-||||
-|---|---|---|
-**Effect:** | `Writer[T]` | **Purposes:** <br/>Purely functional equivalent of **write-only** global variable. <br/>Write-only accumulator. Log.
-**Operation:** | `Tell(x)` | Dumps a value of type `T` somewhere. Let the handler worry what to do with it.  
-**Handler:** | `WriterHandler.seq[T]` | Handles the effect by storing the dumped values in a `Vector[T]`
-**Handler:** | `WriterHandler.strings` | Specialized `WriterHandler.seq[String]`
-**Handler:** | `WriterHandler.monoidish(...)` | TODO
-
-### State Effect
-||||
-|---|---|---|
-**Effect:** | `Writer[T]` | **Purpose:** Purely functional equivalent of mutable global variable.
-**Operation:** | `Get[T]` | Gets the current value of the state
-**Operation:** | `Put(x)` | Overwrites the current value of the state
-**Handler:** | `StateHandler(x)` | Provides the initial value of the state. 
-
-### Maybe Effect
-||||
-|---|---|---|
-**Effect:** | `Maybe` | **Purpose:** Provides ability to stop the computation, without returning any value <br/> Similar to `Option[_]`, but composable with other effects.
-**Operation:** | `Naught` | Aborts the computation. Similar to `None`. 
-**Handler:** | `MaybeHandler` | Result type of the computation in wrapped in an `Option[_]`
-
-There is no counterpart of `Some(x)`. `Return(x)` can be used.
-
-Use `.toEff` extension method, to convert an `Option[T]` to `T !! Maybe`.
-
-### Error Effect
-||||
-|---|---|---|
-**Effect:** | `Error[T]` | **Purpose:** Purely functional equivalent of throwing & handling exceptions. <br/> Similar to `Either[T, _]`, but composable with other effects. <br/> Similar to `Try[_]`, but the error value doesn't have to be `Throwable`.
-**Operation:** | `Wrong(x)` | Aborts the computation with an error value of type `T`. Similar to `Left(x)`
-**Handler:** | `ErrorHandler[T]` | Result type of the computation in wrapped in an `Either[T, _]`
-
-There is no counterpart of `Right(x)` or `Success(x)`. There is no need for any indicating of "lack of error", but `Return(x)` can be used.
-
-Use `.toEff` extension method, to convert an `Either[A, B]` to `B !! A`.
-
-### Validation Effect
-||||
-|---|---|---|
-**Effect:** | `Validation[T]` | **Purpose:** Accumulation of errors from mutually independent computations.
-**Operation:** | `Invalid(x)` | Aborts the computation with an error value of type `T`. 
-**Handler:** | `ValidationHandler[T]` | Result type of the computation in wrapped in an `Either[Vector[T], _]`
-
-### Choice Effect
-||||
-|---|---|---|
-**Effect:** | `Choice` | **Purpose:** Seqential search with backtracking (in depth first order)
-**Operation:** | `Choose(xs)` | Forks the computation, for each `x` from `xs` (where `xs` is any `Iterable[_]`)
-**Operation:** | `Choose.from(a, b, c)` | Same as `Choose(List(a, b, c))`
-**Operation:** | `Choose()` | Aborts the current fork with no result. <br/>Same as `Choose(List())`
-**Handler:** | `ChoiceHandler` | Accumulates the results of each successful fork in a `Vector[_]`
-**Handler:** | `ChoiceHandler.FindFirst` | Stops at first succesful fork. Returns an `Option[_]`
-
-There is no need for any indicating of "successful fork", but
-
-### Concurrency Effect
-||||
-|---|---|---|
-
-
-=====================================
-
-=====================================
-
-=====================================
-
 # Skutek: extensible effects without (heavy) lifting
 
 [![Build Status](https://travis-ci.org/marcinzh/skutek.svg?branch=master)](https://travis-ci.org/marcinzh/skutek)
@@ -534,6 +456,85 @@ The chain of `fx` method calls is a Builder Pattern. It has to be used to enumer
 
 Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stack* of length other than `1`, won't work.
 
+# Part II - Predefined Effects
+
+### Reader Effect
+||||
+|---|---|---|
+**Effect:** |`Reader[T]` | **Purposes:** <br/>Purely functional equivalent of **read-only** global variable. <br/>Scoped constants. Dependency injection.
+**Operation:** | `Ask[T]` |  Summons a value of type `T` out of nowhere. Let the handler worry how to get it. <br/> The summoned value (traditionally called "an environment") is always the same, unless overriden with `Local`.  
+**Operation:** | `Local(f)(eff)` | Executes inner computation `eff` (of any type and with any effects), where the "environment" is locally modified by pure function `f` of type `T => T`.
+**Handler:** |`ReaderHandler(x)` | Provides the initial "environment" of type `T`. 
+
+### Writer Effect
+||||
+|---|---|---|
+**Effect:** | `Writer[T]` | **Purposes:** <br/>Purely functional equivalent of **write-only** global variable. <br/>Write-only accumulator. Log.
+**Operation:** | `Tell(x)` | Dumps a value of type `T` somewhere. Let the handler worry what to do with it.  
+**Handler:** | `WriterHandler.seq[T]` | Handles the effect by storing the dumped values in a `Vector[T]`
+**Handler:** | `WriterHandler.strings` | Specialized `WriterHandler.seq[String]`
+**Handler:** | `WriterHandler.monoidish(...)` | TODO
+
+### State Effect
+||||
+|---|---|---|
+**Effect:** | `Writer[T]` | **Purpose:** Purely functional equivalent of mutable global variable.
+**Operation:** | `Get[T]` | Gets the current value of the state
+**Operation:** | `Put(x)` | Overwrites the current value of the state
+**Handler:** | `StateHandler(x)` | Provides the initial value of the state. 
+
+### Maybe Effect
+||||
+|---|---|---|
+**Effect:** | `Maybe` | **Purpose:** Provides ability to stop the computation, without returning any value <br/> Similar to `Option[_]`, but composable with other effects.
+**Operation:** | `Naught` | Aborts the computation. Similar to `None`. 
+**Handler:** | `MaybeHandler` | Result type of the computation in wrapped in an `Option[_]`
+
+There is no counterpart of `Some(x)`. `Return(x)` can be used.
+
+Use `.toEff` extension method, to convert an `Option[T]` to `T !! Maybe`.
+
+### Error Effect
+||||
+|---|---|---|
+**Effect:** | `Error[T]` | **Purpose:** Purely functional equivalent of throwing & handling exceptions. <br/> Similar to `Either[T, _]`, but composable with other effects. <br/> Similar to `Try[_]`, but the error value doesn't have to be `Throwable`.
+**Operation:** | `Wrong(x)` | Aborts the computation with an error value of type `T`. Similar to `Left(x)`
+**Handler:** | `ErrorHandler[T]` | Result type of the computation in wrapped in an `Either[T, _]`
+
+There is no counterpart of `Right(x)` or `Success(x)`. There is no need for any indicating of "lack of error", but `Return(x)` can be used.
+
+Use `.toEff` extension method, to convert an `Either[A, B]` to `B !! A`.
+
+### Validation Effect
+||||
+|---|---|---|
+**Effect:** | `Validation[T]` | **Purpose:** Similar to `Error` effect, but allows accumulation of errors from mutually independent computations.
+**Operation:** | `Invalid(x)` | Aborts the computation with an error value of type `T`. 
+**Handler:** | `ValidationHandler[T]` | Result type of the computation in wrapped in an `Either[Vector[T], _]`
+
+For error accumulation to actually happen, computations must be composed parallelly. Otherwise, `Validation` will abort the computation at the first error.
+
+### Choice Effect
+||||
+|---|---|---|
+**Effect:** | `Choice` | **Purpose:** Seqential search with backtracking (in depth first order)
+**Operation:** | `Choose(xs)` | Forks the computation, for each `x` from `xs` (where `xs` is any `Iterable[_]`)
+**Operation:** | `Choose.from(a, b, c)` | Same as `Choose(List(a, b, c))`
+**Operation:** | `Choose()` | Aborts the current fork with no result. <br/>Same as `Choose(List())`
+**Handler:** | `ChoiceHandler` | Accumulates the results of each fork in a `Vector[_]`
+**Handler:** | `ChoiceHandler.FindFirst` | Stops at first fork that ends with a result. Returns an `Option[_]`
+
+### Concurrency Effect
+||||
+|---|---|---|
+**Effect:** | `Concurrency` | **Purpose:** Wrapper of `Future` from Scala's stanard library
+**Operation:** | `Run(x)` | Evaluates `x` asynchronously. No `ExecutionContext` required :heart_eyes:
+**Operation:** | `RunEff(eff)` | Same as `Run(eff).flatten`
+**Handler:** | `ConcurrencyHandler()` | Requires implicit `ExecutionContext`. Returns a `Future[_]` of computation's result.
+**Handler:** | `ConcurrencyHandler.await(timeout)` | 
+
+**Warning:** `Concurrency` *Effect* must be handled as the final (outermost) effect in the *Effect Stack*. Failing to do so, will result in `Unhandled Effect` error.
+
 
 
 
@@ -704,9 +705,6 @@ This safety problem is the reason, why 2 ways of [§. local handling](#62-local-
 * [§. The safer way](#622-the-safer-way) **compile-time** forces the user to decompose his *Effect Stack* into individual *Effects* (using Builder Pattern), so that tag uniqueness can be verified by Skutek at **run-time**.
 * [§. The simpler way](#621-the-simpler-way) doesn't use such discipline, so it may leak invalid *Effect Stacks* undetected. Hence the name: `handleCarefully`.
 
-# Predefined Effects
-
-TBD.
 
 # Defining your own Effect
 
