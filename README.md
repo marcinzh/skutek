@@ -53,8 +53,8 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.5.1"
     - No clever type-fu, no macros. Mostly immutable OOP style.
      
 - Practical stuff:
-    - Predefined set of basic effects (`Reader`, `Writer`, etc.). [read more](MANUAL.md#part-ii---predefined-effects)
-    - Ability to annotate effects with tags. [read more](MANUAL.md#tagging-effects)
+    - Predefined set of basic effects (`Reader`, `Writer`, etc.). [More in the manual](MANUAL.md#part-ii---predefined-effects).
+    - Ability to annotate effects with tags. [More in the manual](MANUAL.md#tagging-effects).
     - Potentially parallel execution of effects.
     - Support for `for` comprehension guards, for effects compatible with filtering (e.g. `Maybe`, `Choice`).
     - Tested stack safety.    
@@ -62,10 +62,10 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.5.1"
 - Caveats and limitations:
     - General infancy of the project.
     - No possiblity of adapting pre-existing monads as Skutek's effects.
-    - Removing effects from the stack (local handling) isn't as easy as adding them. [read more](MANUAL.md#72-local-handling)
-    - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`"). [read more](MANUAL.md#32-caveats)
-    - Using patterns in `for` comprehensions can trigger surprising errors (Scala's wart, not specific to Skutek)
-    - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. [read more](MANUAL.md#tag-conflicts)
+    - Removing effects from the stack (local handling) isn't as easy as adding them. [More in the manual](MANUAL.md#62-local-handling).
+    - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`"). [More in the manual](MANUAL.md#32-caveats).
+    - Using patterns in `for` comprehensions can trigger surprising errors (Scala's wart, not specific to Skutek).
+    - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. [More in the manual](MANUAL.md#tag-conflicts).
     - Lack of performance analysis.
     - `Concurrency` effect is a hack.
 
