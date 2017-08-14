@@ -455,17 +455,20 @@ Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stac
 |---|---|---|
 **Effect:** | `Writer[T]` | **Purposes:** <br/>Purely functional equivalent of **write-only** global variable. <br/>Write-only accumulator. Log.
 **Operation:** | `Tell(x)` | Dumps a value of type `T` somewhere. Let the handler worry what to do with it.  
-**Handler:** | `WriterHandler.seq[T]` | Handles the effect by storing the dumped values in a `Vector[T]`
-**Handler:** | `WriterHandler.strings` | Specialized `WriterHandler.seq[String]`
-**Handler:** | `WriterHandler.monoidish(...)` | TODO
+**Handler:** | `WriterHandler.seq[T]` | Handles the effect by storing the dumped values in a `Vector[T]`.
+**Handler:** | `WriterHandler.strings` | Specialized `WriterHandler.seq[String]`.
+**Handler:** | `WriterHandler.monoid(zero, add)` | Creates handler that accumulates dumped values as if `T` was a Monoid.<br/> `zero : T` is the neutral element, `add : (T, T) => T` is the binary operator.
 
 ### State Effect
 ||||
 |---|---|---|
 **Effect:** | `Writer[T]` | **Purpose:** Purely functional equivalent of mutable global variable.
-**Operation:** | `Get[T]` | Gets the current value of the state
-**Operation:** | `Put(x)` | Overwrites the current value of the state
-**Handler:** | `StateHandler(x)` | Provides the initial value of the state. 
+**Operation:** | `Get[T]` | Gets the current value of the state.
+**Operation:** | `Put(x)` | Overwrites the current value of the state.
+**Operation:** | `Modify(f)` | Modifies the current value of the state, by applying a pure `T => T` function to it.
+**Handler:** | `StateHandler(x)` | Provides the initial value of the state. Returns computed value in a pair with the final state.
+**Handler:** | `StateHandler(x).exec` | Returns the final state only.
+**Handler:** | `StateHandler(x).eval` | Forgets the final state.
 
 ### Maybe Effect
 ||||
@@ -707,13 +710,14 @@ For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of 
 
 TODO *how to create your own mapped handlers*
 
+# Synthetic Operations
+
+TODO
+
 # Defining your own Effect
 
 TODO 
 
 This part is the most likely to be modified in future versions of Skutek.
 
-# Synthetic Operations
-
-TODO
 
