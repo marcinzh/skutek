@@ -504,23 +504,23 @@ For error accumulation to actually happen, computations must be composed paralle
 ### Choice Effect
 ||||
 |---|---|---|
-**Effect:** | `Choice` | **Purpose:** Seqential search with backtracking (in depth first order)
-**Operation:** | `Choose(xs)` | Forks the computation, for each `x` from `xs` (where `xs` is any `Iterable[_]`)
-**Operation:** | `Choose.from(a, b, c)` | Same as `Choose(List(a, b, c))`
-**Operation:** | `Choose()` | Aborts the current fork with no result. <br/>Same as `Choose(List())`
-**Handler:** | `ChoiceHandler` | Accumulates the results of each fork in a `Vector[_]`
-**Handler:** | `ChoiceHandler.FindFirst` | Stops at first fork that ends with a result. Returns an `Option[_]`
+**Effect:** | `Choice` | **Purpose:** Seqential search with backtracking (in depth first order).
+**Operation:** | `Choose(xs)` | Forks the computation, for each `x` from `xs` (where `xs` is any `Iterable[_]`).
+**Operation:** | `Choose.from(a, b, c)` | Same as `Choose(List(a, b, c))`.
+**Operation:** | `Choose()` | Aborts the current fork with no result. <br/>Same as `Choose(List())`.
+**Handler:** | `ChoiceHandler` | Accumulates the results of each fork in a `Vector[_]`.
+**Handler:** | `ChoiceHandler.FindFirst` | Stops at first fork that ends with a result. Returns an `Option[_]`.
 
 ### Concurrency Effect
 ||||
 |---|---|---|
-**Effect:** | `Concurrency` | **Purpose:** Wrapper of `Future` from Scala's stanard library
-**Operation:** | `Run(x)` | Evaluates `x` asynchronously. No `ExecutionContext` required :heart_eyes:
-**Operation:** | `RunEff(eff)` | Same as `Run(eff).flatten`
+**Effect:** | `Concurrency` | **Purpose:** Wrapper of `Future` from Scala's stanard library.
+**Operation:** | `Run(x)` | Evaluates `x` asynchronously. No `ExecutionContext` required :heart_eyes:.
+**Operation:** | `RunEff(eff)` | Same as `Run(eff).flatten`.
 **Handler:** | `ConcurrencyHandler()` | Requires implicit `ExecutionContext`. Returns a `Future[_]` of computation's result.
 **Handler:** | `ConcurrencyHandler.await(timeout)` | 
 
-**Warning:** `Concurrency` *Effect* must be handled as the final (outermost) effect in the *Effect Stack*. Failing to do so, will result in `Unhandled Effect` error.
+**Warning:** `Concurrency` must be handled as the final (outermost) *Effect* in the *Effect Stack*. Failing to do so, will result in `Unhandled Effect` error.
 
 
 
@@ -692,6 +692,9 @@ This safety problem is the reason, why 2 ways of [§. local handling](#62-local-
 * [§. The safer way](#622-the-safer-way) **compile-time** forces the user to decompose his *Effect Stack* into individual *Effects* (using Builder Pattern), so that tag uniqueness can be verified by Skutek at **run-time**.
 * [§. The simpler way](#621-the-simpler-way) doesn't use such discipline, so it may leak invalid *Effect Stacks* undetected. Hence the name: `handleCarefully`.
 
+# Parallellism
+
+TODO
 
 # Mapped handlers
 
