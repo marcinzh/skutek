@@ -6,6 +6,7 @@ object Choice extends NullaryEffectCompanion[Choice]
 
 case class Choose[A](values: Iterable[A]) extends Operation[A, Choice]
 
+object NoChoice extends Choose(Iterable.empty[Nothing])
 object Choose {
   def from[A](as: A*) = Choose(as)
 }
@@ -15,7 +16,7 @@ case object ChoiceHandler extends AllChoiceHandler {
 }
 
 protected abstract class BaseChoiceHandler extends NullaryHandler[Choice] {
-  override val onFilterFail = Some(Choose(Iterable.empty))
+  override val onFilterFail = Some(NoChoice)
   type Op[A] = Choose[A]
 }
 

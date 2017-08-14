@@ -451,7 +451,7 @@ For error accumulation to actually happen, computations must be composed paralle
 **Effect:** | `Choice` | **Purpose:** Seqential search with backtracking (in depth first order).
 **Operation:** | `Choose(xs)` | Forks the computation, for each `x` from `xs` (where `xs` is any `Iterable[_]`).
 **Operation:** | `Choose.from(a, b, c)` | Same as `Choose(List(a, b, c))`.
-**Operation:** | `Choose()` | Aborts the current fork with no result. <br/>Same as `Choose(List())`.
+**Operation:** | `NoChoice` | Aborts the current fork with no result. <br/>Same as `Choose(List())`.
 **Handler:** | `ChoiceHandler` | Accumulates the results of each fork in a `Vector[_]`.
 **Handler:** | `ChoiceHandler.FindFirst` | Stops at first fork that ends with a result. Returns an `Option[_]`.
 
