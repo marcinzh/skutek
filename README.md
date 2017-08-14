@@ -455,11 +455,24 @@ The chain of `fx` method calls is a Builder Pattern. It has to be used to enumer
 
 Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stack* of length other than `1`, won't work.
 
-# Part II.
+# Part II - Predefined Effects
+### Reader
+### Writer
+### State
+### Maybe
+### Error
+### Validation
+### Choice
+### Concurrency
+
+
+
+
+# Part III.
+
 1. [Traversing](#traversing)
 1. [Tagging Effects](#tagging-effects)
 1. [Tag Conflicts](#tag-conflicts)
-1. [Predefined Effects](#predefined-effects)
 1. [Defining you own Effect](#defining-your-own-effect)
 
 # Traversing
