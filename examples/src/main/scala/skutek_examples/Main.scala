@@ -4,7 +4,7 @@ object Main extends App {
 
   val registry = List(
     "queens" -> Queens.apply _,
-    "invalidfutures" -> InvalidFutures.apply _,
+    "invalidfutures" -> InvalidFutures.apply _
   )
 
   val args2 = if (args.isEmpty) args :+ registry.head._1 else args
