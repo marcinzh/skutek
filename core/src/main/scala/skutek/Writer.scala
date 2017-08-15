@@ -52,10 +52,10 @@ object WriterHandler {
     def single(x: T) = Vector(x)
   }
 
-  def monoid[T](zero: T, add: (T, T) => T) = new WriterHandler[T] {
+  def monoid[T](zero: T, op: (T, T) => T) = new WriterHandler[T] {
     type Stan = T
     def initial = zero
-    def add(x: T, y: T) = add(x, y)
+    def add(x: T, y: T) = op(x, y)
     def single(x: T) = x
   }
 }
