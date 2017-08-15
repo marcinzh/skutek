@@ -38,7 +38,7 @@ More in [examples](https://github.com/marcinzh/skutek/tree/master/examples/src/m
 ```scala
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.5.1"
+libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.5.2"
 ```
 
 # Features
