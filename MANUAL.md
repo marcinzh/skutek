@@ -459,7 +459,7 @@ For error accumulation to actually happen, computations must be composed paralle
 ||||
 |---|---|---|
 **Effect:** | `Concurrency` | **Purpose:** Wrapper of `Future` from Scala's stanard library.
-**Operation:** | `Run(x)` | Evaluates `x` asynchronously. No `ExecutionContext` required :heart_eyes:.
+**Operation:** | `Run(x)` | Evaluates `x` asynchronously. No `ExecutionContext` required :sunglasses:.
 **Operation:** | `RunEff(eff)` | Same as `Run(eff).flatten`. The `eff` can be any *Computation* with any *Effect Stack*
 **Handler:** | `ConcurrencyHandler()` | Requires implicit `ExecutionContext`. Returns a `Future[_]` of computation's result.
 **Handler:** | `ConcurrencyHandler.await(timeout)` | 
@@ -523,6 +523,13 @@ eff: Unit !! Validation[String] with Writer[String]
 ## Parallellism
 
 TODO
+
+```scala
+eff1 *! eff2 ==== for { a <- eff1; b <- eff2 } yield (a, b)
+```
+
+TODO
+
 
 
 ## Tagging Effects
