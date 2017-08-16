@@ -53,21 +53,21 @@ libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.5.2"
     - No clever type-fu, no macros. Mostly immutable OOP style.
      
 - Practical stuff:
-    - Predefined set of basic effects (`Reader`, `Writer`, etc.). [More in the manual](MANUAL.md#part-ii---predefined-effects).
-    - Ability to annotate effects with tags. [More in the manual](MANUAL.md#tagging-effects).
-    - Potentially parallel execution of effects.
+    - Predefined set of basic effects (`Reader`, `Writer`, etc.). [Read more](MANUAL.md#part-ii---predefined-effects).
+    - Ability to annotate effects with tags. [Read more](MANUAL.md#tagging-effects).
+    - Potentially parallel execution of effects. [Read more](MANUAL.md#parallellism).
     - Support for `for` comprehension guards, for effects compatible with filtering (e.g. `Maybe`, `Choice`).
     - Tested stack safety.    
     
 - Caveats and limitations:
     - General infancy of the project.
     - No possiblity of adapting pre-existing monads as Skutek's effects.
-    - Removing effects from the stack (local handling) isn't as easy as adding them. [More in the manual](MANUAL.md#62-local-handling).
-    - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`"). [More in the manual](MANUAL.md#32-caveats).
+    - Removing effects from the stack (local handling) isn't as easy as adding them. [Read more](MANUAL.md#62-local-handling).
+    - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`"). [Read more](MANUAL.md#32-caveats).
     - Using patterns in `for` comprehensions can trigger surprising errors (Scala's wart, not specific to Skutek).
-    - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. [More in the manual](MANUAL.md#tag-conflicts).
+    - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. [Read more](MANUAL.md#tag-conflicts).
     - Lack of performance analysis.
-    - `Concurrency` effect is a hack.
+    - `Concurrency` effect is a [hack](MANUAL.md#warning).
 
 
 # User Manual
