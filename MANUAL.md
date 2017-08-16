@@ -532,8 +532,8 @@ By parallellism in Skutek, we mean optional ability of an *Effect* to behave dif
 
 ```scala
 // assuming:
-val effA : A !! Fx = ???
-val effB : B !! Fx = ???
+val effA : A !! U = ???
+val effB : B !! U = ???
 
 // let:
 val effPar = eff1 *! eff2
@@ -541,21 +541,21 @@ val effPar = eff1 *! eff2
 val effSer = for { a <- eff1; b <- eff2 } yield (a, b)
 ```
 
-Both `effSer` and `effPar` have the same type: `(A, B) !! Fx`.  But results of **handling them** may not necessary be equal, depending on `Fx`. Also different "real world" side effects may occur. This also means that `*!` should not be confused with `Applicative` composition.
+Both `effSer` and `effPar` have the same type: `(A, B) !! U`.  But results of **handling them** may not necessary be equal, depending on `U`. Also different "real world" side effects may occur. This also means that `*!` should not be confused with `Applicative` composition.
 
-#### Effects neutral with respect to parallellism
+#### 1\. Effects neutral with respect to parallellism
 
 Examples: `Reader`, `Writer`, `Maybe`, `Error`, `Choice`. 
 
 They don't exhibit parallelism. Handling `effSer` and `effPar` produces equal outputs.
 
-#### Effects where parallellism is an essential property
+#### 2\. Effects where parallellism is essential
 
 Examples: `Validation`, `Concurrency`. 
 
 For them, handling `effSer` and `effPar` can produce different results:
 
-- `Validation` is only really useful with parallel composition. Otherwise, it behaves like `Error`, that wraps the error value in singleton `Vector`.
+- `Validation` is only really useful with parallel composition. Otherwise, it behaves like `Error`, except it wraps the error value in singleton `Vector`.
 
   ```scala
   // assuming: 
@@ -569,7 +569,7 @@ For them, handling `effSer` and `effPar` can produce different results:
   ```
 - In `Concurrency`, parallell composition allows overlapping execution of independent `Future`s (implemented with `Future`'s `.zip` method). In this case, the difference between handling `effPar` and `effSer` is observed as "real world" side effect.
 
-#### Effects that are disruptive for parallellism
+#### 3\. Effects that are disruptive for parallellism
 
 Examples: `State`. Also, any hypothetical stateful *Effect*, providing pure API for some impure "real world" service (like database).
 
@@ -594,7 +594,7 @@ To prevent such inhibition, the stateful *Effect* should be handled as late as p
 
 Note that parallellism of Validation has been inhibited by the **mere presence** of `StateHandler` in the composed *Handler*. Handled *Computation*, the `eff`, didn't even include any *Operation* of `State`.
 
-In case of `Concurrency`, this situation is even worse. Current implementation of `Concurrency`, is a [§. hack](#warning). It requires `Concurrency` to be handled as the last *Effect*. This requirements contradicts with the condition of `State` being handled after the parallelisable *Effect*. 
+In case of `Concurrency`, this situation is even worse. Current implementation of `Concurrency`, is a [§. hack](#warning). It requires `Concurrency` to be handled as the last *Effect*. This requirements contradicts with the condition of `State` being handled after the parallelizable *Effect*. 
 
 Limited coexistence of `State` and `Concurrency` is possible though. Using [§. local handling](#62-local-handling), the presence of `State` can be ecnapsulated to fragments of programs, and its diruptive behavior contained there. 
 
