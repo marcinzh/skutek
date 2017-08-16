@@ -573,7 +573,7 @@ For them, handling `effSer` and `effPar` can produce different results:
 
 Examples: `State`. Also, any hypothetical stateful *Effect*, providing pure API for some impure "real world" service (like database).
 
-They not only don't exhibit parallelism themselves, but can also **inhibit parallellism of other Effects**, if handled together.
+They not only don't exhibit parallelism themselves, but can also **inhibit parallellism** of other *Effects* from the previous category, if handled together.
 
 To prevent such inhibition, the stateful *Effect* should be handled as late as possible in the order of *Handlers*:
 
