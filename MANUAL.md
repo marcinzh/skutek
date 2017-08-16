@@ -31,7 +31,7 @@
 - [Eval & Trampoline](#eval--trampoline)
 ### Part III: Advanced Topics
 - [Traversing](#traversing)
-- [Parallellism](#parallellism)
+- [Parallelism](#parallelism)
 - [Tagging Effects](#tagging-effects)
 - [Synthetic Operations](#synthetic-operations)
 - [Tag Conflicts](#tag-conflicts)
@@ -42,11 +42,11 @@
 
 ## 1\. Effect Definition
 
-*Effect Definition*, is a fragment of program, that **extends** functionality of `Effectful` monad. The monad, which is all that Skutek is about.
+*Effect Definition*, is a fragment of a program, that **extends** the functionality of the `Effectful` monad. The monad, which is all that Skutek is about.
 
-Skutek comes with [§. predefined](#part-ii---predefined-effects) effects. User can define [§. new effects](#defining-your-own-effect) as well.
+Skutek comes with [§. predefined](#part-ii---predefined-effects) effects. A User can define [§. new effects](#defining-your-own-effect) as well.
 
-At this point, we won't go into details about what *Effect Definition* is. It's only important to note, that it contains definitions of **3 kinds of entities**:
+At this point, we won't go into details about what an *Effect Definition* is. It's only important to note, that it contains definitions of **3 kinds of entities**:
 * An *Effect*.
 * *Operation(s)* of that *Effect*.
 * *Handler(s)* of that *Effect*.
@@ -64,7 +64,7 @@ In Skutek, an *Effect* is an **abstract type** (a trait), serving as a unique, t
 
 An *Effect Stack* in Skutek, is a type-level **set** of *Effects*.  
 
-It's a misnomer to call it a "stack", as it wrongfully (in case of Skutek) suggests significance of the order of elements. Despite that, we're going to use this term, for traditon and convenience.
+It's a misnomer to call it a "stack", as it wrongfully (in case of Skutek) suggests significance of the order of elements. Despite that, we're going to use this term, for tradition and convenience.
 
 Skutek uses **intersection types** as the representation of *Effect Stacks*.
 
@@ -72,7 +72,7 @@ For example:
 ```scala
 State[Double] with Error[String] with Choice
 ```
-represents 3-element *Effect Stack*, comprising 3 *Effects*: `State[Double]`, `Error[String]` and `Choice`.
+represents a 3-element *Effect Stack*, comprising 3 *Effects*: `State[Double]`, `Error[String]` and `Choice`.
 
 ### 3\.1\. Properties
 
@@ -80,9 +80,9 @@ The nature of intersection types gives raise to the following properties of *Eff
 
 1. An *Effect* is also a single element *Effect Stack*.
 
-1. Type `Any` represents **empty** *Effect Stack*.
+1. Type `Any` represents an **empty** *Effect Stack*.
 
-1. Type `Any` is the neutral element of type intersection operator. In Scala, the following types are equivalent:
+1. Type `Any` is the neutral element of the type intersection operator. In Scala, the following types are equivalent:
     ```scala
     State[Int]
     State[Int] with Any
@@ -117,7 +117,7 @@ The nature of intersection types gives raise to the following properties of *Eff
 
 ### 3\.2\. Caveats
 
-There are caveats related to intersection types:
+There are some caveats related to intersection types:
 * Redundancies and reorderings shown in points 3, 4 and 5, may appear in error messages, when the *Effect Stack* of a *Computation* is inferred by Scala's compiler. It's ugly, but normal.
 
 * Occasionally, when using empty *Effect Stacks*, Scala compiler's linter may complain with message:
@@ -157,11 +157,11 @@ The latter is more readable, as long as one remembers that:
 
 ### 4\.1\. Return
 
-The simplest *Computation* is constructed by `Return(x)` case class, where `x` is any value.  
+The simplest *Computation* is constructed by the `Return(x)` case class, where `x` is any value.  
 
 `Return(_)` is similar to `Pure(_)`, `Some(_)`, `Right(_)`, `Success(_)` from other monads. Except in Skutek, `Return(_)` is shared for all possible *Effects*.
 
-A `Return` has empty *Effect Stack*:
+A `Return` has an empty *Effect Stack*:
 ```scala
 // assuming: 
 val a: A = ???
@@ -179,7 +179,7 @@ Also, `Return()` is an abbreviation of `Return(())`.
 
 An *Operation* is an elementary *Computation*, specific for an *Effect*.
 
-*Operations* originate from *Effect Definitions*, where they are defined as **dumb case classes**, indirectly inheriting from `Effectful` trait.
+*Operations* originate from *Effect Definitions*, where they are defined as **dumb case classes**, indirectly inheriting from the `Effectful` trait.
 
 Examples:
 
@@ -190,7 +190,7 @@ Examples:
 |`Tell("Hello")`      |`Writer[String]`  | `Unit !! Writer[String]`|
 |`Choose(1 to 10)`    |`Choice`          | `Int !! Choice`|
 
-Nullary *Operations* require explicit type parameter, like in the case of `Get[Double]`.
+Nullary *Operations* require explicit type parameters, like in the case of `Get[Double]`.
 
 
 ### 4\.3\. Composing Computations
@@ -216,7 +216,7 @@ eff3: B !! U1 with U2
 
 Two *Computations* can also be composed parallelly, using product operator: `*!`. *Computation's* result type is a pair of result types of the operands.  
 
-The [§. parallelism](#parallellism) is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
+The [§. parallelism](#parallelism) is potential only. Whether it's exploited or not, depends on *Handlers* used to run the resulting *Computation*.
 
 Just like in case of `flatMap`, *Effect Stack* of the product comes from merging *Effect Stacks* of the operands.
 
@@ -237,18 +237,18 @@ Additional 2 operators are provided: `*<!` and `*>!`. They work just like `*!`, 
 
 ## 5\. Handler
 
-*Handler* is an object, that has ability to [§. handle](#6-handling-effects) an *Effect* (or multiple *Effects*).  
+A *Handler* is an object, that has the ability to [§. handle](#6-handling-effects) an *Effect* (or multiple *Effects*).  
 
-Terminology: When it is stated that a *Handler* handles an *Effect Stack*, it's done to emphasize that a *Handler* can handle **multiple** *Effects* at once. It should not be interpreted as statement, that *Handler* can handle this particular *Effect Stack* only.
+Terminology: When it is stated that a *Handler* handles an *Effect Stack*, it's done to emphasize that a *Handler* can handle **multiple** *Effects* at once. It should not be interpreted as a statement, that the *Handler* can handle this particular *Effect Stack* only.
 
-Trait `Handler` is the supertype of all *Handlers*. It's dependent on 2 member types:
-* `Handler#Effects` - An *Effect Stack* - set of *Effects* that can be handled by this *Handler*.
+The trait `Handler` is the supertype of all *Handlers*. It's dependent on 2 member types:
+* `Handler#Effects` - An *Effect Stack* - a set of *Effects* that can be handled by this *Handler*.
 * `Handler#Result[X]` - A type-level function, describing how *Computation's* result type is transformed during handling the *Effect Stack*.
 
 
 ### 5\.1\. Elementary handlers
 
-Those are *Handlers* that originate from *Effect Definitions*. Each one is dedicated to handling **single** specific *Effect*. 
+Those are *Handlers* that originate from *Effect Definitions*. Each one is dedicated to handling a **single** specific *Effect*. 
 
 Examples:
 
@@ -300,8 +300,8 @@ a: A
 ```
 ### 6\.1\. Full handling
 
-The **easiest** way of using *Handlers*, is to handle entire *Effect Stack* at once: 
-1. Create composed *Handler*, covering all *Effects* in the *Computation's* *Effect Stack*.
+The **easiest** way of using *Handlers*, is to handle entire an *Effect Stack* at once: 
+1. Create a composed *Handler*, covering all *Effects* in the *Computation's* *Effect Stack*.
 2. Handle the *Effects* and execute the *Computation*, all in one call.
 
 Example:
@@ -324,18 +324,18 @@ result: (Vector[Int], Double)
 ### 6\.2\. Local handling
 
 In practical programs, it's often desirable to handle only a subset of
-*Computation's* *Effect Stack*, leaving the rest to be handled elsewhere.
-This allows to encapsulate usage of local *Effect(s)* in a module, while 
-still exporting effectful API that uses other, public *Effect(s)*.
+a *Computation's* *Effect Stack*, leaving the rest to be handled elsewhere.
+This allows to encapsulate the usage of local *Effect(s)* in a module, while 
+still exporting an effectful API that uses other, public *Effect(s)*.
 
 Such situation (although on small scale) can be seen in the [Queens](./examples/src/main/scala/skutek_examples/Queens.scala) example:
 * The `State` *Effect* is used and [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L39) internally.
-* The `Choice` *Effect* is used and [exported](./examples/src/main/scala/skutek_examples/Queens.scala#L28) in function's result.
+* The `Choice` *Effect* is used and [exported](./examples/src/main/scala/skutek_examples/Queens.scala#L28) in the function's result.
 * The `Choice` *Effect* is finally [handled](./examples/src/main/scala/skutek_examples/Queens.scala#L10) by the client. By having control of the *Handler*, the client can decide whether it wants to enumerate all solutions, or just get the first one that is found.
 ---
 There are 2 ways of handling *Effects* locally: one is simpler, the other is safer. The safety issue is explained in the [§. Tag Conflicts](./README.md#tag-conflicts).
 
-There is another complication. Unfortunately, in both cases you won't be able to rely on type inference. It will be necessery to explicitly pass an *Effect Stack* as type parameter to handling methods. 
+There is another complication: Unfortunately, in both cases you won't be able to rely on type inference. It will be necessery to explicitly pass an *Effect Stack* as a type parameter to handling methods. 
 
 Moreover, this explicit *Effect Stack* has to consist of *Effects* that are going to **remain unhandled**, not the ones that are being **handled** in the call. That's rather inconvenient, but we can do nothing about it.
 
@@ -346,8 +346,8 @@ Moreover, this explicit *Effect Stack* has to consist of *Effects* that are goin
 val eff: Int !! State[Double] with Reader[Boolean] with Error[String] with Choice = ???
 // continued...
 ```
-We are going to handle *Effects* `State[Double]` and `Choice`.  
-We are going to leave *Effects* `Reader[Boolean]` and `Error[String]` unhandled.
+We are going to handle the *Effects* `State[Double]` and `Choice`.  
+We are going to leave the *Effects* `Reader[Boolean]` and `Error[String]` unhandled.
 
 ```scala
 // ...continued
@@ -382,7 +382,7 @@ The `fx` method is defined for both `Effectful` and `Handler` traits.
 
 The chain of `fx` method calls is a Builder Pattern. It has to be used to enumerate each *Effect* that is has to remain unhandled, before terminating the chain with `handle/handleWith` call. Otherwise, it's not supposed to typecheck.
 
-Also, the type passed to `fx` has to be single *Effect*. Passing an *Effect Stack* of length other than `1`, won't work.
+Also, the type passed to `fx` has to be a single *Effect*. Passing an *Effect Stack* of length other than `1`, won't work.
 
 # Part II - Predefined Effects
 
@@ -499,7 +499,7 @@ eff: List[Int] !! Validation[String]
 By "collection", we mean `Option`, `Either` or any subclass of `Iterable`.  
 Skutek defines extension methods for traversing them: 
 * `.parallelly` - Essentially, it's a fold with `*!`.  
-  The [§. parallelism](#parallellism) is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
+  The [§. parallelism](#parallelism) is potential only. Whether it's exploited or not, depends on *Handlers* used to run the resulting *Computation*.
 * `.serially` - Essentially, it's a **lazy** fold with `flatMap`.  
   By "lazyness" here, we mean that abortable *Effects* (e.g. `Maybe`, `Error` or `Validation`) may abort executing the whole computation on the first error/failure/etc. encountered in the sequence.
 
@@ -524,9 +524,9 @@ val eff = effs.seriallyVoid
 // we get:
 eff: Unit !! Validation[String] with Writer[String]
 ```
-## Parallellism
+## Parallelism
 
-By parallellism in Skutek, we mean optional ability of an *Effect* to behave differently, when composed using `*!`, from when composed using `flatMap`.
+By parallelism in Skutek, we mean the optional ability of an *Effect* to behave differently, when composed using `*!`, from when composed using `flatMap`.
 
 ```scala
 // assuming:
@@ -539,15 +539,15 @@ val effPar = eff1 *! eff2
 val effSer = for { a <- eff1; b <- eff2 } yield (a, b)
 ```
 
-Both `effSer` and `effPar` have the same type: `(A, B) !! U`.  But results of **handling them** may not necessary be equal, depending on `U`. Also different "real world" side effects may occur. This also means that `*!` should not be confused with `Applicative` composition.
+Both `effSer` and `effPar` have the same type: `(A, B) !! U`.  But the results of **handling them** may not necessary be equal, depending on `U`. Also different "real world" side effects may occur. This also means that `*!` should not be confused with `Applicative` composition.
 
-#### 1\. Effects neutral with respect to parallellism
+#### 1\. Effects neutral with respect to parallelism
 
 Examples: `Reader`, `Writer`, `Maybe`, `Error`, `Choice`. 
 
 They don't exhibit parallelism. Handling `effSer` and `effPar` produces equal outputs.
 
-#### 2\. Effects where parallellism is essential
+#### 2\. Effects where parallelism is essential
 
 Examples: `Validation`, `Concurrency`. 
 
@@ -565,13 +565,13 @@ For them, handling `effSer` and `effPar` can produce different results:
   h.run(effPar) == Left(Vector("foo", "bar"))
   h.run(effSer) == Left(Vector("foo"))          // <--- Stops at the first error, just like Error would.
   ```
-- In `Concurrency`, parallell composition allows overlapping execution of independent `Future`s (implemented with `Future`'s `.zip` method). In this case, the difference between handling `effPar` and `effSer` is observed as "real world" side effect.
+- In `Concurrency`, parallel composition allows overlapping execution of independent `Future`s (implemented with `Future`'s `.zip` method). In this case, the difference between handling `effPar` and `effSer` is observed as "real world" side effect.
 
-#### 3\. Effects that are disruptive for parallellism
+#### 3\. Effects that are disruptive for parallelism
 
 Examples: `State`. Also, any hypothetical stateful *Effect*, providing pure API for some impure "real world" service (like database).
 
-They not only don't exhibit parallelism themselves, but can also **inhibit parallellism** of other *Effects* from the previous category, if handled together.
+They not only don't exhibit parallelism themselves, but can also **inhibit parallelism** of other *Effects* from the previous category, if handled together.
 
 To prevent such inhibition, the stateful *Effect* should be handled as late as possible in the order of *Handlers*:
 
@@ -586,15 +586,15 @@ To prevent such inhibition, the stateful *Effect* should be handled as late as p
   val state_second  = effPar.runWith(hs +! hv)  // State handled after Validation 
 
   // we get:
-  state_first == Left(Vector("foo"))           // <-- parallellism of Validation has been inhibited by State
-  state_second == Left(Vector("foo", "bar"))   // <-- parallellism ok
+  state_first == Left(Vector("foo"))           // <-- parallelism of Validation has been inhibited by State
+  state_second == Left(Vector("foo", "bar"))   // <-- parallelism ok
   ```
 
-Note that parallellism of Validation has been inhibited by the **mere presence** of `StateHandler` in the composed *Handler*. Handled *Computation*, the `eff`, didn't even include any *Operation* of `State`.
+Note that parallelism of Validation has been inhibited by the **mere presence** of `StateHandler` in the composed *Handler*. Handled *Computation*, the `eff`, didn't even include any *Operation* of `State`.
 
 In case of `Concurrency`, this situation is even worse. Current implementation of `Concurrency`, is a [§. hack](#warning). It requires `Concurrency` to be handled as the last *Effect*. This requirements contradicts with the condition of `State` being handled after the parallelizable *Effect*. 
 
-Limited coexistence of `State` and `Concurrency` is possible though. Using [§. local handling](#62-local-handling), the presence of `State` can be ecnapsulated to fragments of programs, and its diruptive behavior contained there. 
+Limited coexistence of `State` and `Concurrency` is possible though. Using [§. local handling](#62-local-handling), the presence of `State` can be encapsulated to fragments of programs, and its diruptive behavior contained there. 
 
 Example in [test](core/src/test/scala/skutek/ConcurrencyTests.scala#L36-L60).
 
@@ -604,7 +604,7 @@ If such encapsulation is impossible, it might be so for the reason the program i
 
 As explained in the [§. beginning](#2-effect), the role of *Effect* is to be type-level name. Tagging allows overriding that name, so that multiple instances of the same *Effect* can coexist in one *Effect Stack*. 
 
-Such name-overriding is done by attaching unique *Tag*. A *Tag* is required to be unique **type**, as well as unique **value**. The easiest way of definning *Tags*, is with `case object`. For example:
+Such name-overriding is done by attaching a unique *Tag*. A *Tag* is required to be a unique **type**, as well as a unique **value**. The easiest way of defining *Tags*, is with `case object`. For example:
 ```scala
 case object TagA
 case object TagB
@@ -615,7 +615,7 @@ For example, an *Effect Stack* with 2 `State` *Effects*, each given separate *Ta
 ```scala
 (State[Int] @! TagA) with (State[Double] @! TagB)
 ```
-For such *Effects* to be usable, we need ability to also tag *Operations* and *Handlers*, so that they are compatible with the tagged *Effects*. This tagging is also done using `@!` operator. However, this time it operates on **values**, instead of types.
+For such *Effects* to be usable, we need the ability to also tag *Operations* and *Handlers*, so that they are compatible with the tagged *Effects*. This tagging is also done using the `@!` operator. However, this time it operates on **values**, instead of types.
 
 Example of tagged *Operation*:
 ```scala
@@ -626,11 +626,11 @@ Example of tagged *Handler*:
 val handler = StateHandler(42) @! TagA
 ```
 
-In 2 above examples, the *Effect Stack* of `eff` and `handler` is `State[Int] @! TagA`
+In the above 2 examples, the *Effect Stack* of `eff` and `handler` is `State[Int] @! TagA`
 
 ---
 
-Now, full example combining 2 tagged *Effects*:
+Now, a full example combining 2 tagged *Effects*:
 ```scala
 case object TagA
 case object TagB
@@ -653,7 +653,7 @@ result == (("42 * 0.25 = 10.5", 10.5), 42)
 
 ---
 
-Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. In current implementation, Skutek uses `scala.reflect.ClassTag[Fx]` as the default *Tag* for *Effect* `Fx`.
+Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. In its current implementation, Skutek uses `scala.reflect.ClassTag[Fx]` as the default *Tag* for *Effect* `Fx`.
 
 ## Synthetic Operations
 
@@ -674,7 +674,7 @@ val eff = modify(inc) @! TagA
 ```
 The last line won't compile.
 
-To alleviate the problem, we can use `SyntheticOperation`. This allows creating of operations, that are both taggable, and composed of simpler operations. This mechanism is quite complex and may be changed in future versions. For now, read the sources:
+To alleviate the problem, we can use `SyntheticOperation`. This allows creating operations, that are both taggable, and composed of simpler operations. This mechanism is quite complex and may be changed in future versions. For now, read the sources:
 
 - How `State` effect defines `Modify` operation: [link](core/src/main/scala/skutek/State.scala#L11-L17).
 - How `Reader` effect defines `Local` operation: [link](core/src/main/scala/skutek/Reader.scala#L11-L19).
@@ -699,7 +699,7 @@ because implicit tags of those 2 *Effects* are the same (in current implementati
 
 ---
 
-Unfortunately, Skutek is unable to detect invalid *Effect Stacks* at **compile-time**. Attempt to run a computation with invalid *Effect Stack* would result in `asInstanceOf` error, or filed `match`, somewhere deep inside effect interpreter loop.
+Unfortunately, Skutek is unable to detect invalid *Effect Stacks* at **compile-time**. Attempting to run a computation with invalid *Effect Stack* would result in `asInstanceOf` error, or failed `match`, somewhere deep inside effect interpreter loop.
 
 The only defense mechanism Skutek has, is employed at **run-time**. Type information is utilised to make detection of invalid *Effect Stacks* at predictable, static spots of the program: where **handlers** are put to work. 
 
@@ -724,9 +724,9 @@ This safety problem is the reason, why 2 ways of [§. local handling](#62-local-
 
 An elementary *Handler* can be transformed to another *Handler*, by using a [polymorphic function](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#polymorphic-function-values) (a.k.a. [natural transformation](https://apocalisp.wordpress.com/2010/07/02/higher-rank-polymorphism-in-scala/)), that will be applied to postprocess the value obtained from [§. handling](#6-handling-effects). 
 
-Mapped handler handles the same *Effect* as the original, but typically have different `Handler#Result[X]` type.
+A mapped handler handles the same *Effect* as the original, but typically have different a `Handler#Result[X]` type.
 
-For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of which constructs mapped *Handler*. The postprocessing function, in this case, is projection of pair to its first and second element respectively:
+For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of which constructs a mapped *Handler*. The postprocessing function, in this case, is the projection of a pair to its first and second element respectively:
 
 | Handler construcion | `Handler#Result[A]` | Comment |
 |---|---|---|
