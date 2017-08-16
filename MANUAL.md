@@ -218,7 +218,7 @@ eff3: B !! U1 with U2
 
 Two *Computations* can also be composed parallelly, using product operator: `*!`. *Computation's* result type is a pair of result types of the operands.  
 
-The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
+The [§. parallelism](#parallellism) is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
 
 Just like in case of `flatMap`, *Effect Stack* of the product comes from merging *Effect Stacks* of the operands.
 
@@ -501,7 +501,7 @@ eff: List[Int] !! Validation[String]
 By "collection", we mean `Option`, `Either` or any subclass of `Iterable`.  
 Skutek defines extension methods for traversing them: 
 * `.parallelly` - Essentially, it's a fold with `*!`.  
-  The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
+  The [§. parallelism](#parallellism) is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
 * `.serially` - Essentially, it's a **lazy** fold with `flatMap`.  
   By "lazyness" here, we mean that abortable *Effects* (e.g. `Maybe`, `Error` or `Validation`) may abort executing the whole computation on the first error/failure/etc. encountered in the sequence.
 
@@ -528,7 +528,7 @@ eff: Unit !! Validation[String] with Writer[String]
 ```
 ## Parallellism
 
-By parallellism in Skutek, we mean optional ability of an *Effect* have to behave differently, when composed using `*!`, from when composed using `flatMap`.
+By parallellism in Skutek, we mean optional ability of an *Effect* to behave differently, when composed using `*!`, from when composed using `flatMap`.
 
 ```scala
 // assuming:
@@ -541,7 +541,7 @@ val effPar = eff1 *! eff2
 val effSer = for { a <- eff1; b <- eff2 } yield (a, b)
 ```
 
-Both `effSer` and `effPar` have the same type: `(A, B) !! Fx`.  But results of handling them may be not equal, depending on `Fx`. Also different "real world" side effects may occur. This also means that `*!` should not be confused with `Applicative` composition.
+Both `effSer` and `effPar` have the same type: `(A, B) !! Fx`.  But results of **handling them** may not necessary be equal, depending on `Fx`. Also different "real world" side effects may occur. This also means that `*!` should not be confused with `Applicative` composition.
 
 #### Effects neutral with respect to parallellism
 
@@ -589,15 +589,18 @@ To prevent such inhibition, the stateful *Effect* should be handled as late as p
 
   // we get:
   state_first == Left(Vector("foo"))           // <-- parallellism of Validation has been inhibited by State
-  state_second == Left(Vector("foo", "bar"))
+  state_second == Left(Vector("foo", "bar"))   // <-- parallellism ok
   ```
 
-In case of `Concurrency`, this situation is even worse. Current implementation of `Concurrency`, is a [hack](#warning). It requires `Concurrency` to be handled as the last *Effect*. This requirements contradicts with the condition of `State` being handled after the parallelisable *Effect*. 
+Note that parallellism of Validation has been inhibited by the **mere presence** of `StateHandler` in the composed *Handler*. Handled *Computation*, the `eff`, didn't even include any *Operation* of `State`.
 
-Limited coexistence of `State` and `Concurrency` is possible though. Using [local handling](#62-local-handling), the presence of `State` can be ecnapsulated to fragments of programs, and its diruptive behavior contained there. 
+In case of `Concurrency`, this situation is even worse. Current implementation of `Concurrency`, is a [§. hack](#warning). It requires `Concurrency` to be handled as the last *Effect*. This requirements contradicts with the condition of `State` being handled after the parallelisable *Effect*. 
 
-Example in [§. tests](core/src/test/scala/skutek/ConcurrencyTests.scala#L36-L60).
+Limited coexistence of `State` and `Concurrency` is possible though. Using [§. local handling](#62-local-handling), the presence of `State` can be ecnapsulated to fragments of programs, and its diruptive behavior contained there. 
 
+Example in [test](core/src/test/scala/skutek/ConcurrencyTests.scala#L36-L60).
+
+If such encapsulation is impossible, it might be so for the reason the program is inherently sequential.
 
 ## Tagging Effects
 
