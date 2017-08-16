@@ -462,9 +462,10 @@ For error accumulation to actually happen, computations must be composed paralle
 **Operation:** | `Run(x)` | Evaluates `x` asynchronously. No `ExecutionContext` required :sunglasses:.
 **Operation:** | `RunEff(eff)` | Same as `Run(eff).flatten`. The `eff` can be any *Computation* with any *Effect Stack*
 **Handler:** | `ConcurrencyHandler()` | Requires implicit `ExecutionContext`. Returns a `Future[_]` of computation's result.
-**Handler:** | `ConcurrencyHandler.await(timeout)` | 
+**Handler:** | `ConcurrencyHandler().await(timeout)` | Returns the result directly, instead of in a `Future[_]`
 
-**Warning:** `Concurrency` must be handled as the final (outermost) *Effect* in the *Effect Stack*. Failing to do so, will result in `Unhandled Effect` error.
+##### Warning: 
+`Concurrency` must be handled as the final (outermost) *Effect* in the *Effect Stack*. Failing to do so, will result in `Unhandled Effect` error.
 
 ## Eval & Trampoline
 
