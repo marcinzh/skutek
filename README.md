@@ -38,8 +38,9 @@ More in [examples](https://github.com/marcinzh/skutek/tree/master/examples/src/m
 ```scala
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.5.2"
+libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.5.3"
 ```
+Cross built for 2.11 and 2.12.
 
 # Features
 
