@@ -33,9 +33,9 @@
 - [Traversing](#traversing)
 - [Parallellism](#parallellism)
 - [Tagging Effects](#tagging-effects)
+- [Synthetic Operations](#synthetic-operations)
 - [Tag Conflicts](#tag-conflicts)
 - [Mapped Handlers](#mapped-handlers)
-- [Synthetic Operations](#synthetic-operations)
 - [Defining your own Effect](#defining-your-own-effect)
 
 # Part I: Core concepts in Skutek
@@ -501,7 +501,7 @@ Skutek defines extension methods for traversing them:
 * `.serially` - Essentially, it's a **lazy** fold with `flatMap`.  
   By "lazyness" here, we mean that abortable *Effects* (e.g. `Maybe`, `Error` or `Validation`) may abort executing the whole computation on the first error/failure/etc. encountered in the sequence.
 
-Obviously, for `Option` and `Either`, the difference between `.serially` and `.parallely` vanishes.
+Obviously, for `Option` and `Either`, the difference between `.serially` and `p.arallely` vanishes.
 
 ---
 
@@ -589,11 +589,11 @@ result == (("42 * 0.25 = 10.5", 10.5), 42)
 
 Actually, *Tags* were always there. What appeared as untagged entities (*Effects*, *Operations* and *Handlers*), were in fact entities tagged with **implicit** *Tags*. In current implementation, Skutek uses `scala.reflect.ClassTag[Fx]` as the default *Tag* for *Effect* `Fx`.
 
----
+## Synthetic Operations
 
-Caution: you can't attach a *Tag* to a composed *Computation*. Neither to a composed *Handler* for the matter, but it wouldn't make sense anyway.
+It's impossible to attach a *Tag* to a composed *Computation*. Neither to a composed *Handler* for the matter, but it wouldn't make sense anyway.
 
-Example:
+For example:
 ```scala
 // assuming:
 def modify[S](f : S => S) = for { 
@@ -606,8 +606,13 @@ val inc = (i: Int) => i + 1
 // let:
 val eff = modify(inc) @! TagA
 ```
-
 The last line won't compile.
+
+To alleviate the problem, we can use `SyntheticOperation`. This allows creating of operations, that are both taggable, and composed of simpler operations. This mechanism is quite complex and may be changed in future versions. For now, read the sources:
+
+- How `State` effect defines `Modify` operation: [link](core/src/main/scala/skutek/State.scala#L11-L17).
+- How `Reader` effect defines `Local` operation: [link](core/src/main/scala/skutek/Reader.scala#L11-L19).
+
 
 ## Tag Conflicts
 
@@ -665,10 +670,6 @@ For example, `StateHandler` has 2 utility methods: `.eval` and `.exec`, each of 
 
 
 TODO *how to create your own mapped handlers*
-
-## Synthetic Operations
-
-TODO
 
 ## Defining your own Effect
 
