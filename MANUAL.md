@@ -46,12 +46,10 @@
 
 Skutek comes with [§. predefined](#part-ii---predefined-effects) effects. User can define [§. new effects](#defining-your-own-effect) as well.
 
-At this point, we won't go into details how *Effect Definition* are made. It's only important to note that an *Effect Definition* contains definitions of **3 kinds of entities**:
+At this point, we won't go into details about what *Effect Definition* is. It's only important to note, that it contains definitions of **3 kinds of entities**:
 * An *Effect*.
 * *Operation(s)* of that *Effect*.
 * *Handler(s)* of that *Effect*.
-
-
 
 
 ## 2\. Effect
