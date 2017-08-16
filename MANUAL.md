@@ -496,16 +496,18 @@ eff: List[Int] !! Validation[String]
 
 By "collection", we mean `Option`, `Either` or any subclass of `Iterable`.  
 Skutek defines extension methods for traversing them: 
-* `parallelly` - Essentially, it's a fold with `*!`.  
+* `.parallelly` - Essentially, it's a fold with `*!`.  
   The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
-* `serially` - Essentially, it's a **lazy** fold with `flatMap`.  
+* `.serially` - Essentially, it's a **lazy** fold with `flatMap`.  
   By "lazyness" here, we mean that abortable *Effects* (e.g. `Maybe`, `Error` or `Validation`) may abort executing the whole computation on the first error/failure/etc. encountered in the sequence.
 
-Obviously, for `Option` and `Either`, the difference between `serially` and `parallely` vanishes.
-  
-In case we want to traverse collection only for the *Effects*, and discard result of each element of the collection, there are more efficient alternatives:
-* `parallellyVoid` 
-* `seriallyVoid`
+Obviously, for `Option` and `Either`, the difference between `.serially` and `.parallely` vanishes.
+
+---
+
+In case we want to traverse the collection only for the *Effects*, and discard result of each element of the collection, there are more efficient alternatives:
+* `.parallellyVoid` 
+* `.seriallyVoid`
 
 They are more efficient, because they avoid construction of useless collection of `()` values. Also, the result type of the *Computation* is overriden as `Unit`.
 
