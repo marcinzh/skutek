@@ -44,17 +44,17 @@
 
 *Effect Definition*, is a fragment of program, that **extends** functionality of `Effectful` monad. The monad, which is all that Skutek is about.
 
-An *Effect Definition* contains definitions of 3 kinds of entities:
+Skutek comes with [§. predefined](#part-ii---predefined-effects) effects. User can define [§. new effects](#defining-your-own-effect) as well.
+
+At this point, we won't go into details about what *Effect Definition* is. It's only important to note, that it contains definitions of **3 kinds of entities**:
 * An *Effect*.
 * *Operation(s)* of that *Effect*.
 * *Handler(s)* of that *Effect*.
 
-Skutek comes with [§. predefined](#part-ii---predefined-effects) effects. User can define [§. new effects](#defining-your-own-effect) as well.
-
 
 ## 2\. Effect
 
-In Skutek, an *Effect* is an **abstract type** (a trait), serving as a unique, type-level **name**. Such type is supposed to be never instantiated or inherited. *Effects* are only useful as type-arguments for other types or methods. Most notably, for types of *Computations* and *Handler* constructors.
+In Skutek, an *Effect* is an **abstract type** (a trait), serving as a unique, type-level **name**. Such types are supposed to be never instantiated or inherited. They are only useful as type-arguments for other types or methods. Most notably, for types of *Computations*.
 
 *Effects* can be:
 * parameterless, e.g. `Maybe`, `Choice`
@@ -203,7 +203,7 @@ Example:
 ```scala
 // assuming:
 val eff1: A !! U1 = ???
-val eff2: B !! U2 = ???  // dependency of eff2 on eff1 is ommited for the sake of clarity
+val eff2: B !! U2 = ???  // dependency of eff2 on eff1 is ommited for the sake of brevity
 
 // let:
 val eff3 = eff1.flatMap(_ => eff2)  
@@ -216,7 +216,7 @@ eff3: B !! U1 with U2
 
 Two *Computations* can also be composed parallelly, using product operator: `*!`. *Computation's* result type is a pair of result types of the operands.  
 
-The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
+The [§. parallelism](#parallellism) is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
 
 Just like in case of `flatMap`, *Effect Stack* of the product comes from merging *Effect Stacks* of the operands.
 
@@ -462,9 +462,11 @@ For error accumulation to actually happen, computations must be composed paralle
 **Operation:** | `Run(x)` | Evaluates `x` asynchronously. No `ExecutionContext` required :sunglasses:.
 **Operation:** | `RunEff(eff)` | Same as `Run(eff).flatten`. The `eff` can be any *Computation* with any *Effect Stack*
 **Handler:** | `ConcurrencyHandler()` | Requires implicit `ExecutionContext`. Returns a `Future[_]` of computation's result.
-**Handler:** | `ConcurrencyHandler.await(timeout)` | 
+**Handler:** | `ConcurrencyHandler().await(timeout)` | Returns the result directly, instead of in a `Future[_]`
 
-**Warning:** `Concurrency` must be handled as the final (outermost) *Effect* in the *Effect Stack*. Failing to do so, will result in `Unhandled Effect` error.
+### Warning: 
+`Concurrency` must be handled as the final (outermost) *Effect* in the *Effect Stack*.  
+Failing to do so, will result in **run-time** error: `Unhandled Effect`.
 
 ## Eval & Trampoline
 
@@ -497,7 +499,7 @@ eff: List[Int] !! Validation[String]
 By "collection", we mean `Option`, `Either` or any subclass of `Iterable`.  
 Skutek defines extension methods for traversing them: 
 * `.parallelly` - Essentially, it's a fold with `*!`.  
-  The parallelism is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
+  The [§. parallelism](#parallellism) is potential only. Whether it's exploited or not, deppends on *Handlers* used to run the resulting *Computation*.
 * `.serially` - Essentially, it's a **lazy** fold with `flatMap`.  
   By "lazyness" here, we mean that abortable *Effects* (e.g. `Maybe`, `Error` or `Validation`) may abort executing the whole computation on the first error/failure/etc. encountered in the sequence.
 
@@ -524,15 +526,79 @@ eff: Unit !! Validation[String] with Writer[String]
 ```
 ## Parallellism
 
-TODO
+By parallellism in Skutek, we mean optional ability of an *Effect* to behave differently, when composed using `*!`, from when composed using `flatMap`.
 
 ```scala
-eff1 *! eff2 ==== for { a <- eff1; b <- eff2 } yield (a, b)
+// assuming:
+val effA : A !! U = ???
+val effB : B !! U = ???
+
+// let:
+val effPar = eff1 *! eff2
+
+val effSer = for { a <- eff1; b <- eff2 } yield (a, b)
 ```
 
-TODO
+Both `effSer` and `effPar` have the same type: `(A, B) !! U`.  But results of **handling them** may not necessary be equal, depending on `U`. Also different "real world" side effects may occur. This also means that `*!` should not be confused with `Applicative` composition.
 
+#### 1\. Effects neutral with respect to parallellism
 
+Examples: `Reader`, `Writer`, `Maybe`, `Error`, `Choice`. 
+
+They don't exhibit parallelism. Handling `effSer` and `effPar` produces equal outputs.
+
+#### 2\. Effects where parallellism is essential
+
+Examples: `Validation`, `Concurrency`. 
+
+For them, handling `effSer` and `effPar` can produce different results:
+
+- `Validation` is only really useful with parallel composition. Otherwise, it behaves like `Error`, except it wraps the error value in singleton `Vector`.
+
+  ```scala
+  // assuming: 
+  val effPar = Invalid("foo") *! Invalid("bar")
+  val effSer = Invalid("foo") flatMap (_ -> Invalid("bar"))
+  val h = ValidationHandler[String]
+
+  // we get:
+  h.run(effPar) == Left(Vector("foo", "bar"))
+  h.run(effSer) == Left(Vector("foo"))          // <--- Stops at the first error, just like Error would.
+  ```
+- In `Concurrency`, parallell composition allows overlapping execution of independent `Future`s (implemented with `Future`'s `.zip` method). In this case, the difference between handling `effPar` and `effSer` is observed as "real world" side effect.
+
+#### 3\. Effects that are disruptive for parallellism
+
+Examples: `State`. Also, any hypothetical stateful *Effect*, providing pure API for some impure "real world" service (like database).
+
+They not only don't exhibit parallelism themselves, but can also **inhibit parallellism** of other *Effects* from the previous category, if handled together.
+
+To prevent such inhibition, the stateful *Effect* should be handled as late as possible in the order of *Handlers*:
+
+  ```scala
+  // assuming: 
+  val effPar = Invalid("foo") *! Invalid("bar")
+  val hv = ValidationHandler[String]
+  val hs = StateHandler(whatever).eval
+
+  // let:
+  val state_first   = effPar.runWith(hv +! hs)  // State handled before Validation
+  val state_second  = effPar.runWith(hs +! hv)  // State handled after Validation 
+
+  // we get:
+  state_first == Left(Vector("foo"))           // <-- parallellism of Validation has been inhibited by State
+  state_second == Left(Vector("foo", "bar"))   // <-- parallellism ok
+  ```
+
+Note that parallellism of Validation has been inhibited by the **mere presence** of `StateHandler` in the composed *Handler*. Handled *Computation*, the `eff`, didn't even include any *Operation* of `State`.
+
+In case of `Concurrency`, this situation is even worse. Current implementation of `Concurrency`, is a [§. hack](#warning). It requires `Concurrency` to be handled as the last *Effect*. This requirements contradicts with the condition of `State` being handled after the parallelizable *Effect*. 
+
+Limited coexistence of `State` and `Concurrency` is possible though. Using [§. local handling](#62-local-handling), the presence of `State` can be ecnapsulated to fragments of programs, and its diruptive behavior contained there. 
+
+Example in [test](core/src/test/scala/skutek/ConcurrencyTests.scala#L36-L60).
+
+If such encapsulation is impossible, it might be so for the reason the program is inherently sequential.
 
 ## Tagging Effects
 
