@@ -3,7 +3,7 @@ import org.specs2._
 
 
 class TraverseTests extends Specification with CanLaunchTheMissiles {
-  def is = ValidationWithWriter.is ^ ValidationWithState.is ^ Trav1.is ^ TraverseLaziness.is
+  def is = ValidationWithWriter.is ^ ValidationWithState.is ^ Trav1.is ^ TravMap.is ^ TraverseLaziness.is
 
   sealed trait Invalids {
     val (x, y, z, w) = ("bad", "wrong", "incorrect", "unacceptable")
@@ -109,6 +109,24 @@ class TraverseTests extends Specification with CanLaunchTheMissiles {
           }
 
       br ^ descr ! { missiles.launchedOnce must_== !useLazy }
+    }
+  }
+
+
+  object TravMap extends Invalids {
+
+    def is = 
+      br ^ t ^ "Traverse map's values:" ^ 
+      br ^ "parallelly" ! test(true) ^
+      br ^ "serially" ! test(false) ^
+      bt
+
+    def test(parOrElseSer: Boolean) = {
+      val m = List(x, y, z).zipWithIndex.map(_.swap).toMap
+      val m_! = m.mapValues(x => Tell(x) *>! Return(x))
+      val eff = if (parOrElseSer) m_!.parallellyValues else m_!.seriallyValues
+      val (m2, acc) = eff.runWith(WriterHandler.strings)
+      (m2, acc.toSet) must_== (m, Set(x, y, z))
     }
   }
 }

@@ -41,6 +41,28 @@ protected trait Traverse_exports {
   }
 
 
+  implicit class MapOfEffsCBF_extension[A, +B, -U, S[X, +Y] <: Map[X, Y]](thiz: S[A, B !! U])(implicit cbf: CanBuildFrom[S[A, B !! U], (A, B), S[A, B]]) {
+    
+    def parallellyValues: S[A, B] !! U = {
+      thiz.foldLeft(Return(Vector.empty[(A, B)]).upCast[U]) { case (abs_!, (a, b_!)) => (abs_! *! b_!).map2(_ :+ (a, _)) }
+      .map(abs => (cbf() ++= abs).result())
+    }
+
+    def seriallyValues: S[A, B] !! U = {
+      def loop(todos: Iterable[(A, B !! U)], accum: Vector[(A, B)]): Vector[(A, B)] !! U =
+        if (todos.isEmpty)
+          Return(accum)
+        else {
+          val (a, b_!) = todos.head
+          b_!.flatMap(b => loop(todos.tail, accum :+ (a, b)))
+        }
+
+      loop(thiz, Vector())
+      .map(abs => (cbf() ++= abs).result())
+    }
+  }
+
+
   implicit class OptionOfEff_extension[+A, -U](thiz: Option[A !! U]) {
     def parallelly: Option[A] !! U = thiz match {
       case Some(eff) => eff.map(Some(_))
