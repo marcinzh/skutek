@@ -2,12 +2,12 @@ package skutek
 import _internals._
 
 sealed trait Maybe extends FilterableEffect
-object Maybe extends NullaryEffectCompanion[Maybe]
+object Maybe extends EffectCompanion0[Maybe]
 
 sealed trait Naught extends Operation[Nothing, Maybe]
 case object Naught extends Naught
 
-sealed trait MaybeHandler extends NullaryHandler[Maybe]
+sealed trait MaybeHandler extends StatelessHandler.NoSecret[Maybe]
 case object MaybeHandler extends MaybeHandler {
   type Result[A] = Option[A]
   type Op[A] = Naught

@@ -27,7 +27,7 @@ class ConcurrencyTests extends Specification {
     val eff = sleep_!(500) *! sleep_!(500) *! sleep_!(500)
     Try { 
       withThreadPool(3) { implicit ec =>
-        ConcurrencyHandler().await(700.millis).run(eff) 
+        ConcurrencyHandler().await(900.millis).run(eff) 
       } 
     } must beSuccessfulTry
   }
@@ -52,7 +52,7 @@ class ConcurrencyTests extends Specification {
 
     Try { 
       withThreadPool(5) { implicit ec =>
-        val h = ConcurrencyHandler().await(1200.millis) +! ReaderHandler("#") +! WriterHandler.strings
+        val h = ConcurrencyHandler().await(1400.millis) +! ReaderHandler("#") +! WriterHandler.strings
         h run eff3
       } 
     } must beSuccessfulTry

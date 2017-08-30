@@ -17,5 +17,5 @@ trait Driver extends BaseDriver {
   def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U], k: ((A, B)) => Secret[C, U]): Secret[C, U]
   def onConceal[A, B, U, V](eff: A !! U, f: A => Secret[B, V]): Secret[B, U with V]
   def onReveal[A, U](aa: Secret[A, U]): Result[A] !! U
-  def onFilterFail: Option[Op[Nothing]] = None
+  def onFilterFail: Option[Op[Nothing]]
 }

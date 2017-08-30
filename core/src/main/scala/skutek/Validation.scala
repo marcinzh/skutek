@@ -2,11 +2,11 @@ package skutek
 import _internals._
 
 sealed trait Validation[T] 
-object Validation extends UnaryEffectCompanion[Validation[?]]
+object Validation extends EffectCompanion1[Validation[?]]
 
 case class Invalid[T](value: T) extends Operation[Nothing, Validation[T]]
 
-case class ValidationHandler[T]() extends NullaryHandler[Validation[T]] {
+case class ValidationHandler[T]() extends StatelessHandler.NoSecret[Validation[T]] {
   type Result[A] = Either[Vector[T], A]
   type Op[A] = Invalid[T]
 

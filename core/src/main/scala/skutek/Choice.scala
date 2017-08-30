@@ -2,7 +2,7 @@ package skutek
 import _internals._
 
 sealed trait Choice extends FilterableEffect
-object Choice extends NullaryEffectCompanion[Choice]
+object Choice extends EffectCompanion0[Choice]
 
 case class Choose[A](values: Iterable[A]) extends Operation[A, Choice]
 
@@ -15,7 +15,7 @@ case object ChoiceHandler extends AllChoiceHandler {
   case object FindFirst extends FirstChoiceHandler
 }
 
-protected abstract class BaseChoiceHandler extends NullaryHandler[Choice] {
+protected abstract class BaseChoiceHandler extends StatelessHandler.NoSecret[Choice] {
   override val onFilterFail = Some(NoChoice)
   type Op[A] = Choose[A]
 }

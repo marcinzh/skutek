@@ -2,13 +2,13 @@ package skutek
 import _internals._
 
 sealed trait Writer[T]
-object Writer extends UnaryEffectCompanion[Writer[?]]
+object Writer extends EffectCompanion1[Writer[?]]
 
 sealed trait WriterOperation[A, T] extends Operation[A, Writer[T]]
 case class Tell[T](value: T) extends WriterOperation[Unit, T]
 
 
-abstract class WriterHandler[T] extends UnaryHandler[Writer[T]] {
+abstract class WriterHandler[T] extends StatefulHandler.NoSecret[Writer[T]] {
   type Result[A] = (A, Stan)
   type Op[A] = WriterOperation[A, T]
 
