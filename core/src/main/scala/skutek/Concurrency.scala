@@ -5,7 +5,7 @@ import scala.concurrent.duration._
 
 
 sealed trait Concurrency
-object Concurrency extends NullaryEffectCompanion[Concurrency]
+object Concurrency extends EffectCompanion0[Concurrency]
 
 sealed class Run[A](val run: () => A) extends Operation[A, Concurrency]
 
@@ -33,6 +33,8 @@ case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends BaseHandl
 
   def onReveal[A, U](fut: Future[A]): Future[A] !! U = Return(fut)
 
+  def onFilterFail = None
+  
   def await(timeout: Duration = Duration.Inf) = 
     new MappedHandler[Lambda[A => A]] {
       def apply[A](fut: Future[A]): A = Await.result(fut, timeout)

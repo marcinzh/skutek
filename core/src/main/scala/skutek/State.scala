@@ -2,7 +2,7 @@ package skutek
 import _internals._
 
 sealed trait State[S]
-object State extends UnaryEffectCompanion[State[?]]
+object State extends EffectCompanion1[State[?]]
 
 sealed trait StateOperation[A, S] extends Operation[A, State[S]]
 case class Get[S]() extends StateOperation[S, S] 
@@ -17,7 +17,7 @@ case class Modify[S](fun: S => S) extends SyntheticOperation.Shallow[Unit, State
 }
 
 
-case class StateHandler[S](val initial: S) extends SimpleStatefulHandler[State[S]] {
+case class StateHandler[S](val initial: S) extends LinearStatefulHandler.Simple[State[S]] {
   type Op[A] = StateOperation[A, S]
   type Stan = S
 

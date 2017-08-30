@@ -2,7 +2,7 @@ package skutek
 import _internals._
 
 sealed trait Reader[S]
-object Reader extends UnaryEffectCompanion[Reader[?]]
+object Reader extends EffectCompanion1[Reader[?]]
 
 sealed trait ReaderOperation[A, S] extends Operation[A, Reader[S]]
 case class Ask[S]() extends ReaderOperation[S, S]
@@ -19,7 +19,7 @@ case class Local[A, S, U](f: S => S)(eff: A !! U) extends SyntheticOperation.Dee
 }
 
 
-case class ReaderHandler[S](val initial: S) extends UnaryHandler[Reader[S]] {
+case class ReaderHandler[S](val initial: S) extends StatefulHandler.NoSecret[Reader[S]] {
   type Op[A] = ReaderOperation[A, S]
   type Result[A] = A
   type Stan = S

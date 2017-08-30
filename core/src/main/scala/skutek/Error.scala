@@ -2,11 +2,11 @@ package skutek
 import _internals._
 
 sealed trait Error[T] 
-object Error extends UnaryEffectCompanion[Error[?]]
+object Error extends EffectCompanion1[Error[?]]
 
 case class Wrong[T](value: T) extends Operation[Nothing, Error[T]]
 
-case class ErrorHandler[T]() extends NullaryHandler[Error[T]] {
+case class ErrorHandler[T]() extends StatelessHandler.NoSecret[Error[T]] {
   type Result[A] = Either[T, A]
   type Op[A] = Wrong[T]
 
