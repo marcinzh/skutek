@@ -114,7 +114,7 @@ protected trait Handler_exports {
     def +![H2 <: Handler](that: H2): H1 +! H2 = ComposedHandler(thiz, that)
   }
 
-  implicit class EffectfulRun_extension[A, U](thiz: A !! U) {
+  implicit class ComputationRun_extension[A, U](thiz: A !! U) {
     def run(implicit ev: U =:= Any): A = Interpreter.pure(thiz)
     def runWith(h: Handler { type Effects <: U }) = h.run(thiz)
     def handleCarefullyWith[V] = new HandleWithPoly[V]

@@ -30,7 +30,7 @@ object Interpreter {
 
       eff match {
         case Return(a) => h.onReturn(a)
-        case FlatMapped(eff: Effectful[type_X, UV], k) => {
+        case FlatMapped(eff: Computation[type_X, UV], k) => {
           type X = type_X
 
           def kk      = (x: X) => loop(k(x))

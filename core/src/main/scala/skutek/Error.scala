@@ -24,7 +24,7 @@ case class ErrorHandler[T]() extends StatelessHandler.NoSecret[Error[T]] {
 
 
 trait Error_exports {
-  implicit class EitherToEffectful[L, R](thiz: Either[L, R]) {
+  implicit class EitherToComputation[L, R](thiz: Either[L, R]) {
     def toEff: R !! Error[L] = thiz match {
       case Right(x) => Return(x)
       case Left(x) => Wrong(x)

@@ -1,5 +1,5 @@
 package object skutek
-  extends Effectful_exports
+  extends Computation_exports
   with Effect_exports
   with Handler_exports 
   with Traverse_exports
