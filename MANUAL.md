@@ -391,14 +391,16 @@ Also, the type passed to `fx` has to be a single *Effect*. Passing an *Effect St
 |---|---|---|
 **Effect:** |`Reader[T]` | **Purposes:** <br/>Purely functional equivalent of **read-only** global variable. <br/>Scoped constants. Dependency injection.
 **Operation:** | `Ask[T]` |  Summons a value of type `T` out of nowhere. Let the handler worry how to deliver it. <br/> The summoned value (traditionally called "an environment") is always the same, unless overriden with `Local`.  
-**Operation:** | `Local(f)(eff)` | Executes inner computation `eff` (of any type and with any effects), where the "environment" is locally modified by pure function `f` of type `T => T`.
+**Operation:** | `Asks[T](f)` |  `Ask` followed by a projection, from `T` to any type. <br/> Useful when multiple data are packed in one "environment".
+**Operation:** | `Local(x)(eff)` | Executes inner computation `eff` (of any type and with any effects), where the "environment" is locally shadowed by new one `x`, of the same type. <br/> The old "environment" is restored afterwards, for subsequent computations.
+**Operation:** | `LocalMod(f)(eff)` | Similar to `Local`, but the new "ennvironment" is derived from the old one, by application of pure function `f` of type `T => T`.
 **Handler:** |`ReaderHandler(x)` | Provides the initial "environment" of type `T`. 
 
 ## Writer Effect
 ||||
 |---|---|---|
 **Effect:** | `Writer[T]` | **Purposes:** <br/>Purely functional equivalent of **write-only** global variable. <br/>Write-only accumulator. Log.
-**Operation:** | `Tell(x)` | Dumps a value of type `T` somewhere. Let the handler worry what to do with it.  
+**Operation:** | `Tell(x)` | Dumps a value of type `T` somewhere. Let the handler worry how to deal with it.  
 **Handler:** | `WriterHandler.seq[T]` | Handles the effect by storing the dumped values in a `Vector[T]`.
 **Handler:** | `WriterHandler.strings` | Specialized `WriterHandler.seq[String]`.
 **Handler:** | `WriterHandler.monoid(zero, add)` | Creates handler that accumulates dumped values as if `T` was a Monoid.<br/> `zero : T` is the neutral element, `add : (T, T) => T` is the binary operator.
