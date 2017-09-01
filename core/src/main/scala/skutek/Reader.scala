@@ -8,7 +8,14 @@ sealed trait ReaderOperation[A, S] extends Operation[A, Reader[S]]
 case class Ask[S]() extends ReaderOperation[S, S]
 private case class DontTell[S](s: S) extends ReaderOperation[Unit, S]
 
-case class Local[A, S, U](f: S => S)(eff: A !! U) extends SyntheticOperation.Deep[A, Reader[S], U] {
+
+case class Asks[S, A](fun: S => A) extends SyntheticOperation.Shallow[A, Reader[S]] {
+  def synthesize[T <: SyntheticTagger](implicit tagger: T): A !! tagger.Tagged[Reader[S]] = 
+    Ask[S].tagged.map(fun)
+}
+
+
+class LocalMod[A, S, U](f: S => S, eff: A !! U) extends SyntheticOperation.Deep[A, Reader[S], U] {
   def synthesize[T <: SyntheticTagger](implicit tagger: T): A !! tagger.Tagged[Reader[S]] with U = 
     for {
       s <- Ask[S].tagged
@@ -16,6 +23,17 @@ case class Local[A, S, U](f: S => S)(eff: A !! U) extends SyntheticOperation.Dee
       a <- eff
       _ <- DontTell(s).tagged
     } yield a
+}
+
+object LocalMod {
+  def apply[S](f: S => S) = new Apply(f)
+  protected class Apply[S](f: S => S) {
+    def apply[A, U](eff: A !! U) = new LocalMod(f, eff)
+  }
+}
+
+object Local {
+  def apply[S](s: S) = LocalMod[S](_ => s)
 }
 
 
@@ -40,5 +58,4 @@ case class ReaderHandler[S](val initial: S) extends StatefulHandler.NoSecret[Rea
       (x(s) *! y(s)).flatMap { 
         case (a, b) => k((a, b))(s)
       }
-
 }
