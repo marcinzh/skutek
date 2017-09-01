@@ -1,8 +1,6 @@
 
 # Skutek: extensible effects without (heavy) lifting
 
-[![Build Status](https://travis-ci.org/marcinzh/skutek.svg?branch=master)](https://travis-ci.org/marcinzh/skutek)
-
 Skutek ([pronounced](https://translate.google.com/#pl/en/skutek): *skoo-tech*) is a framework implementing a monad of extensible effects 
 (a.k.a. [*One monad to rule them all*](https://www.youtube.com/watch?v=KGJLeHhsZBo)), based on [Freer monad](http://okmij.org/ftp/Haskell/extensible/more.pdf), adapted to leverage specifics of Scala's type system, with main differences being:
 
@@ -10,6 +8,7 @@ Skutek ([pronounced](https://translate.google.com/#pl/en/skutek): *skoo-tech*) i
 
 - Use of classic OOP inheritence as the way of extending the monad with new operations.
 
+[![Build Status](https://travis-ci.org/marcinzh/skutek.svg?branch=master)](https://travis-ci.org/marcinzh/skutek)
 
 # Example
 ```scala
