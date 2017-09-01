@@ -3,7 +3,7 @@ import _internals.SyntheticTagger
 import scala.reflect.ClassTag
 
 
-sealed trait Effectful[+A, -U] {
+sealed trait Computation[+A, -U] {
   final def map[B](f: A => B): B !! U = flatMap[B, U](a => Return(f(a)))
   final def flatMap[B, V](f: A => B !! V): B !! U with V = FlatMapped(this, f)
   final def flatten[B, V](implicit ev: A <:< (B !! V)): B !! U with V = flatMap(ev)
@@ -15,7 +15,7 @@ sealed trait Effectful[+A, -U] {
 }
 
 
-final case class Return[+A](value: A) extends Effectful[A, Any]
+final case class Return[+A](value: A) extends Computation[A, Any]
 
 object Return {
   def apply(): Return[Unit] = returnUnit
@@ -23,14 +23,14 @@ object Return {
 }
 
 
-private[skutek] final case class FlatMapped[A, +B, -U, -V](eff: A !! U, cont: A => B !! V) extends Effectful[B, U with V]
+private[skutek] final case class FlatMapped[A, +B, -U, -V](eff: A !! U, cont: A => B !! V) extends Computation[B, U with V]
 
-private[skutek] final case class Product[+A, +B, -U, -V](eff1: A !! U, eff2: B !! V) extends Effectful[(A, B), U with V] 
+private[skutek] final case class Product[+A, +B, -U, -V](eff1: A !! U, eff2: B !! V) extends Computation[(A, B), U with V] 
 
-private[skutek] final case class FilterFail[U]() extends Effectful[Nothing, U]
+private[skutek] final case class FilterFail[U]() extends Computation[Nothing, U]
 
 
-protected[skutek] sealed trait NaturalOperation[+A, -U] extends Effectful[A, U] {
+protected[skutek] sealed trait NaturalOperation[+A, -U] extends Computation[A, U] {
   val tag: Any
   def stripTag: Operation[_, _]
 }
@@ -50,7 +50,7 @@ abstract class Operation[+A, Fx](implicit implicitTag: ClassTag[Fx]) extends Nat
 }
 
 
-sealed trait SyntheticOperation[+A, -U] extends Effectful[A, U] {
+sealed trait SyntheticOperation[+A, -U] extends Computation[A, U] {
   def tagless: A !! U
 }
 
@@ -73,17 +73,17 @@ object SyntheticOperation {
 }
 
 
-protected trait Effectful_exports {
+protected trait Computation_exports {
 
-  type !![+A, -U] = Effectful[A, U]
+  type !![+A, -U] = Computation[A, U]
 
-  implicit class Eff_extension[A, U](thiz: A !! U) {
+  implicit class Computation_extension[A, U](thiz: A !! U) {
     def downCast[V >: U] = thiz.sideCast[V]
     def withFilter(f: A => Boolean)(implicit ev: U <:< FilterableEffect): A !! U = 
       thiz.flatMap(a => if (f(a)) Return(a) else FilterFail[U])
   }
 
-  implicit class EffOfPair_extension[+A, +B, -U](thiz: (A, B) !! U) {
+  implicit class ComputationOfPair_extension[+A, +B, -U](thiz: (A, B) !! U) {
     def map2[C](f: (A, B) => C): C !! U = thiz.map(f.tupled)
   }
 }
