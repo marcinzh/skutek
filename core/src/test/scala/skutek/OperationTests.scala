@@ -4,7 +4,7 @@ import org.specs2._
 
 class OperationTests extends Specification with CanLaunchTheMissiles {
 
-  def is = List(reader, writer, state, choice, validation, maybe, except).reduce(_^_)
+  def is = List(ReaderOps.is, writer, state, choice, validation, maybe, except).reduce(_^_)
 
   def state = br ^ "State operations should work" ! {
     (for {
@@ -36,35 +36,48 @@ class OperationTests extends Specification with CanLaunchTheMissiles {
   }
 
 
-  def reader = br ^ "Reader operations should work" ! {
-    def loop(str: String): Unit !! Reader[Int] with Writer[String] = {
-      if (str.isEmpty)
-        Return()
-      else 
-        str.head match {
-          case '[' => LocalMod[Int](_ + 1)(loop(str.tail))
-          case ']' => LocalMod[Int](_ - 1)(loop(str.tail))
-          case x => for { 
-            indent <- Ask[Int]
-            _ <- Tell(("  " * indent) :+ x)
-            _ <- loop(str.tail) 
-          } yield ()
-        }
+  object ReaderOps {
+    def is = br ^ "Reader operations should work" ! List(asks, localmod).reduce(_ and _)
+
+    def asks = {
+      type Env = (Int, String)
+      val eff = for {
+        i <- Asks[Env](_._1)
+        s <- Asks[Env, String](_._2)
+      } yield (i, s)
+      eff.runWith(ReaderHandler((42, "foo"))) must_== (42, "foo")
     }
 
-    val lines1 = loop("ab[cd[e]f[]g]h").runWith(ReaderHandler(0) +! WriterHandler.strings.exec).mkString("\n")
-    val lines2 = """
-      |a
-      |b
-      |  c
-      |  d
-      |    e
-      |  f
-      |  g
-      |h
-      |""".stripMargin.tail.init
+    def localmod = {
+      def loop(str: String): Unit !! Reader[Int] with Writer[String] = {
+        if (str.isEmpty)
+          Return()
+        else 
+          str.head match {
+            case '[' => LocalMod[Int](_ + 1)(loop(str.tail))
+            case ']' => LocalMod[Int](_ - 1)(loop(str.tail))
+            case x => for { 
+              indent <- Ask[Int]
+              _ <- Tell(("  " * indent) :+ x)
+              _ <- loop(str.tail) 
+            } yield ()
+          }
+      }
 
-    lines1 must_== lines2
+      val lines1 = loop("ab[cd[e]f[]g]h").runWith(ReaderHandler(0) +! WriterHandler.strings.exec).mkString("\n")
+      val lines2 = """
+        |a
+        |b
+        |  c
+        |  d
+        |    e
+        |  f
+        |  g
+        |h
+        |""".stripMargin.tail.init
+
+      lines1 must_== lines2
+    }
   }
 
 

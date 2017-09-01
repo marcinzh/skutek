@@ -14,6 +14,12 @@ case class Asks[S, A](fun: S => A) extends SyntheticOperation.Shallow[A, Reader[
     Ask[S].tagged.map(fun)
 }
 
+object Asks {
+  def apply[S] : Apply[S] = new Apply[S]()
+  protected class Apply[S] {
+    def apply[A](f: S => A) = new Asks(f)
+  }
+}
 
 class LocalMod[A, S, U](f: S => S, eff: A !! U) extends SyntheticOperation.Deep[A, Reader[S], U] {
   def synthesize[T <: SyntheticTagger](implicit tagger: T): A !! tagger.Tagged[Reader[S]] with U = 
