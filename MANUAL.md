@@ -42,7 +42,7 @@
 
 ## 1\. Effect Definition
 
-*Effect Definition*, is a fragment of a program, that **extends** the functionality of the `Effectful` monad. The monad, which is all that Skutek is about.
+*Effect Definition*, is a fragment of a program, that **extends** the functionality of the `Computation` monad. The monad, which is all that Skutek is about.
 
 Skutek comes with [§. predefined](#part-ii---predefined-effects) effects. A User can define [§. new effects](#defining-your-own-effect) as well.
 
@@ -138,15 +138,15 @@ There are some caveats related to intersection types:
 
 ## 4\. Computation
 
-A *Computation* is any value of a type derived from `Effectful[+A, -U]` trait.  
+A *Computation* is any value of a type derived from `Computation[+A, -U]` trait.  
 * Parameter `A` is the result type of the *Computation*.  
 * Parameter `U` is the *Effect Stack* of the *Computation*. It's meaning is to act as a registry of *Effects* that will have to be [§. handled](#6-handling-effects), before the result of the *Computation* can be obtained.
 
 Example:
 ```scala
-type MyComputation = Effectful[Foo, State[Double] with Error[String] with Choice]
+type MyComputation = Computation[Foo, State[Double] with Error[String] with Choice]
 ```
-Same example, but using `!!`, an **infix type alias** for `Effectful`:
+Same example, but using `!!`, an **infix type alias** for `Computation`:
 ```scala
 type MyComputation = Foo !! State[Double] with Error[String] with Choice
 ```
@@ -179,7 +179,7 @@ Also, `Return()` is an abbreviation of `Return(())`.
 
 An *Operation* is an elementary *Computation*, specific for an *Effect*.
 
-*Operations* originate from *Effect Definitions*, where they are defined as **dumb case classes**, indirectly inheriting from the `Effectful` trait.
+*Operations* originate from *Effect Definitions*, where they are defined as **dumb case classes**, indirectly inheriting from the `Computation` trait.
 
 Examples:
 
@@ -378,7 +378,7 @@ val eff2 = eff.fx[Error[String]].fx[Reader[Boolean]].handleWith(handler)  // alt
 // we get:
 eff2: ... // same as in previous example
 ```
-The `fx` method is defined for both `Effectful` and `Handler` traits. 
+The `fx` method is defined for both `Computation` and `Handler` traits. 
 
 The chain of `fx` method calls is a Builder Pattern. It has to be used to enumerate each *Effect* that is has to remain unhandled, before terminating the chain with `handle/handleWith` call. Otherwise, it's not supposed to typecheck.
 
