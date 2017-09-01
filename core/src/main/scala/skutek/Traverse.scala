@@ -5,7 +5,7 @@ import scala.collection.generic.CanBuildFrom
 
 protected trait Traverse_exports {
 
-  implicit class IterableOfEffs_extension[+A, -U, S[+X] <: Iterable[X]](thiz: S[A !! U]) {
+  implicit class IterableOfComputations_extension[+A, -U, S[+X] <: Iterable[X]](thiz: S[A !! U]) {
 
     def parallellyVoid: Unit !! U = thiz.foldLeft(Return().upCast[U])(_ *<! _)
 
@@ -21,7 +21,7 @@ protected trait Traverse_exports {
   }
 
 
-  implicit class IterableOfEffsCBF_extension[+A, -U, S[+X] <: Iterable[X]](thiz: S[A !! U])(implicit cbf: CanBuildFrom[S[A !! U], A, S[A]]) {
+  implicit class IterableOfComputationsCBF_extension[+A, -U, S[+X] <: Iterable[X]](thiz: S[A !! U])(implicit cbf: CanBuildFrom[S[A !! U], A, S[A]]) {
 
     def parallelly: S[A] !! U = {
       thiz.foldLeft(Return(Vector.empty[A]).upCast[U]) { case (as_!, a_!) => (as_! *! a_!).map2(_ :+ _) }
@@ -41,7 +41,7 @@ protected trait Traverse_exports {
   }
 
 
-  implicit class MapOfEffsCBF_extension[A, +B, -U, S[X, +Y] <: Map[X, Y]](thiz: S[A, B !! U])(implicit cbf: CanBuildFrom[S[A, B !! U], (A, B), S[A, B]]) {
+  implicit class MapOfComputationsCBF_extension[A, +B, -U, S[X, +Y] <: Map[X, Y]](thiz: S[A, B !! U])(implicit cbf: CanBuildFrom[S[A, B !! U], (A, B), S[A, B]]) {
     
     def parallellyValues: S[A, B] !! U = {
       thiz.foldLeft(Return(Vector.empty[(A, B)]).upCast[U]) { case (abs_!, (a, b_!)) => (abs_! *! b_!).map2(_ :+ (a, _)) }
@@ -63,7 +63,7 @@ protected trait Traverse_exports {
   }
 
 
-  implicit class OptionOfEff_extension[+A, -U](thiz: Option[A !! U]) {
+  implicit class OptionOfComputation_extension[+A, -U](thiz: Option[A !! U]) {
     def parallelly: Option[A] !! U = thiz match {
       case Some(eff) => eff.map(Some(_))
       case None => Return(None)
@@ -74,7 +74,7 @@ protected trait Traverse_exports {
   }
 
 
-  implicit class EitherOfEff_extension[+A, +T, -U](thiz: Either[T, A !! U]) {
+  implicit class EitherOfComputation_extension[+A, +T, -U](thiz: Either[T, A !! U]) {
     def parallelly: Either[T, A] !! U = thiz match {
       case Right(eff) => eff.map(Right(_))
       case Left(x) => Return(Left(x))

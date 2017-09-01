@@ -27,7 +27,7 @@ case object MaybeHandler extends MaybeHandler {
 
 
 trait Maybe_exports {
-  implicit class OptionToEffectful[T](thiz: Option[T]) {
+  implicit class OptionToComputation[T](thiz: Option[T]) {
     def toEff: T !! Maybe = thiz match {
       case Some(x) => Return(x)
       case _ => Naught
