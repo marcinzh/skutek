@@ -42,8 +42,8 @@ class OperationTests extends Specification with CanLaunchTheMissiles {
         Return()
       else 
         str.head match {
-          case '[' => Local((_: Int) + 1)(loop(str.tail))
-          case ']' => Local((_: Int) - 1)(loop(str.tail))
+          case '[' => LocalMod[Int](_ + 1)(loop(str.tail))
+          case ']' => LocalMod[Int](_ - 1)(loop(str.tail))
           case x => for { 
             indent <- Ask[Int]
             _ <- Tell(("  " * indent) :+ x)
