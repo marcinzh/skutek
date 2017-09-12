@@ -4,7 +4,7 @@ import skutek._
 
 object Queens {
 
-  def apply() = {
+  def apply(args: Seq[String]) = {
     val boardSize = 8
     search(boardSize)
     .runWith(ChoiceHandler.FindFirst)
