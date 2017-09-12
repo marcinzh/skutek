@@ -40,7 +40,7 @@ object InvalidFutures {
   }
 
 
-  def apply() = {
+  def apply(args: Seq[String]) = {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     val eff = time("Creating effect") { makeEff(false, true, true, false) }
