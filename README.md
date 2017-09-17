@@ -23,6 +23,12 @@ object Main extends App {
     _ <- Put(c)
   } yield ()
 
+  // This block is only to demonstrate the inferred type of eff:
+  {
+    type Eff = Unit !! State[Int] with Reader[Int] with Error[String]
+    val _ = implicitly[eff.type <:< Eff]
+  }
+
   val handler = ErrorHandler[String] +! StateHandler(100).exec +! ReaderHandler(3)
 
   val result = handler.run(eff)
