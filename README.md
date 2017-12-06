@@ -17,10 +17,10 @@ import skutek._
 object Main extends App {
 
   val computation = for {
-    a <- Get[Int]
-    b <- Ask[Int]
-    c <- if (b != 0) Return(a / b) else Wrong(s"Tried to divide $a by zero")
-    _ <- Put(c)
+    a <- Get[Int] // use State[Int] effect
+    b <- Ask[Int] // use Reader[Int] effect
+    c <- if (b != 0) Return(a / b) else Wrong(s"Tried to divide $a by zero")  // use Error[String] effect
+    _ <- Put(c)   // use State[Int] effect again
   } yield ()
 
   val handler = ErrorHandler[String] +! StateHandler(100).exec +! ReaderHandler(3)
@@ -35,9 +35,11 @@ The inferred type of `computation` above is equivalent to:
 ```scala
   Unit !! State[Int] with Reader[Int] with Error[String]
 ```
-where `!!` is infix type alias for `Computation[+A, -U]` monad.
+where `!!` is infix type alias for [Computation](./core/src/main/scala/skutek/Computation.scala) monad.
 
-More in [examples](https://github.com/marcinzh/skutek/tree/master/examples/src/main/scala/skutek_examples) directory.
+---
+
+More usage in [examples](./examples/src/main/scala/skutek_examples) directory.
 
 # Setup
 
@@ -80,6 +82,3 @@ Cross built for 2.11 and 2.12.
 # User Manual
 
   [MANUAL.md](MANUAL.md)
-  
-If you wish to learn how Skutek works from the sources, it's recommended to start with [Computation](core/src/main/scala/Computation.scala), [Interpreter](core/src/main/scala/_internals/Interpreter.scala), [Handler](core/src/main/scala/Handler.scala).
-
