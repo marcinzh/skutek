@@ -2,7 +2,7 @@ package skutek
 import _internals._
 
 sealed trait State[S]
-object State extends EffectCompanion1[State[?]]
+object State extends EffectCompanion1[State]
 
 sealed trait StateOperation[A, S] extends Operation[A, State[S]]
 case class Get[S]() extends StateOperation[S, S] 

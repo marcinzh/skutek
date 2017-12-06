@@ -2,7 +2,7 @@ package skutek
 import _internals._
 
 sealed trait Reader[S]
-object Reader extends EffectCompanion1[Reader[?]]
+object Reader extends EffectCompanion1[Reader]
 
 sealed trait ReaderOperation[A, S] extends Operation[A, Reader[S]]
 case class Ask[S]() extends ReaderOperation[S, S]
