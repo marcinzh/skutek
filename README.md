@@ -16,15 +16,24 @@ import skutek._
 
 object Main extends App {
 
+  // Create a monadic computation using several effects:
   val computation = for {
-    a <- Get[Int] // use State[Int] effect
-    b <- Ask[Int] // use Reader[Int] effect
-    c <- if (b != 0) Return(a / b) else Wrong(s"Tried to divide $a by zero")  // use Error[String] effect
-    _ <- Put(c)   // use State[Int] effect again
+    a <- Get[Int] // uses State[Int] effect.
+    b <- Ask[Int] // uses Reader[Int] effect.
+    c <- {
+      if (b != 0) 
+        Return(a / b)
+      else 
+        Wrong(s"Tried to divide $a by zero") // uses Error[String] effect.
+    }
+    _ <- Put(c) // uses State[Int] effect again.
   } yield ()
 
+  // Create a handler for the above computation, by composing
+  // individual handlers of each requested effect:
   val handler = ErrorHandler[String] +! StateHandler(100).exec +! ReaderHandler(3)
 
+  // Execute the computation using the handler:
   val result = handler.run(computation)
 
   println(result) // prints "Right(33)"
