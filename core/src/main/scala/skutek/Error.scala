@@ -2,7 +2,7 @@ package skutek
 import _internals._
 
 sealed trait Error[T] 
-object Error extends EffectCompanion1[Error[?]]
+object Error extends EffectCompanion1[Error]
 
 case class Wrong[T](value: T) extends Operation[Nothing, Error[T]]
 

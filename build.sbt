@@ -2,8 +2,8 @@ sourcesInBase := false
 
 lazy val commonSettings = Seq(
   organization := "com.github.marcinzh",
-  version := "0.6.0",
-  scalaVersion := "2.12.3",
+  version := "0.6.1",
+  scalaVersion := "2.12.4",
   crossScalaVersions := Seq(scalaVersion.value, "2.11.11"),
   scalacOptions ++= Seq(
     "-language:implicitConversions",
@@ -29,8 +29,8 @@ lazy val commonSettings = Seq(
 
 lazy val dontPublishMe = Seq(
   publishTo := None,
-  publish := (),
-  publishLocal := (),
+  publish := (()),
+  publishLocal := (()),
   publishArtifact := false
 )
 

@@ -2,7 +2,7 @@ package skutek
 import _internals._
 
 sealed trait Validation[T] 
-object Validation extends EffectCompanion1[Validation[?]]
+object Validation extends EffectCompanion1[Validation]
 
 case class Invalid[T](value: T) extends Operation[Nothing, Validation[T]]
 

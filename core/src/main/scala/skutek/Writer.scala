@@ -2,7 +2,7 @@ package skutek
 import _internals._
 
 sealed trait Writer[T]
-object Writer extends EffectCompanion1[Writer[?]]
+object Writer extends EffectCompanion1[Writer]
 
 sealed trait WriterOperation[A, T] extends Operation[A, Writer[T]]
 case class Tell[T](value: T) extends WriterOperation[Unit, T]
