@@ -35,6 +35,7 @@ The inferred type of `computation` above is equivalent to:
 ```scala
   Unit !! State[Int] with Reader[Int] with Error[String]
 ```
+where `!!` is infix type alias for `Computation[+A, -U]` monad.
 
 More in [examples](https://github.com/marcinzh/skutek/tree/master/examples/src/main/scala/skutek_examples) directory.
 
@@ -80,3 +81,5 @@ Cross built for 2.11 and 2.12.
 
   [MANUAL.md](MANUAL.md)
   
+If you wish to learn how Skutek works from the sources, it's recommended to start with [Computation](core/src/main/scala/Computation.scala), [Interpreter](core/src/main/scala/_internals/Interpreter.scala), [Handler](core/src/main/scala/Handler.scala).
+
