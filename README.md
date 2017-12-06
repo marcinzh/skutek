@@ -16,26 +16,26 @@ import skutek._
 
 object Main extends App {
 
-  val eff = for {
+  val computation = for {
     a <- Get[Int]
     b <- Ask[Int]
     c <- if (b != 0) Return(a / b) else Wrong(s"Tried to divide $a by zero")
     _ <- Put(c)
   } yield ()
 
-  // This block is only to demonstrate the inferred type of eff:
-  {
-    type Eff = Unit !! State[Int] with Reader[Int] with Error[String]
-    val _ = implicitly[eff.type <:< Eff]
-  }
-
   val handler = ErrorHandler[String] +! StateHandler(100).exec +! ReaderHandler(3)
 
-  val result = handler.run(eff)
+  val result = handler.run(computation)
 
   println(result) // prints "Right(33)"
 }
 ```
+
+The inferred type of `computation` above is equivalent to:
+```scala
+  Unit !! State[Int] with Reader[Int] with Error[String]
+```
+
 More in [examples](https://github.com/marcinzh/skutek/tree/master/examples/src/main/scala/skutek_examples) directory.
 
 # Setup
