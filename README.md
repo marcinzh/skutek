@@ -55,7 +55,7 @@ More usage in [examples](./examples/src/main/scala/skutek_examples) directory.
 ```scala
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.6.1"
+libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.6.2"
 ```
 Cross built for 2.11 and 2.12.
 
