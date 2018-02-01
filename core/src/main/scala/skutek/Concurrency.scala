@@ -7,7 +7,9 @@ import scala.concurrent.duration._
 sealed trait Concurrency
 object Concurrency extends EffectCompanion0[Concurrency]
 
-sealed class Run[A](val run: () => A) extends Operation[A, Concurrency]
+sealed trait ConcurrencyOperation[A] extends Operation[A, Concurrency]
+sealed class Run[A](val run: () => A) extends ConcurrencyOperation[A]
+case class FutureWrapper[A](future: Future[A]) extends ConcurrencyOperation[A]
 
 object Run {
   def apply[A](run : => A) = new Run(() => run)
@@ -21,11 +23,17 @@ object RunEff {
 case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends BaseHandlerWithSelfDriver[Concurrency] {
   type Secret[A, -U] = Future[A]
   type Result[A] = Future[A]
-  type Op[A] = Run[A]
+  type Op[A] = ConcurrencyOperation[A]
 
   def onReturn[A](a: A) = Future.successful(a)
 
-  def onOperation[A, B, U](op: Op[A], k: A => Future[B]): Future[B] = Future { op.run() }.flatMap(k)
+  // def onOperation[A, B, U](op: Op[A], k: A => Future[B]): Future[B] = Future { op.run() }.flatMap(k)
+  // def onOperation[A, B, U](op: Op[A], k: A => Future[B]): Future[B] = op.future.flatMap(k)
+  def onOperation[A, B, U](op: Op[A], k: A => Future[B]): Future[B] = 
+    (op match {
+      case r : Run[A] => Future { r.run() }
+      case FutureWrapper(fut) => fut
+    }).flatMap(k)
 
   def onProduct[A, B, C, U](aa: Future[A], bb: Future[B], k: ((A, B)) => Future[C]): Future[C] = (aa zip bb).flatMap(k)
 
@@ -43,4 +51,10 @@ case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends BaseHandl
 
 object ConcurrencyHandler {
   def global = ConcurrencyHandler()(ExecutionContext.Implicits.global)
+}
+
+trait Concurrency_exports {
+  implicit class FutureToComputation[A](thiz: Future[A]) {
+    def toEff: A !! Concurrency = FutureWrapper(thiz)
+  }
 }

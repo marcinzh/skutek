@@ -30,4 +30,12 @@ trait Error_exports {
       case Left(x) => Wrong(x)
     }
   }
+
+  import scala.util._
+  implicit class TryToComputation[A](thiz: Try[A]) {
+    def toEff: A !! Error[Throwable] = thiz match {
+      case Success(x) => Return(x)
+      case Failure(x) => Wrong(x)
+    }
+  }
 }
