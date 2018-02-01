@@ -5,3 +5,4 @@ package object skutek
   with Traverse_exports
   with Maybe_exports
   with Error_exports 
+  with Concurrency_exports 
