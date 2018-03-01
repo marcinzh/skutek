@@ -8,41 +8,25 @@ sealed trait WriterOperation[A, T] extends Operation[A, Writer[T]]
 case class Tell[T](value: T) extends WriterOperation[Unit, T]
 
 
-abstract class WriterHandler[T] extends StatefulHandler.NoSecret[Writer[T]] {
-  type Result[A] = (A, Stan)
+abstract class WriterHandler[T] extends StatefulHandler2[Writer[T]] {
   type Op[A] = WriterOperation[A, T]
 
   def add(s1: Stan, s2: Stan): Stan
   def single(x: T): Stan
 
-  final def onReturn[A](a: A) = s => Return((a, s))
-
-  final def onOperation[A, B, U](op: Op[A], k: A => Stan => Result[B] !! U): Stan => Result[B] !! U = op match {
+  def onOperation[A, B, U](op: Op[A], k: A => Secret[B, U]): Secret[B, U] = op match {
     case Tell(x) => s => k(())(add(s, single(x)))
   }
 
-  final def onProduct[A, B, C, U](
-    x: Stan => Result[A] !! U, 
-    y: Stan => Result[B] !! U, 
-    k: ((A, B)) => Stan => Result[C] !! U
-  ): Stan => Result[C] !! U = 
-    (s: Stan) => 
-      (x(initial) *! y(initial)).flatMap { 
-        case ((a, s1), (b, s2)) => k((a, b))(add(add(s, s1), s2)) 
+  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U], k: ((A, B)) => Secret[C, U]): Secret[C, U] =
+    (s1: Stan) => 
+      (aa(initial) *! bb(initial)).flatMap { 
+        case ((a, s2), (b, s3)) => k((a, b))(add(add(s1, s2), s3)) 
       }
-
-  def exec = new MappedHandler[Lambda[A => Stan]] {
-    def apply[A](pair: (A, Stan)) = pair._2
-  }
-
-  def eval = new MappedHandler[Lambda[A => A]] {
-    def apply[A](pair: (A, Stan)) = pair._1
-  }
 }
 
 
 object WriterHandler {
-
   def strings = seq[String]
 
   def seq[T]() = new WriterHandler[T] {
