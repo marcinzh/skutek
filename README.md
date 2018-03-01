@@ -55,7 +55,7 @@ More usage in [examples](./examples/src/main/scala/skutek_examples) directory.
 ```scala
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.6.2"
+libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.7.0"
 ```
 Cross built for 2.11 and 2.12.
 
@@ -79,7 +79,7 @@ Cross built for 2.11 and 2.12.
     
 - Caveats and limitations:
     - General infancy of the project.
-    - No possiblity of adapting pre-existing monads as Skutek's effects.
+    - ~~No~~ Limited possiblity of adapting pre-existing monads as Skutek's effects.
     - Removing effects from the stack (local handling) isn't as easy as adding them. [Read more](MANUAL.md#62-local-handling).
     - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`"). [Read more](MANUAL.md#32-caveats).
     - Using patterns in `for` comprehensions can trigger surprising errors (Scala's wart, not specific to Skutek).
