@@ -17,12 +17,19 @@ case class Modify[S](fun: S => S) extends SyntheticOperation.Shallow[Unit, State
 }
 
 
-case class StateHandler[S](val initial: S) extends LinearStatefulHandler.Simple[State[S]] {
-  type Op[A] = StateOperation[A, S]
+case class StateHandler[S](val initial: S) extends StatefulHandler2[State[S]] {
   type Stan = S
+  type Op[A] = StateOperation[A, S]
 
-  def onOperation[A](op: Op[A], s: S): (A, S) = op match {
-    case _: Get[_]  => (s, s)
-    case Put(s2)     => ((), s2)
+  def onOperation[A, B, U](op: Op[A], k: A => Secret[B, U]): Secret[B, U] = op match {
+    case _: Get[_]  => s => k(s)(s)
+    case Put(s2)     => _ => k(())(s2)
   }
+
+  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U], k: ((A, B)) => Secret[C, U]): Secret[C, U] =
+    (s1: Stan) => aa(s1).flatMap { 
+      case (a, s2) => bb(s2).flatMap { 
+        case (b, s3) => k((a, b))(s3)
+      }
+    }
 }

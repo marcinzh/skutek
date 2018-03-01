@@ -1,11 +1,10 @@
 package skutek
-import _internals.{Interpreter, Driver}
+// import _internals._{Interpreter, Driver, DriverAndHandler}
+import skutek._internals._
 import scala.reflect.ClassTag
 
 
-sealed trait Handler { outer =>
-  type Effects
-  type Result[X]
+sealed trait Handler extends DriverAndHandler { outer =>
 
   def interpret[A, U](eff: A !! U with Effects): Result[A] !! U
   final def handleCarefully[U] = new HandlePoly[U]
@@ -79,28 +78,28 @@ protected sealed trait TaggableHandler extends ElementalHandler { outer =>
 }
 
 
-abstract class BaseHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends TaggableHandler { 
+protected abstract class CustomHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends TaggableHandler { this: Driver =>
   final type Effects = Fx
   final def myTag: Any = implicitTag
+  final def interpretWithTag[A, U](eff: A !! U with Effects, tag: Any): Result[A] !! U = 
+    Interpreter.impure[A, U, Effects, this.type](this, tag, eff)
 }
 
 
-abstract class BaseHandlerWithDriver[Fx](implicit implicitTag: ClassTag[Fx]) extends BaseHandler { outer =>
+abstract class UniversalHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends CustomHandler[Fx] with Driver
 
-  type Drv = Driver { 
-    type Result[X] = outer.Result[X]
-    type Effects = Fx
+abstract class StatelessHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends CustomHandler[Fx] with StatelessDriver
+
+abstract class StatefulHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends CustomHandler[Fx] with StatefulDriver
+
+abstract class StatefulHandler2[Fx](implicit implicitTag: ClassTag[Fx]) extends CustomHandler[Fx] with StatefulDriver2 {
+  final def exec = new MappedHandler[Lambda[A => Stan]] {
+    def apply[A](pair: (A, Stan)) = pair._2
   }
 
-  def driver: Drv  
-
-  final def interpretWithTag[A, U](eff: A !! U with Effects, tag: Any): Result[A] !! U = 
-    Interpreter.impure[A, U, Effects, Drv](driver, tag, eff)
-}
-
-
-abstract class BaseHandlerWithSelfDriver[Fx](implicit implicitTag: ClassTag[Fx]) extends BaseHandlerWithDriver with Driver { 
-  final def driver = this
+  final def eval = new MappedHandler[Lambda[A => A]] {
+    def apply[A](pair: (A, Stan)) = pair._1
+  }
 }
 
 

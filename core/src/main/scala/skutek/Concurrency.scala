@@ -20,7 +20,7 @@ object RunEff {
 }
 
 
-case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends BaseHandlerWithSelfDriver[Concurrency] {
+case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends UniversalHandler[Concurrency] {
   type Secret[A, -U] = Future[A]
   type Result[A] = Future[A]
   type Op[A] = ConcurrencyOperation[A]
@@ -41,8 +41,6 @@ case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends BaseHandl
 
   def onReveal[A, U](fut: Future[A]): Future[A] !! U = Return(fut)
 
-  def onFilterFail = None
-  
   def await(timeout: Duration = Duration.Inf) = 
     new MappedHandler[Lambda[A => A]] {
       def apply[A](fut: Future[A]): A = Await.result(fut, timeout)

@@ -6,16 +6,16 @@ object Error extends EffectCompanion1[Error]
 
 case class Wrong[T](value: T) extends Operation[Nothing, Error[T]]
 
-case class ErrorHandler[T]() extends StatelessHandler.NoSecret[Error[T]] {
+case class ErrorHandler[T]() extends StatelessHandler[Error[T]] {
   type Result[A] = Either[T, A]
   type Op[A] = Wrong[T]
 
-  def onReturn[A](a: A) = Return(Right(a))
+  def onReturn[A](a: A): Secret[A, Any] = Return(Right(a))
 
-  def onOperation[A, B, U](op: Op[A], k: A => Result[B] !! U): Result[B] !! U = Return(Left(op.value))
+  def onOperation[A, B, U](op: Op[A], k: A => Secret[B, U]): Secret[B, U] = Return(Left(op.value))
   
-  def onProduct[A, B, C, U](effA: Result[A] !! U, effB: Result[B] !! U, k: ((A, B)) => Result[C] !! U): Result[C] !! U =
-    (effA *! effB).flatMap { 
+  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U], k: ((A, B)) => Secret[C, U]): Secret[C, U] =
+    (aa *! bb).flatMap { 
       case (Right(a), Right(b)) => k((a, b))
       case (Left(x), _) => Return(Left(x))
       case (_, Left(x)) => Return(Left(x))

@@ -15,7 +15,7 @@ case object ChoiceHandler extends AllChoiceHandler {
   case object FindFirst extends FirstChoiceHandler
 }
 
-protected abstract class BaseChoiceHandler extends StatelessHandler.NoSecret[Choice] {
+protected abstract class BaseChoiceHandler extends StatelessHandler[Choice] {
   override val onFilterFail = Some(NoChoice)
   type Op[A] = Choose[A]
 }
