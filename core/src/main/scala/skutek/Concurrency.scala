@@ -27,11 +27,9 @@ case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends Universal
 
   def onReturn[A](a: A) = Future.successful(a)
 
-  // def onOperation[A, B, U](op: Op[A], k: A => Future[B]): Future[B] = Future { op.run() }.flatMap(k)
-  // def onOperation[A, B, U](op: Op[A], k: A => Future[B]): Future[B] = op.future.flatMap(k)
   def onOperation[A, B, U](op: Op[A], k: A => Future[B]): Future[B] = 
     (op match {
-      case r : Run[A] => Future { r.run() }
+      case r: Run[A] => Future { r.run() }
       case FutureWrapper(fut) => fut
     }).flatMap(k)
 
@@ -54,5 +52,6 @@ object ConcurrencyHandler {
 trait Concurrency_exports {
   implicit class FutureToComputation[A](thiz: Future[A]) {
     def toEff: A !! Concurrency = FutureWrapper(thiz)
+    def toEff[Tag](tag: Tag): A !! (Concurrency @! Tag) = FutureWrapper(thiz) @! tag
   }
 }

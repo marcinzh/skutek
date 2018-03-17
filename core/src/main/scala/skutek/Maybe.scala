@@ -32,5 +32,9 @@ trait Maybe_exports {
       case Some(x) => Return(x)
       case _ => Naught
     }
+    def toEff[Tag](tag: Tag): T !! (Maybe @! Tag) = thiz match {
+      case Some(x) => Return(x)
+      case _ => Naught @! tag
+    }
   }
 }
