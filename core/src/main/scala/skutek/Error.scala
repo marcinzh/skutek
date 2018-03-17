@@ -29,6 +29,10 @@ trait Error_exports {
       case Right(x) => Return(x)
       case Left(x) => Wrong(x)
     }
+    def toEff[Tag](tag: Tag): R !! (Error[L] @! Tag) = thiz match {
+      case Right(x) => Return(x)
+      case Left(x) => Wrong(x) @! tag
+    }
   }
 
   import scala.util._
@@ -36,6 +40,10 @@ trait Error_exports {
     def toEff: A !! Error[Throwable] = thiz match {
       case Success(x) => Return(x)
       case Failure(x) => Wrong(x)
+    }
+    def toEff[Tag](tag: Tag): A !! (Error[Throwable] @! Tag) = thiz match {
+      case Success(x) => Return(x)
+      case Failure(x) => Wrong(x) @! tag
     }
   }
 }
