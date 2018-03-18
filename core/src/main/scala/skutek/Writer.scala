@@ -14,15 +14,15 @@ abstract class WriterHandler[T] extends StatefulHandler2[Writer[T]] {
   def add(s1: Stan, s2: Stan): Stan
   def single(x: T): Stan
 
-  def onOperation[A, B, U](op: Op[A], k: A => Secret[B, U]): Secret[B, U] = op match {
-    case Tell(x) => s => k(())(add(s, single(x)))
-  }
+  def onOperation[A, B, U](op: Op[A]): Cont[A, B, U] = 
+    k => s => op match {
+      case Tell(x) => k(())(add(s, single(x)))
+    }
 
-  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U], k: ((A, B)) => Secret[C, U]): Secret[C, U] =
-    (s1: Stan) => 
-      (aa(initial) *! bb(initial)).flatMap { 
-        case ((a, s2), (b, s3)) => k((a, b))(add(add(s1, s2), s3)) 
-      }
+  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] =
+    k => s => (aa(initial) *! bb(initial)).flatMap { 
+      case ((a, s2), (b, s3)) => k((a, b))(add(add(s, s2), s3)) 
+    }
 }
 
 

@@ -21,23 +21,27 @@ object RunEff {
 
 
 case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends UniversalHandler[Concurrency] {
-  type Secret[A, -U] = Future[A]
   type Result[A] = Future[A]
+  type Secret[A, -U] = Future[A]
   type Op[A] = ConcurrencyOperation[A]
 
-  def onReturn[A](a: A) = Future.successful(a)
+  def onReturn[A](a: A): Secret[A, Any] = 
+    Future.successful(a)
 
-  def onOperation[A, B, U](op: Op[A], k: A => Future[B]): Future[B] = 
-    (op match {
+  def onOperation[A, B, U](op: Op[A]): Cont[A, B, U] = 
+    k => (op match {
       case r: Run[A] => Future { r.run() }
       case FutureWrapper(fut) => fut
     }).flatMap(k)
 
-  def onProduct[A, B, C, U](aa: Future[A], bb: Future[B], k: ((A, B)) => Future[C]): Future[C] = (aa zip bb).flatMap(k)
+  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] = 
+    k => (aa zip bb).flatMap(k)
 
-  def onConceal[A, B, U, V](eff: A !! U, f: A => Future[B]): Future[B] = f(Interpreter.pure(eff))
+  def onConceal[A, B, U](a_! : A !! U): Cont[A, B, U] =
+    k => k(Interpreter.pure(a_!))
 
-  def onReveal[A, U](fut: Future[A]): Future[A] !! U = Return(fut)
+  def onReveal[A, U](aa: Secret[A, U]): Result[A] !! U =
+    Return(aa)
 
   def await(timeout: Duration = Duration.Inf) = 
     new MappedHandler[Lambda[A => A]] {
