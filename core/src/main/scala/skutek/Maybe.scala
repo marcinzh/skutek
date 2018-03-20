@@ -12,12 +12,14 @@ case object MaybeHandler extends MaybeHandler {
   type Result[A] = Option[A]
   type Op[A] = Naught
 
-  def onReturn[A](a: A): Secret[A, Any] = Return(Some(a))
+  def onReturn[A](a: A): Secret[A, Any] = 
+    Return(Some(a))
 
-  def onOperation[A, B, U](op: Op[A], k: A => Secret[B, U]): Secret[B, U] = Return(None)
-  
-  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U], k: ((A, B)) => Secret[C, U]): Secret[C, U] =
-    (aa *! bb).flatMap { 
+  def onOperation[A, B, U](op: Op[A]): Cont[A, B, U] = 
+    _ => Return(None)
+
+  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] = 
+    k => (aa *! bb).flatMap { 
       case (Some(a), Some(b)) => k((a, b))
       case _ => Return(None)
     }
@@ -32,6 +34,7 @@ trait Maybe_exports {
       case Some(x) => Return(x)
       case _ => Naught
     }
+
     def toEff[Tag](tag: Tag): T !! (Maybe @! Tag) = thiz match {
       case Some(x) => Return(x)
       case _ => Naught @! tag

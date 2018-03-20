@@ -24,14 +24,15 @@ protected abstract class BaseChoiceHandler extends StatelessHandler[Choice] {
 protected class AllChoiceHandler extends BaseChoiceHandler {
   type Result[A] = Vector[A]
 
-  def onReturn[A](a: A) = Return(Vector(a))
 
-  def onOperation[A, B, U](op: Op[A], k: A => Vector[B] !! U): Vector[B] !! U = {
-    iterate(op.values.iterator, k)
-  }
+  def onReturn[A](a: A): Secret[A, Any] = 
+    Return(Vector(a))
 
-  def onProduct[A, B, C, U](a_! : Vector[A] !! U, b_! : Vector[B] !! U, k: ((A, B)) => Vector[C] !! U): Vector[C] !! U =
-    (a_! *! b_!).flatMap { 
+  def onOperation[A, B, U](op: Op[A]): Cont[A, B, U] = 
+    k => iterate(op.values.iterator, k)
+
+  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] = 
+    k => (aa *! bb).flatMap { 
       case (as, bs) => {
         val it = for { 
           a <- as.iterator
@@ -40,7 +41,6 @@ protected class AllChoiceHandler extends BaseChoiceHandler {
         iterate(it, k)
       }
     }
-
 
   private def iterate[A, B, U](todos: Iterator[A], k: A => Vector[B] !! U): Vector[B] !! U = {
     def loop(accum: Vector[B]): Vector[B] !! U = {
@@ -62,18 +62,18 @@ protected class AllChoiceHandler extends BaseChoiceHandler {
 protected abstract class FirstChoiceHandler extends BaseChoiceHandler {
   type Result[A] = Option[A]
 
-  def onReturn[A](a: A) = Return(Some(a))
 
-  def onOperation[A, B, U](op: Op[A], k: A => Option[B] !! U): Option[B] !! U = {
-    iterate(op.values, k)
-  }
+  def onReturn[A](a: A): Secret[A, Any] = 
+    Return(Some(a))
 
-  def onProduct[A, B, C, U](a_! : Option[A] !! U, b_! : Option[B] !! U, k: ((A, B)) => Option[C] !! U): Option[C] !! U =
-    (a_! *! b_!).flatMap { 
+  def onOperation[A, B, U](op: Op[A]): Cont[A, B, U] = 
+    k => iterate(op.values, k)
+
+  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] = 
+    k => (aa *! bb).flatMap { 
       case (Some(a), Some(b)) => k((a, b))
       case _ => Return(None)
     }
-
 
   private def iterate[A, B, U](todos: Iterable[A], k: A => Option[B] !! U): Option[B] !! U = {
     def loop(todos: Iterable[A]): Option[B] !! U = {

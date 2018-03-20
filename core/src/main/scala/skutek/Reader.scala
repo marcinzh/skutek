@@ -48,16 +48,17 @@ case class ReaderHandler[S](val initial: S) extends StatefulHandler[Reader[S]] {
   type Result[A] = A
   type Stan = S
 
-  def onReturn[A](a: A): Secret[A, Any] = _ => Return(a)
+  def onReturn[A](a: A): Secret[A, Any] = 
+    _ => Return(a)
 
-  def onOperation[A, B, U](op: Op[A], k: A => Secret[B, U]): Secret[B, U] = op match {
-    case _: Ask[_] => s => k(s)(s)
-    case DontTell(s) => _ => k(())(s)
-  }
+  def onOperation[A, B, U](op: Op[A]): Cont[A, B, U] = 
+    k => s => op match {
+      case _: Ask[_] => k(s)(s)
+      case DontTell(s2) => k(())(s2)
+    }
 
-  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U], k: ((A, B)) => Secret[C, U]): Secret[C, U] =
-    (s: S) => 
-      (aa(s) *! bb(s)).flatMap { 
-        case (a, b) => k((a, b))(s)
-      }
+  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] =
+    k => s => (aa(s) *! bb(s)).flatMap { 
+      case (a, b) => k((a, b))(s)
+    }
 }
