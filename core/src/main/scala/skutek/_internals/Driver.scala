@@ -22,23 +22,27 @@ trait Driver extends DriverAndHandler {
 
 
 trait StatelessDriver extends Driver {
-  type Secret[A, -U] = Result[A] !! U
-  def onConceal[A, B, U](a_! : A !! U): Cont[A, B, U] = k => a_!.flatMap(k)
-  def onReveal[A, U](aa: Secret[A, U]): Result[A] !! U = aa
+  final type Secret[A, -U] = Result[A] !! U
+  final def onConceal[A, B, U](a_! : A !! U): Cont[A, B, U] = k => a_!.flatMap(k)
+  final def onReveal[A, U](aa: Secret[A, U]): Result[A] !! U = aa
 }
 
 
 trait StatefulDriver extends Driver {
-  type Secret[A, -U] = Stan => Result[A] !! U
   type Stan
   def initial: Stan
-  def onConceal[A, B, U](a_! : A !! U): Cont[A, B, U] = k => s => a_!.flatMap(a => k(a)(s))
-  def onReveal[A, U](aa: Secret[A, U]): Result[A] !! U = aa(initial)
+  final type Secret[A, -U] = Stan => Result[A] !! U
+  final def onConceal[A, B, U](a_! : A !! U): Cont[A, B, U] = k => s => a_!.flatMap(a => k(a)(s))
+  final def onReveal[A, U](aa: Secret[A, U]): Result[A] !! U = aa(initial)
   final override def onFilterFail: Option[Op[Nothing]] = None
 }
 
 
 trait StatefulDriver2 extends StatefulDriver {
-  type Result[A] = (A, Stan)
+  final type Result[A] = (A, Stan)
   final def onReturn[A](a: A) = s => Return((a, s))
 }
+
+
+
+
