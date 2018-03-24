@@ -88,6 +88,8 @@ protected abstract class CustomHandler[Fx](implicit implicitTag: ClassTag[Fx]) e
 
 abstract class UniversalHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends CustomHandler[Fx] with Driver
 
+abstract class ForeignHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends CustomHandler[Fx] with ForeignDriver
+
 abstract class StatelessHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends CustomHandler[Fx] with StatelessDriver
 
 abstract class StatefulHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends CustomHandler[Fx] with StatefulDriver
