@@ -26,11 +26,4 @@ case class StateHandler[S](val initial: S) extends StatefulHandler2[State[S]] {
       case _: Get[_]  => k(s)(s)
       case Put(s2)     => k(())(s2)
     }
-
-  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] =
-    k => s => aa(s).flatMap { 
-      case (a, s2) => bb(s2).flatMap { 
-        case (b, s3) => k((a, b))(s3)
-      }
-    }
 }

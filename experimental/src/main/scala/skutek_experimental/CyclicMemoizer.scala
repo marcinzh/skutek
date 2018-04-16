@@ -42,8 +42,6 @@ class CyclicMemoizerHandler[K, V, W](val initial: Cache[K, V], fun: K => V !! W 
       }
     }
 
-  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] = ???
-
   private def tieKnots: MappedHandler[Lambda[A => A !! W]] = new MappedHandler[Lambda[A => A !! W]] {
     def apply[A](pair: (A, Stan)): A !! W = {
       val (a, m) = pair

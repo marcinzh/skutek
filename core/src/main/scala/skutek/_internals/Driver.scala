@@ -41,6 +41,14 @@ trait StatefulDriver extends Driver {
 trait StatefulDriver2 extends StatefulDriver {
   final type Result[A] = (A, Stan)
   final def onReturn[A](a: A) = s => Return((a, s))
+
+  //// overriden in Writer
+  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] =
+    k => s => aa(s).flatMap { 
+      case (a, s2) => bb(s2).flatMap { 
+        case (b, s3) => k((a, b))(s3)
+      }
+    }
 }
 
 
