@@ -12,14 +12,14 @@ abstract class WriterHandler[T] extends StatefulHandler2[Writer[T]] {
   type Op[A] = WriterOperation[A, T]
 
   def add(s1: Stan, s2: Stan): Stan
-  def single(x: T): Stan
+  def add1(s: Stan, x: T): Stan
 
   def onOperation[A, B, U](op: Op[A]): Cont[A, B, U] = 
     k => s => op match {
-      case Tell(x) => k(())(add(s, single(x)))
+      case Tell(x) => k(())(add1(s, x))
     }
 
-  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] =
+  override def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] =
     k => s => (aa(initial) *! bb(initial)).flatMap { 
       case ((a, s2), (b, s3)) => k((a, b))(add(add(s, s2), s3)) 
     }
@@ -33,13 +33,13 @@ object WriterHandler {
     type Stan = Vector[T]
     def initial = Vector.empty[T]
     def add(s1: Stan, s2: Stan) = s1 ++ s2
-    def single(x: T) = Vector(x)
+    def add1(s: Stan, x: T) = s :+ x
   }
 
   def monoid[T](zero: T, op: (T, T) => T) = new WriterHandler[T] {
     type Stan = T
     def initial = zero
     def add(x: T, y: T) = op(x, y)
-    def single(x: T) = x
+    def add1(s: Stan, x: T) = op(s, x)
   }
 }

@@ -20,9 +20,8 @@ object RunEff {
 }
 
 
-case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends UniversalHandler[Concurrency] {
+case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends ForeignHandler[Concurrency] {
   type Result[A] = Future[A]
-  type Secret[A, -U] = Future[A]
   type Op[A] = ConcurrencyOperation[A]
 
   def onReturn[A](a: A): Secret[A, Any] = 
@@ -36,12 +35,6 @@ case class ConcurrencyHandler()(implicit ec: ExecutionContext) extends Universal
 
   def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] = 
     k => (aa zip bb).flatMap(k)
-
-  def onConceal[A, B, U](a_! : A !! U): Cont[A, B, U] =
-    k => k(Interpreter.pure(a_!))
-
-  def onReveal[A, U](aa: Secret[A, U]): Result[A] !! U =
-    Return(aa)
 
   def await(timeout: Duration = Duration.Inf) = 
     new MappedHandler[Lambda[A => A]] {

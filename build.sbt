@@ -2,7 +2,7 @@ sourcesInBase := false
 
 lazy val commonSettings = Seq(
   organization := "com.github.marcinzh",
-  version := "0.8.0",
+  version := "0.9.0",
   scalaVersion := "2.12.4",
   crossScalaVersions := Seq(scalaVersion.value, "2.11.11"),
   scalacOptions ++= Seq(
@@ -27,6 +27,14 @@ lazy val commonSettings = Seq(
 )
 
 
+lazy val testSettings = Seq(
+  libraryDependencies += "org.specs2" %% "specs2-core" % "3.9.1" % "test",
+  libraryDependencies += "org.specs2" %% "specs2-matcher-extra" % "3.9.1" % "test",
+  parallelExecution in Test := false,
+  scalacOptions in Test += "-Yrangepos",
+)
+
+
 lazy val dontPublishMe = Seq(
   publishTo := None,
   publish := (()),
@@ -40,17 +48,21 @@ lazy val root = project
   .settings(name := "skutek-root")
   .settings(commonSettings: _*)
   .settings(dontPublishMe: _*)
-  .aggregate(core, examples)
+  .aggregate(core, examples, experimental)
 
 
 lazy val core = project
   .in(file("core"))
   .settings(name := "skutek-core")
   .settings(commonSettings: _*)
-  .settings(libraryDependencies += "org.specs2" %% "specs2-core" % "3.9.1" % "test")
-  .settings(libraryDependencies += "org.specs2" %% "specs2-matcher-extra" % "3.9.1" % "test")
-  .settings(parallelExecution in Test := false)
-  .settings(scalacOptions in Test += "-Yrangepos")
+  .settings(testSettings: _*)
+
+lazy val experimental = project
+  .in(file("experimental"))
+  .settings(name := "skutek-experimental")
+  .settings(commonSettings: _*)
+  .settings(testSettings: _*)
+  .dependsOn(core)
 
 lazy val examples = project
   .in(file("examples"))
