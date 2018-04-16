@@ -27,6 +27,14 @@ lazy val commonSettings = Seq(
 )
 
 
+lazy val testSettings = Seq(
+  libraryDependencies += "org.specs2" %% "specs2-core" % "3.9.1" % "test",
+  libraryDependencies += "org.specs2" %% "specs2-matcher-extra" % "3.9.1" % "test",
+  parallelExecution in Test := false,
+  scalacOptions in Test += "-Yrangepos",
+)
+
+
 lazy val dontPublishMe = Seq(
   publishTo := None,
   publish := (()),
@@ -47,10 +55,7 @@ lazy val core = project
   .in(file("core"))
   .settings(name := "skutek-core")
   .settings(commonSettings: _*)
-  .settings(libraryDependencies += "org.specs2" %% "specs2-core" % "3.9.1" % "test")
-  .settings(libraryDependencies += "org.specs2" %% "specs2-matcher-extra" % "3.9.1" % "test")
-  .settings(parallelExecution in Test := false)
-  .settings(scalacOptions in Test += "-Yrangepos")
+  .settings(testSettings: _*)
 
 lazy val examples = project
   .in(file("examples"))
