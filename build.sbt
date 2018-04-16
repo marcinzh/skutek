@@ -48,7 +48,7 @@ lazy val root = project
   .settings(name := "skutek-root")
   .settings(commonSettings: _*)
   .settings(dontPublishMe: _*)
-  .aggregate(core, examples)
+  .aggregate(core, examples, experimental)
 
 
 lazy val core = project
@@ -56,6 +56,13 @@ lazy val core = project
   .settings(name := "skutek-core")
   .settings(commonSettings: _*)
   .settings(testSettings: _*)
+
+lazy val experimental = project
+  .in(file("experimental"))
+  .settings(name := "skutek-experimental")
+  .settings(commonSettings: _*)
+  .settings(testSettings: _*)
+  .dependsOn(core)
 
 lazy val examples = project
   .in(file("examples"))
