@@ -28,6 +28,15 @@ trait StatelessDriver extends Driver {
 }
 
 
+trait StatelessDriver2 extends StatelessDriver {
+  final type Result[A] = A
+  final def onReturn[A](a: A) = Return(a)
+
+  def onProduct[A, B, C, U](aa: Secret[A, U], bb: Secret[B, U]): Cont[(A, B), C, U] = 
+    k => (aa *! bb).flatMap(k)
+}
+
+
 trait StatefulDriver extends Driver {
   type Stan
   def initial: Stan
