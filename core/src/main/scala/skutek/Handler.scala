@@ -92,6 +92,8 @@ abstract class ForeignHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends Cu
 
 abstract class StatelessHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends CustomHandler[Fx] with StatelessDriver
 
+abstract class StatelessHandler2[Fx](implicit implicitTag: ClassTag[Fx]) extends CustomHandler[Fx] with StatelessDriver2
+
 abstract class StatefulHandler[Fx](implicit implicitTag: ClassTag[Fx]) extends CustomHandler[Fx] with StatefulDriver
 
 abstract class StatefulHandler2[Fx](implicit implicitTag: ClassTag[Fx]) extends CustomHandler[Fx] with StatefulDriver2 {
