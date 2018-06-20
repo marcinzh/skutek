@@ -42,4 +42,7 @@ object WriterHandler {
     def add(x: T, y: T) = op(x, y)
     def add1(s: Stan, x: T) = op(s, x)
   }
+
+  def freeMonoid[T](op: (T, T) => T) = 
+    monoid[Option[T]](None, (a_?, b_?) => a_?.flatMap(a => b_?.map(b => op(a, b))))
 }
