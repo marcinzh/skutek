@@ -6,11 +6,13 @@ class Cache[K, V](
   val map: Map[K, OnceVar[V]],
   val untied: List[(K, OnceVar[V])] = Nil
 ) {
-  def add(key: K, once: OnceVar[V]) = 
+  def add(key: K, once: OnceVar[V]) = {
+    val kv = (key, once)
     new Cache[K, V](
-      map = map + (key -> once), 
-      untied = (key, once) :: untied
+      map = map + kv, 
+      untied = untied :+ kv
     )
+  }
 
   def snapshot() = map.mapValues(f => f())
 }
