@@ -83,4 +83,24 @@ protected trait Traverse_exports {
     def serially = parallelly
     def seriallyVoid = parallellyVoid
   }
+
+
+  implicit class IterableOfComputations2_extension[A, C[X] <: Iterable[X]](thiz : C[A]) {
+    def foldLeft_!![U, B](z : B)(op : (B, A) => B !! U) = thiz.foldLeft(Return(z).upCast[U]) {
+      case (b_!, a) => for {
+        b <- b_!
+        b2 <- op(b, a)
+      } yield b2
+    }
+
+    def foldRight_!![U, B](z : B)(op : (A, B) => B !! U) = thiz.foldRight(Return(z).upCast[U]) {
+      case (a, b_!) => for {
+        b <- b_!
+        b2 <- op(a, b)
+      } yield b2
+    }
+
+    def reduceLeft_!![U](op : (A, A) => A !! U) = thiz.tail.foldLeft_!!(thiz.head)(op)
+    def reduceRight_!![U](op : (A, A) => A !! U) = thiz.init.foldRight_!!(thiz.last)(op)
+  }
 }

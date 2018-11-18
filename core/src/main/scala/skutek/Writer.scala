@@ -36,10 +36,24 @@ object WriterHandler {
     def add1(s: Stan, x: T) = s :+ x
   }
 
+  def set[T]() = new WriterHandler[T] {
+    type Stan = Set[T]
+    def initial = Set.empty[T]
+    def add(s1: Stan, s2: Stan) = s1 | s2
+    def add1(s: Stan, x: T) = s + x
+  }
+
   def monoid[T](zero: T, op: (T, T) => T) = new WriterHandler[T] {
     type Stan = T
     def initial = zero
     def add(x: T, y: T) = op(x, y)
     def add1(s: Stan, x: T) = op(s, x)
+  }
+
+  def semigroup[T](op: (T, T) => T) = new WriterHandler[T] {
+    type Stan = Option[T]
+    def initial = None
+    def add(mx : Option[T], my : Option[T]) = mx.flatMap(x => my.map(y => op(x, y)))
+    def add1(mx: Stan, y: T) = mx.map(op(_, y))
   }
 }
