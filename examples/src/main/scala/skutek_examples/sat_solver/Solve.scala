@@ -23,7 +23,7 @@ private case class Env(solution: Set[Literal], formula: List[List[Literal]]) {
     else
       copy(solution = solution + l).bcp
 
-  def bcp = formula.foldLeft(Return(copy(formula = Nil)).upCast[Choice]) { (env_!, ls) => env_!.flatMap(_.bcpAux(ls)) }
+  def bcp = formula.foldLeft_!!(copy(formula = Nil))((env, ls) => env.bcpAux(ls))
 
   def bcpAux(ls: List[Literal]): Env !! Choice = 
     if (ls.exists(l => solution.contains(l)))
