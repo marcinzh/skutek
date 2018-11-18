@@ -26,8 +26,8 @@ class CyclicMemoTests extends Specification with CanLaunchTheMissiles {
     case class Edge(from: () => Vertex, to: () => Vertex)
 
     def visit(n: Int) = {
-      missiles(n).launch()
       for {
+        _ <- missiles(n).launch_!
         _ <- Tell(n)
         from <- CyclicMemo[Vertex](n)
         edges <- (
