@@ -45,15 +45,12 @@ class CyclicMemoTests extends Specification with CanLaunchTheMissiles {
       .flatten
       .runWith(WriterHandler.seq[Int])
 
-    // println(log)
-
     {
       def loop(todos: List[Vertex], visited: Set[Int]): Unit = {
         todos match {
           case Nil => ()
           case x :: rest => 
             val targets = x.outgoing.map(_.to())
-            println(s"${x.serno} -> ${targets.map(_.serno).mkString(" ")}")
             val more = targets.filterNot(v => visited.contains(v.serno))
             val visited2 = visited ++ more.map(_.serno)
             loop(rest ++ more, visited2)
@@ -61,12 +58,6 @@ class CyclicMemoTests extends Specification with CanLaunchTheMissiles {
       }
       loop(roots.head() :: Nil, Set(roots.head().serno))
     }
-    // for (v <- m.values.toVector.sortBy(_.serno)) {
-    // 	println(s"v ${v.serno}:")
-    // 	for (Edge(from, to) <- v.outgoing) {
-    // 		println(s"\t ${from().serno} ->  ${to().serno}")
-    // 	}
-    // }
 
     missiles.map(_.mustHaveLaunchedOnce).reduce(_ and _) and
     (log.sorted must_== (0 until outgoings.size))
