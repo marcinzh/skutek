@@ -82,7 +82,7 @@ Cross built for 2.11 and 2.12.
     - ~~No~~ Limited possiblity of adapting pre-existing monads as Skutek's effects.
     - Removing effects from the stack (local handling) isn't as easy as adding them. [Read more](MANUAL.md#62-local-handling).
     - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`"). [Read more](MANUAL.md#32-caveats).
-    - Using patterns in `for` comprehensions can trigger surprising errors (Scala's wart, not specific to Skutek).
+    - Using patterns in `for` comprehensions can trigger surprising compiler errors. This is well known Scala's wart, not specific to Skutek. It can be mitigated by [This](https://github.com/oleg-py/better-monadic-for) compiler plugin.
     - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. [Read more](MANUAL.md#tag-conflicts).
     - Lack of performance analysis.
     - `Concurrency` effect is a [hack](MANUAL.md#warning).

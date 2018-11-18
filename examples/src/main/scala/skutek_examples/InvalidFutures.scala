@@ -24,8 +24,7 @@ object InvalidFutures {
 
     for {
       a <- futureA
-      workaround <- futureB(a) *! futureC(a) 
-      (b, c) = workaround
+      (b, c) <- futureB(a) *! futureC(a) //// this syntax requires "better-monadic-for" compiler plugin
       d <- futureD(b, c)
     } yield d
   }
