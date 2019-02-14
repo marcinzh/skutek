@@ -1,24 +1,27 @@
 package skutek_examples.sat_solver
-import skutek._
+import skutek.abstraction._
+import skutek.std_effects._
 
 
 object Parser {
+  case object ErrorFx extends Except[(String, Int)]
 
-  def apply(source: String): AST !! Error[(String, Int)] = 
+  def apply(source: String): AST !! ErrorFx.type = 
     (for {
       ast <- parseExpr
       c <- getChar
-      _ <- if (c == EOF) Return() else fail("Expected end of input")
+      _ <- if (c == EOF) Return else fail("Expected end of input")
     } yield ast)
-    .handleCarefullyWith(StateHandler(ParserState(0, source)).eval)
+    .handleWith[ErrorFx.type](StFx.handler(ParserState(0, source)).dropState)
 
-  val EOF = '\u0000'
-  type Parser[T] = T !! State[ParserState] with Error[(String, Int)]
+  case object StFx extends State[ParserState]
+  type Parser[T] = T !! StFx.type with ErrorFx.type
   case class ParserState(position: Int, source: String)
+  val EOF = '\u0000'
 
   val getChar: Parser[Char] = for {
-    ps <- Get[ParserState]
-    _ <- Put(ps.copy(position = ps.position + 1))
+    ps <- StFx.Get
+    _ <- StFx.Put(ps.copy(position = ps.position + 1))
     c <- 
       if (!ps.source.isDefinedAt(ps.position)) Return(EOF) else {
         val c = ps.source(ps.position) 
@@ -26,9 +29,9 @@ object Parser {
       }
   } yield c
 
-  val ungetChar = Modify[ParserState]{ case ParserState(i, cs) => ParserState(i - 1, cs) }
+  val ungetChar = StFx.Mod { case ParserState(i, cs) => ParserState(i - 1, cs) }
   
-  def fail(msg: String) = Get[ParserState].flatMap { case ParserState(i, _) => Wrong((msg, i - 1)) }
+  def fail(msg: String) = StFx.Get.flatMap { case ParserState(i, _) => ErrorFx.Raise((msg, i - 1)) }
 
   def parseExpr: Parser[AST] = 
     parseBinaryOrElse('=', Equiv)(
@@ -58,7 +61,7 @@ object Parser {
         expr <- parseExpr
         c <- getChar
         _ <- c match { 
-          case ')' => Return()
+          case ')' => Return
           case _ => fail("Expected closing brace")
         }
       } yield expr

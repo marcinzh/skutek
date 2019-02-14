@@ -1,13 +1,20 @@
 package skutek_experimental
-import skutek._
+import skutek.abstraction._
+import skutek.std_effects._
 import org.specs2._
 
 
-class CyclicMemoTests extends Specification with CanLaunchTheMissiles {
+class CyclicMemoTest extends Specification with CanLaunchTheMissiles {
 
   def is = graph
 
   def graph = br ^ "CyclicMemoizer operations should work" ! {
+
+    case object FxMemo extends CyclicMemoizer[Int, Vertex]
+    case object FxW extends Writer[Int]
+
+    case class Vertex(serno: Int, outgoing: List[Edge])
+    case class Edge(from: () => Vertex, to: () => Vertex)
 
     val outgoings = Vector(
       List(0,1,2,3,4,5),
@@ -20,30 +27,28 @@ class CyclicMemoTests extends Specification with CanLaunchTheMissiles {
       List()
     )
 
-    val missiles = outgoings.map(_ => Missiles())
+    val missiles = outgoings.map(_ => Missile())
 
-    case class Vertex(serno: Int, outgoing: List[Edge])
-    case class Edge(from: () => Vertex, to: () => Vertex)
 
     def visit(n: Int) = {
       for {
         _ <- missiles(n).launch_!
-        _ <- Tell(n)
-        from <- CyclicMemo[Vertex](n)
+        _ <- FxW.Tell(n)
+        from <- FxMemo.Recur(n)
         edges <- (
           for (i <- outgoings(n)) 
-            yield for (to <- CyclicMemo[Vertex](i)) 
+            yield for (to <- FxMemo.Recur(i)) 
               yield Edge(from, to)
-        ).serially
+        ).traverse
       } yield Vertex(n, edges)
     }
 
     val (roots, log) = 
       Vector(0)
-      .map(CyclicMemo[Vertex](_)).serially
-      .fx[Writer[Int]].handleWith(CyclicMemoizerHandler[Writer[Int]](visit))
+      .map(FxMemo.Recur(_)).traverse
+      .handleWith[FxW.type](FxMemo.handler[FxW.type](visit))
       .flatten
-      .runWith(WriterHandler.seq[Int])
+      .runWith(FxW.handler)
 
     {
       def loop(todos: List[Vertex], visited: Set[Int]): Unit = {
