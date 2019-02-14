@@ -2,15 +2,18 @@
 // https://www.reddit.com/r/scala/comments/6pmoah/running_dependent_futures_in_parallel/
 package skutek_examples
 import scala.concurrent.duration._
-import skutek._
+import skutek.abstraction._
+import skutek.std_effects._
 
 object InvalidFutures {
 
-  def beBusy[A, E](dur: Duration, failMe: Boolean, failure : => E, success : => A) = 
-    RunEff {
+  case object FxV extends Validation[String]
+
+  def beBusy[A](dur: Duration, failMe: Boolean, failure : => String, success : => A) = 
+    Concurrency.RunEff {
       Thread.sleep(dur.toMillis)
       if (failMe)
-        Invalid(failure)
+        FxV.Invalid(failure)
       else
         Return(success)
     }
@@ -44,7 +47,7 @@ object InvalidFutures {
 
     val eff = time("Creating effect") { makeEff(false, true, true, false) }
   
-    val handler = ConcurrencyHandler().await(1100.millis) +! ValidationHandler[String]
+    val handler = Concurrency.handler.await(1100.millis) <<<! FxV.handler
 
     time("Handling effect") { handler.run(eff) } match {
       case Right(x) => println(s"Success: $x")

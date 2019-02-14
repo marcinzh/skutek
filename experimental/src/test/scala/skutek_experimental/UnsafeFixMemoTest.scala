@@ -1,11 +1,11 @@
 package skutek_experimental
-import skutek._
+import skutek.abstraction._
 import org.specs2._
 
 class UnsafeFixMemoTest extends Specification with CanLaunchTheMissiles {
 
-  def fibs(n : Int) : (Int, Vector[Missiles]) = {
-    val missiles = Vector.fill(n + 1)(Missiles())
+  def fibs(n: Int): (Int, Vector[Missile]) = {
+    val missiles = Vector.fill(n + 1)(Missile())
     
     def fib = UnsafeFixMemo[Int, Int, Any]{ recur => 
       i => missiles(i).launch_! *>! (

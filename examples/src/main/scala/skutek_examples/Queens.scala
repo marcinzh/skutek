@@ -1,13 +1,17 @@
 package skutek_examples
-import skutek._
+import skutek.abstraction._
+import skutek.std_effects._
 
 
 object Queens {
+  case object FxS extends State[Solution]
+  case object FxC extends Choice
+
 
   def apply(args: Seq[String]) = {
     val boardSize = 8
     search(boardSize)
-    .runWith(ChoiceHandler.FindFirst)
+    .runWith(FxC.findFirst)
     .foreach { solution => 
       printSolution(boardSize, solution)
     }
@@ -24,19 +28,18 @@ object Queens {
     }
   }
 
-
-  def search(boardSize: Int): Solution !! Choice = {
+  def search(boardSize: Int): Solution !! FxC.type = {
     (for (row <- 0 until boardSize) yield 
       for {
-        solution <- Get[Solution]
-        column <- Choose(0 until boardSize)
+        solution <- FxS.Get
+        column <- FxC.Choose(0 until boardSize)
         p = Placement(column, row)
         if !solution.exists(_.collidesWith(p))
-        _ <- Put(solution :+ p)
+        _ <- FxS.Put(solution :+ p)
       } yield ()
     )
-    .seriallyVoid
-    .handleCarefullyWith(StateHandler(Vector.empty[Placement]).exec)
+    .traverseVoid
+    .handleWith[FxC.type](FxS.handler(Vector.empty[Placement]).justState)
   }
 
 

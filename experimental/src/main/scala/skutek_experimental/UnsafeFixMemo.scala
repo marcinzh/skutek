@@ -1,5 +1,6 @@
 package skutek_experimental
-import skutek._
+import skutek.abstraction._
+
 
 object UnsafeFixMemo {
   def apply[K, V, U] = new Apply[K, V, U]

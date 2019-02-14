@@ -1,8 +1,0 @@
-package object skutek
-  extends Computation_exports
-  with EffectMisc_exports
-  with Handler_exports 
-  with Traverse_exports
-  with Maybe_exports
-  with Error_exports 
-  with Concurrency_exports 

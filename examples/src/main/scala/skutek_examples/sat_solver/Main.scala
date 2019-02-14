@@ -1,5 +1,6 @@
 package skutek_examples.sat_solver
-import skutek._
+import skutek.abstraction._
+import skutek.std_effects._
 
 
 object Main {
@@ -51,7 +52,7 @@ object Main {
     }
 
     val names = formula.filter(_.isLetter).distinct
-    val substs = ChoiceHandler.run(
+    val substs = Solve.Fx.findAll.run(
       for {
         result <- Solve(cnf)
         yays = result.collect { case Literal(x, true) => x.head }.toSet
@@ -63,8 +64,8 @@ object Main {
             n = nays.contains(c)
             ys = if (y || !n) List('1') else Nil
             ns = if (n || !y) List('0') else Nil
-          } yield Choose(ns ++ ys))
-          .parallelly
+          } yield Solve.Fx.Choose(ns ++ ys))
+          .traverse
           .map(_.mkString)
       } yield subst
     )
@@ -87,7 +88,7 @@ object Main {
 
 
   def parse(formula: String): Option[AST] = 
-    Parser(formula).runWith(ErrorHandler[(String, Int)]) match {
+    Parser(formula).runWith(Parser.ErrorFx.handler) match {
       case Left((err, n)) => {
         println(s"Error: $err")
         val f = formula + " "
