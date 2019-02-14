@@ -63,7 +63,7 @@ More usage in [examples](./examples/src/main/scala/skutek_examples) directory.
 ```scala
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.9.2"
+libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "10.0.0"
 ```
 Cross built for 2.11 and 2.12.
 
@@ -82,7 +82,7 @@ Cross built for 2.11 and 2.12.
      
 - Practical stuff:
     - Predefined set of basic effects (`Reader`, `Writer`, etc.). [Read more](MANUAL.md#part-ii---predefined-effects).
-    - Conflict proof: ability for multiple instances of the same type of effect to coexist in the same effect stack (e.g. `State[Int]` and `State[String]`).
+    - Conflict proof: ability for multiple instances of the same type of effect, to coexist in the same effect stack (e.g. `State[Int]` and `State[String]`).
     - Potentially parallel execution of effects. [Read more](MANUAL.md#parallellism).
     - Support for `for` comprehension guards, for effects compatible with filtering (e.g. `Maybe`, `Choice`).
     - Tested stack safety.    
@@ -92,7 +92,7 @@ Cross built for 2.11 and 2.12.
     - ~~No~~ Limited possiblity of adapting pre-existing monads as Skutek's effects.
     - Removing effects from the stack (local handling) isn't as easy as adding them. [Read more](MANUAL.md#62-local-handling).
     - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`"). [Read more](MANUAL.md#32-caveats).
-    - Using patterns in `for` comprehensions can trigger surprising compiler errors. This is well known Scala's wart, not specific to Skutek. It can be mitigated by [This](https://github.com/oleg-py/better-monadic-for) compiler plugin.
+    - Using patterns in `for` comprehensions can trigger surprising compiler errors. It can be mitigated by [This](https://github.com/oleg-py/better-monadic-for) compiler plugin.
     - Lack of performance analysis.
     - `Concurrency` effect is a [hack](MANUAL.md#warning).
 
