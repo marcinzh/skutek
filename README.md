@@ -12,26 +12,31 @@ Skutek ([pronounced](https://translate.google.com/#pl/en/skutek): *skoo-tech*) i
 
 # Example
 ```scala
-import skutek._
+import skutek.abstraction._
+import skutek.std_effects._
 
 object Main extends App {
+  // Declare some effects:
+  case object MyReader extends Reader[Int]
+  case object MyState extends State[Int]
+  case object MyExcept extends Except[String]
 
-  // Create a monadic computation using several effects:
+  // Create a monadic computation using those effects:
   val computation = for {
-    a <- Get[Int] // uses State[Int] effect.
-    b <- Ask[Int] // uses Reader[Int] effect.
+    a <- MyState.Get
+    b <- MyReader.Ask
     c <- {
       if (b != 0) 
         Return(a / b)
       else 
-        Wrong(s"Tried to divide $a by zero") // uses Error[String] effect.
+        MyExcept.Raise(s"Tried to divide $a by zero")
     }
-    _ <- Put(c) // uses State[Int] effect again.
+    _ <- MyState.Put(c)
   } yield ()
 
   // Create a handler for the above computation, by composing
   // individual handlers of each requested effect:
-  val handler = ErrorHandler[String] +! StateHandler(100).exec +! ReaderHandler(3)
+  val handler = MyExcept.handler <<<! MyState.handler(100).exec <<<! MyReader.handler(3)
 
   // Execute the computation using the handler:
   val result = handler.run(computation)
@@ -42,9 +47,12 @@ object Main extends App {
 
 The inferred type of `computation` above is equivalent to:
 ```scala
-  Unit !! State[Int] with Reader[Int] with Error[String]
+  Unit !! MyState.type with MyReader.type with MyExcept.type
 ```
-where `!!` is infix type alias for [Computation](./core/src/main/scala/skutek/Computation.scala) monad.
+where `!!` is infix type alias for [Computation](./core/src/main/scala/skutek/Computation.scala) monad:
+```scala
+  Computation[Unit, MyState.type with MyReader.type with MyExcept.type]
+```
 
 ---
 
@@ -61,6 +69,8 @@ Cross built for 2.11 and 2.12.
 
 # Features
 
+  **Warning:** contains links to partially outdated manual.
+
 - Simplicity of use:
     - No need of defining the effect stack upfront. 
     - No need of lifting of operations into the monad.
@@ -72,7 +82,7 @@ Cross built for 2.11 and 2.12.
      
 - Practical stuff:
     - Predefined set of basic effects (`Reader`, `Writer`, etc.). [Read more](MANUAL.md#part-ii---predefined-effects).
-    - Ability to annotate effects with tags. [Read more](MANUAL.md#tagging-effects).
+    - Conflict proof: ability for multiple instances of the same type of effect to coexist in the same effect stack (e.g. `State[Int]` and `State[String]`).
     - Potentially parallel execution of effects. [Read more](MANUAL.md#parallellism).
     - Support for `for` comprehension guards, for effects compatible with filtering (e.g. `Maybe`, `Choice`).
     - Tested stack safety.    
@@ -83,11 +93,12 @@ Cross built for 2.11 and 2.12.
     - Removing effects from the stack (local handling) isn't as easy as adding them. [Read more](MANUAL.md#62-local-handling).
     - Rare occurences of false positives by Scala's linter (i.e. "inferred `Any`"). [Read more](MANUAL.md#32-caveats).
     - Using patterns in `for` comprehensions can trigger surprising compiler errors. This is well known Scala's wart, not specific to Skutek. It can be mitigated by [This](https://github.com/oleg-py/better-monadic-for) compiler plugin.
-    - **Type unsafety:** Certain class of invalid effect stacks are detected **at runtime** only. [Read more](MANUAL.md#tag-conflicts).
     - Lack of performance analysis.
     - `Concurrency` effect is a [hack](MANUAL.md#warning).
 
 
 # User Manual
+
+  WIP. Partially outdated since many breaking chanches in 10.0.0
 
   [MANUAL.md](MANUAL.md)
