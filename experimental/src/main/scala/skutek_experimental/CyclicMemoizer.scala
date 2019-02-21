@@ -17,24 +17,17 @@ trait CyclicMemoizer[K, V] extends EffectImpl {
   protected class Handler[W](
     val initial: Cache[K, V], 
     fun: K => V !! W with ThisEffect
-  ) extends Stateful2[Cache[K, V]] with Sequential {
-
+  ) extends Stateful[Cache[K, V]] with Sequential {
     def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
       op match {
         case Recur(key) => cache => 
           cache.contents.get(key) match {
             case Some(o) => k(o)(cache)
-            case None => {
+            case None =>
               val o = new OnceVar[V]
               k(o)(cache.add(key, o))
-            }
           }
       }
-
-    //@#@TODO copied from State
-    def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
-      onProductDefault(ma, mb, k)
-
 
     def tieKnots: Into[Lambda[A => A !! W]] = new Into[Lambda[A => A !! W]] {
       def apply[A](pair: (A, Cache[K, V])): A !! W = {
