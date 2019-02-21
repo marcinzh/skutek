@@ -1,11 +1,10 @@
 package skutek.misc
 import skutek.abstraction._
 import skutek.std_effects._
-import skutek.operations.CanLaunchTheMissiles
 import org.specs2._
 
 
-class ParallelismTest extends Specification with CanLaunchTheMissiles {
+class ParallelismTest extends Specification {
   def is = ValidationWithWriter.is ^ ValidationWithState.is
 
   object ValidationWithWriter {
