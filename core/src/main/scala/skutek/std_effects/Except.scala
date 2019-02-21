@@ -13,12 +13,12 @@ trait Except[E] extends EffectImpl {
     }
 
   trait CommonHandler extends Stateless {
-    type Result[A] = Either[E, A]
+    final override type Result[A] = Either[E, A]
 
-    def onReturn[A, U](a: A): A !@! U =
+    final override def onReturn[A, U](a: A): A !@! U =
       Return(Right(a))
 
-    def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
+    final override def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
       op match {
         case Raise(e) => Return(Left(e))
       }

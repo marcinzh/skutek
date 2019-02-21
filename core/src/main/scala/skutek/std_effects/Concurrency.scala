@@ -20,21 +20,21 @@ trait Concurrency extends EffectImpl {
   }
 
   class CommonHandler(implicit ec: ExecutionContext) extends Ultimate with Parallel {
-    type Result[A] = Future[A]
+    final override type Result[A] = Future[A]
 
-    def onReturn[A, U](a: A): A !@! U =
+    final override def onReturn[A, U](a: A): A !@! U =
       Future.successful(a)
 
-    def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
+    final override def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
       (op match {
         case r: Run[A] => Future { r.run() }
         case FutureWrapper(fut) => fut
       }).flatMap(k)
 
-    def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+    final override def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
       (ma zip mb).flatMap(k)
 
-    def await(timeout: Duration = Duration.Inf) =
+    final def await(timeout: Duration = Duration.Inf) =
       new Into[Lambda[A => A]] {
         def apply[A](fut: Future[A]): A = Await.result(fut, timeout)
       }

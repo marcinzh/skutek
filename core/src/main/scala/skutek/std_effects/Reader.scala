@@ -8,7 +8,7 @@ trait Reader[S] extends EffectImpl {
 
   def Asks[A](f: S => A) = Ask.map(f)
   def Local[A, U](s: S)(scope: A !! U) = LocalMod(_ => s)(scope)
-  def LocalMod[A, U](f: S => S)(scope: A !! U) = Ask.flatMap(s => scope.handleWith[U](handler(f(s))))
+  def LocalMod[A, U](f: S => S)(scope: A !! U) = Ask.flatMap(s => handler(f(s)).handle[U](scope))
 
   def handler(s: S) = new Stateless with Parallel {
     type Result[A] = A
