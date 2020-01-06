@@ -54,13 +54,13 @@ lazy val root = project
 
 
 lazy val core = project
-  .in(file("core"))
+  .in(file("modules/core"))
   .settings(name := "skutek-core")
   .settings(commonSettings: _*)
   .settings(testSettings: _*)
 
 lazy val experimental = project
-  .in(file("experimental"))
+  .in(file("modules/experimental"))
   .settings(name := "skutek-experimental")
   .settings(commonSettings: _*)
   .settings(lessCommonSettings: _*)
@@ -68,7 +68,7 @@ lazy val experimental = project
   .dependsOn(core)
 
 lazy val examples = project
-  .in(file("examples"))
+  .in(file("modules/examples"))
   .settings(name := "skutek-examples")
   .settings(commonSettings: _*)
   .settings(lessCommonSettings: _*)
