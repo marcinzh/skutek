@@ -1,6 +1,6 @@
 package skutek.abstraction.custom_effect
 import skutek.abstraction._
-import skutek.abstraction.Computation.FilterFail
+import skutek.abstraction.ComputationCases.FilterFail //@#@
 
 
 object PrimitiveHandlerImpl {

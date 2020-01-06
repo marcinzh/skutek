@@ -1,6 +1,6 @@
 package skutek.abstraction.custom_effect
 import skutek.abstraction._
-import skutek.abstraction.Computation._
+import skutek.abstraction.ComputationCases._
 
 
 trait PrimitiveHandler extends Handler {

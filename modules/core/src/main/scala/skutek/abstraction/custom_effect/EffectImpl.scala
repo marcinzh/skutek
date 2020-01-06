@@ -1,10 +1,12 @@
 package skutek.abstraction.custom_effect
-import skutek.abstraction._
+import skutek.abstraction.ComputationCases
+import skutek.abstraction.Effect //@#@
+import skutek.abstraction.FilterableEffect //@#@
 import skutek.abstraction.custom_effect.{PrimitiveHandlerImpl => H}
 
 
 protected sealed trait CommonEffectImpl extends Effect { outer =>
-  trait Op[A] extends Computation.Operation[A, ThisEffect] {
+  trait Op[A] extends ComputationCases.Operation[A, ThisEffect] {
     final override def thisEffect: ThisEffect = outer
   }
 

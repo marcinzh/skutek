@@ -1,5 +1,5 @@
 package skutek.abstraction
-import Computation._
+import ComputationCases._
 
 
 sealed trait Computation[+A, -U] {
@@ -33,14 +33,20 @@ sealed trait Computation[+A, -U] {
   }
 }
 
+object Computation {
+  def pure(): Unit !! Any = Return
+  def pure[A](a: A): A !! Any = Return(a)
+  // def fail: Nothing !! FailEffect = ???
+  // def defer[A, U](ua: => A !! U): A !! U = ???
+}
+
 case class Return[+A](value: A) extends Computation[A, Any]
 
 object Return extends Return(()) {
   def apply[U] : Unit !! U = this.widen[U]
 }
 
-
-object Computation {
+private[abstraction] object ComputationCases {
   case class FlatMap[A, +B, -U](ma: A !! U, k: A => B !! U) extends Computation[B, U]
   case class Product[+A, +B, -U](ma: A !! U, mb: B !! U) extends Computation[(A, B), U]
   case object FilterFail extends Computation[Nothing, Any]
@@ -53,6 +59,7 @@ object Computation {
 
 trait Computation_exports {
   type !![+A, -U] = Computation[A, U]
+  def !! = Computation
 
   implicit class Computation_extension[A, U](thiz: A !! U) {
     def withFilter(f: A => Boolean)(implicit ev: U <:< FilterableEffect): A !! U = 
