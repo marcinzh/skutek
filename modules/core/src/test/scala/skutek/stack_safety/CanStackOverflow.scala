@@ -8,5 +8,5 @@ import scala.util.Try
 trait CanStackOverflow { this: Specification => 
   val TooBigForStack = 100000
 
-  def mustNotStackOverflow[A](a : => A) = Try { a } must beSuccessfulTry
+  def mustNotStackOverflow[A](a : => A) = a must not (throwA[java.lang.StackOverflowError])
 }
