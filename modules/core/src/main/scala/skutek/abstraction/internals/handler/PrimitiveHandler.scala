@@ -22,5 +22,5 @@ trait PrimitiveHandler extends HandlerCases.Unsealed {
   def isParallel: Boolean
   final def isSequential = !isParallel
 
-  final override def interpret[A, U](ma: A !! U with Effects): Result[A] !! U = Interpreter.runImpure[A, U, this.type](this)(ma)
+  final override def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U = Interpreter.runImpure[A, U, this.type](this)(ma)
 }

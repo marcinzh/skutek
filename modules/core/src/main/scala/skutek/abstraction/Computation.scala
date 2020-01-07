@@ -58,12 +58,12 @@ trait Computation_exports {
     def run(implicit ev: CanRunPure[U]): A = Interpreter.runPure(ev(thiz))
 
     def runWith[H <: Handler](h: H)(implicit ev: CanRunImpure[U, h.Effects]): h.Result[A] =
-      h.interpret[A, Any](ev(thiz)).run
+      h.doHandle[A, Any](ev(thiz)).run
 
     def handleWith[V] : HandleWithApply[V] = new HandleWithApply[V]
     class HandleWithApply[V] {
       def apply[H <: Handler](h: H)(implicit ev: CanHandle[V, U, h.Effects]): h.Result[A] !! V =
-        h.interpret[A, V](ev(thiz))
+        h.doHandle[A, V](ev(thiz))
     }
 
     def withFilter(f: A => Boolean)(implicit ev: U <:< FilterableEffect): A !! U = 
