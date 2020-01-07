@@ -35,9 +35,9 @@ trait Concurrency extends EffectImpl {
       (ma zip mb).flatMap(k)
 
     final def await(timeout: Duration = Duration.Inf) =
-      new Into[Lambda[A => A]] {
+      map[Lambda[A => A]](new Into[Lambda[A => A]] {
         def apply[A](fut: Future[A]): A = Await.result(fut, timeout)
-      }
+      })
   }
 
   def handler(implicit ec: ExecutionContext) = new CommonHandler

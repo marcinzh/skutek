@@ -2,11 +2,11 @@ package skutek.abstraction
 import skutek.abstraction.internals.aux.CanHandle
 
 
-trait Handler { outer =>
+sealed trait Handler { outer =>
   type Effects
   type Result[A]
-
-  def interpret[A, U](ma: A !! U with Effects): Result[A] !! U
+  final type This = Handler.Apply[Result, Effects]
+  final type Into[F[_]] = Result ~> F
 
   final def handle[U] = new HandleApply[U]
   final class HandleApply[U] {
@@ -15,28 +15,12 @@ trait Handler { outer =>
 
   final def run[A](eff: A !! Effects): Result[A] = handle[Any](eff).run
 
-  final def <<<![H <: Handler](that: H) = new Composed(that)
+  final def <<<![H <: Handler](that: H) = HandlerCases.Composed[This, H](this, that)
   final def >>>![H <: Handler](that: H) = that <<<! this
 
-  class Composed[H <: Handler](val h: H) extends Handler {
-    final override type Effects = outer.Effects with h.Effects
-    final override type Result[A] = outer.Result[h.Result[A]]
+  final def map[F[_]](f: Result ~> F): Handler.Apply[F, Effects] = HandlerCases.Mapped[This, F](this)(f)
 
-    final override def interpret[A, U](ma: A !! U with Effects): Result[A] !! U =
-      outer.interpret[h.Result[A], U](
-        h.interpret[A, U with outer.Effects](ma)
-      )
-  }
-
-  abstract class Into[F[_]] extends Handler {
-    final override type Result[A] = F[A]
-    final override type Effects = outer.Effects
-
-    final override def interpret[A, U](ma: A !! U with Effects): Result[A] !! U =
-      outer.interpret[A, U](ma).map(apply)
-    
-    def apply[A](x: outer.Result[A]): F[A]
-  }
+  protected[abstraction] def interpret[A, U](ma: A !! U with Effects): Result[A] !! U
 }
 
 
@@ -48,11 +32,54 @@ object Handler {
 }
 
 
+object HandlerCases {
+  private[abstraction] trait Unsealed extends Handler
+
+  final case class Composed[HL <: Handler, HR <: Handler](val lhs: HL, val rhs: HR) extends Handler {
+    override type Effects = lhs.Effects with rhs.Effects
+    override type Result[A] = lhs.Result[rhs.Result[A]]
+
+    protected[abstraction] override def interpret[A, U](eff: A !! U with lhs.Effects with rhs.Effects): Result[A] !! U =
+      lhs.interpret[rhs.Result[A], U](
+        rhs.interpret[A, U with lhs.Effects](eff)
+      )
+  }
+
+  final case class Mapped[H <: Handler, F[_]](that: H)(fun: H#Result ~> F) extends Handler {
+    override type Result[A] = F[A]
+    override type Effects = that.Effects
+
+    protected[abstraction] override def interpret[A, U](eff: A !! U with Effects): Result[A] !! U =
+      that.interpret[A, U](eff).map(fun(_))
+  }
+}
+
+
 trait Handler_exports {
   type >>>![H1 <: Handler, H2 <: Handler] = H2 <<<! H1
 
   type <<<![H1 <: Handler, H2 <: Handler] = Handler {
     type Effects = H1#Effects with H2#Effects
     type Result[A] = H1#Result[H2#Result[A]]
+  }
+
+  //@#@TODO swap (A, S)
+  // implicit class HandlerIntoPairExtension[S, U](val thiz: Handler.Apply[(S, ?), U]) {
+  implicit class HandlerIntoPairExtension[S, U](val thiz: Handler.Apply[(?, S), U]) {
+    type Const[X] = S
+    type Identity[X] = X
+
+    def eval: Handler.Apply[Identity, U] = thiz.map(new ((?, S) ~> Identity) {
+      def apply[A](pair: (A, S)) = pair._1
+      // def apply[A](pair: (S, A)) = pair._2
+    })
+
+    def exec: Handler.Apply[Const, U] = thiz.map[Const](new ((?, S) ~> Const) {
+      def apply[A](pair: (A, S)) = pair._2
+      // def apply[A](pair: (S, A)) = pair._1
+    })
+
+    def justState = exec
+    def dropState = eval
   }
 }

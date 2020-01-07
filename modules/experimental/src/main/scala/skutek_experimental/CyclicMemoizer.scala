@@ -29,7 +29,7 @@ trait CyclicMemoizer[K, V] extends EffectImpl {
           }
       }
 
-    def tieKnots: Into[Lambda[A => A !! W]] = new Into[Lambda[A => A !! W]] {
+    def tieKnots: Handler.Apply[? !! W, ThisEffect] = map[? !! W](new Into[? !! W] {
       def apply[A](pair: (A, Cache[K, V])): A !! W = {
         val (a, m) = pair
         if (m.untied.isEmpty)
@@ -43,6 +43,6 @@ trait CyclicMemoizer[K, V] extends EffectImpl {
           h.tieKnots.handle[W](effs).flatten
         }
       }
-    }
+    })
   }
 }

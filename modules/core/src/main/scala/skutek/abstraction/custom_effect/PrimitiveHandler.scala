@@ -3,7 +3,7 @@ import skutek.abstraction._
 import skutek.abstraction.ComputationCases._
 
 
-trait PrimitiveHandler extends Handler {
+trait PrimitiveHandler extends HandlerCases.Unsealed {
   type ThisEffect <: Effect
   final override type Effects = ThisEffect
   val thisEffect: ThisEffect

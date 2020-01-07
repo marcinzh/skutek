@@ -32,19 +32,9 @@ object PrimitiveHandlerImpl {
     final override def onReveal[A, U](ma: A !@! U): Result[A] !! U = ma
   }
 
+  //@#@TODO remove
   trait AlmostStateful[S] extends PrimitiveHandler {
     final override type Result[A] = (A, S)
-
-    final def dropState = new Into[Lambda[A => A]] {
-      def apply[A](pair: (A, S)) = pair._1
-    }
-
-    final def justState = new Into[Lambda[A => S]] {
-      def apply[A](pair: (A, S)) = pair._2
-    }
-
-    final def eval = dropState
-    final def exec = justState
   }
 
   trait Stateful[S] extends AlmostStateful[S] {
