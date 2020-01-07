@@ -27,7 +27,7 @@ class ReaderTest extends Specification {
 
   def localmod = {
     case object FxR extends Reader[Int]
-    case object FxW extends Writer[String]
+    case object FxW extends Writer[Vector[String]]
 
     def loop(str: String): Unit !! FxR.type with FxW.type = {
       if (str.isEmpty)

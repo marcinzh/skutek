@@ -33,13 +33,9 @@ object PrimitiveHandlerImpl {
     final override def onReveal[A, U](ma: A !@! U): Result[A] !! U = ma
   }
 
-  //@#@TODO remove
-  trait AlmostStateful[S] extends PrimitiveHandler {
-    final override type Result[A] = (A, S)
-  }
-
-  trait Stateful[S] extends AlmostStateful[S] {
+  trait Stateful[S] extends PrimitiveHandler {
     def initial: S
+    final override type Result[A] = (A, S)
     final override type !@![A, U] = S => Result[A] !! U
     final override def onConceal[A, B, U](ma: A !! U, k: A => B !@! U): B !@! U = s => ma.flatMap(a => k(a)(s))
     final override def onReveal[A, U](ma: A !@! U): Result[A] !! U = ma(initial)

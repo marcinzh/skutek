@@ -6,7 +6,7 @@ import org.specs2._
 
 class ValidationTest extends Specification with CanLaunchTheMissiles {
   def is = {
-    case object Fx extends Validation[Char]
+    case object Fx extends Validation[Vector[Char]]
 
     val missile1 = Missile()
     val missile2 = Missile()

@@ -8,8 +8,8 @@ class ParallelismTest extends Specification {
   def is = ValidationWithWriter.is ^ ValidationWithState.is
 
   object ValidationWithWriter {
-    case object FxW extends Writer[Int]
-    case object FxV extends Validation[Char]
+    case object FxW extends Writer[Vector[Int]]
+    case object FxV extends Validation[Vector[Char]]
 
     val eff = for {
       _ <- FxW.Tell(1)
@@ -33,7 +33,7 @@ class ParallelismTest extends Specification {
 
   object ValidationWithState {
     case object FxS extends State[Int]
-    case object FxV extends Validation[Char]
+    case object FxV extends Validation[Vector[Char]]
 
     val eff = for {
       _ <- FxS.Put(111) *! FxV.Invalid('x') *! FxV.Invalid('y') *! FxS.Put(222) *! FxV.Invalid('z')

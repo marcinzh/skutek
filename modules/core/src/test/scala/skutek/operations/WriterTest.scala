@@ -6,7 +6,7 @@ import org.specs2._
 
 class WriterTest extends Specification {
   def is = {
-    case object Fx extends Writer[Int]
+    case object Fx extends Writer[Vector[Int]]
 
     (for {
       _ <- Fx.Tell(1)

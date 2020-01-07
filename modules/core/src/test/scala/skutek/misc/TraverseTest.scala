@@ -9,7 +9,7 @@ class TraverseTest extends Specification with CanLaunchTheMissiles {
   def is = TravV.is ^ TravE.is
 
   object TravV {
-    case object Fx extends Validation[String]
+    case object Fx extends Validation[Vector[String]]
 
     def mkEffs = {
       val m = Missile()

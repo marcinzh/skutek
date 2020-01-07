@@ -21,7 +21,7 @@ class RepeatedlyTest extends Specification with CanStackOverflow {
   }
 
   case object FxR extends Reader[Int]	
-  case object FxW extends Writer[Int]	
+  case object FxW extends Writer[Vector[Int]]
   case object FxS extends State[Int]	
   case object FxC extends Choice
 

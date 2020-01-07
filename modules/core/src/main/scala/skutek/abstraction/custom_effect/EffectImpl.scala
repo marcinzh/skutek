@@ -26,7 +26,6 @@ trait EffectImpl extends CommonEffectImpl { outer =>
 
   trait Stateless extends H.Stateless with ThisHandler
   trait Stateful[S] extends H.Stateful[S] with ThisHandler
-  trait AlmostStateful[S] extends H.AlmostStateful[S] with ThisHandler
   trait Ultimate extends H.Ultimate with ThisHandler
 }
 
@@ -38,6 +37,5 @@ trait FilterableEffectImpl extends CommonEffectImpl with FilterableEffect { oute
 
   trait Stateless extends H.Stateless with ThisHandler
   trait Stateful[S] extends H.Stateful[S] with ThisHandler
-  trait AlmostStateful[S] extends H.AlmostStateful[S] with ThisHandler
   trait Ultimate extends H.Ultimate with ThisHandler
 }

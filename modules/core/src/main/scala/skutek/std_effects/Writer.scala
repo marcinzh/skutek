@@ -1,35 +1,36 @@
 package skutek.std_effects
+import mwords._ //{Monoid, SingletonCons}
 import skutek.abstraction._
 import skutek.abstraction.custom_effect._
-import skutek.utils.Accumulator
 
 
-trait Writer[W] extends EffectImpl with AccumulatingEffect[W] {
+trait Writer[W] extends EffectImpl {
   case class Tell(value: W) extends Op[Unit]
+  def Tell[X](x: X)(implicit ev: SingletonCons[X, W]): Unit !! this.type = Tell(ev.singletonCons(x))
 
-  final override type HandlerCtor[S] = CommonHandler[S]
-  final override def handlerCtor[S](acc: Accumulator[W, S]) = new CommonHandler[S](acc)
+  def handler(implicit W: Monoid[W]) = new DefaultHandler
 
-  class CommonHandler[S](acc: Accumulator[W, S]) extends Stateless with Parallel with AlmostStateful[S] {
+  class DefaultHandler(implicit W: Monoid[W]) extends Stateless with Parallel {
+    final override type Result[A] = (A, W)
+
     final override def onReturn[A, U](a: A): A !@! U =
-      Return((a, acc.zero))
+      Return((a, Monoid[W].empty))
 
     final override def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
       op match {
-        case Tell(w) =>
+        case Tell(w1) =>
           k(()).map {
-            case (b, s) => (b, acc.add(acc.one(w), s))
+            case (b, w2) => (b, w1 |@| w2)
           }
       }
 
     final override def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
       (ma *! mb).flatMap {
-        case ((a, s1), (b, s2)) =>
-          val s12 = acc.add(s1, s2)
+        case ((a, w1), (b, w2)) =>
+          val w12 = w1 |@| w2
           k((a, b)).map {
-            case (c, s3) =>
-              val s123 = acc.add(s12, s3)
-              (c, s123)
+            case (c, w3) =>
+              (c, w12 |@| w3)
           }
       }
   }

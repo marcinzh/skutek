@@ -11,7 +11,7 @@ class AcyclicMemoTest extends Specification with CanLaunchTheMissiles {
   def graph = br ^ "AcyclicMemoizer operations should work" ! {
 
     case object FxMemo extends AcyclicMemoizer[Int, Vertex]
-    case object FxW extends Writer[Int]
+    case object FxW extends Writer[Vector[Int]]
 
     case class Vertex(serno: Int, outgoing: List[Edge])
     case class Edge(to: Vertex)

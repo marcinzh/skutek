@@ -37,7 +37,7 @@ class ConcurrencyTest extends Specification {
 
   def tricky = br ^ "Locally handled State should not disrupt Concurrency" ! { 
     case object FxR extends Reader[String]
-    case object FxW extends Writer[String]
+    case object FxW extends Writer[Vector[String]]
     case object FxS extends State[Int]
 
     val eff1 = for {
