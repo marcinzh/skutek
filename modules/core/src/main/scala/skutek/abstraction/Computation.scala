@@ -1,4 +1,5 @@
 package skutek.abstraction
+import skutek.abstraction.internals.aux.{CanRunPure, CanRunImpure, CanHandle}
 import ComputationCases._
 
 
@@ -22,7 +23,7 @@ sealed trait Computation[+A, -U] {
   final def widen[V <: U] = this: A !! V
   final def forceFilterable = this: A !! U with FilterableEffect
 
-  final def run(implicit ev: Any <:< U): A = pureLoop
+  // final def run(implicit ev: CanRunPure[U]): A = ev(this).pureLoop
   
   @annotation.tailrec final private[skutek] def pureLoop: A = this match {
     case Return(a) => a
@@ -65,6 +66,17 @@ trait Computation_exports {
   def !! = Computation
 
   implicit class Computation_extension[A, U](thiz: A !! U) {
+    def run(implicit ev: CanRunPure[U]): A = ev(thiz).pureLoop
+
+    def runWith[H <: Handler](h: H)(implicit ev: CanRunImpure[U, h.Effects]): h.Result[A] =
+      h.interpret[A, Any](ev(thiz)).run
+
+    def handleWith[V] : HandleWithApply[V] = new HandleWithApply[V]
+    class HandleWithApply[V] {
+      def apply[H <: Handler](h: H)(implicit ev: CanHandle[V, U, h.Effects]): h.Result[A] !! V =
+        h.interpret[A, V](ev(thiz))
+    }
+
     def withFilter(f: A => Boolean)(implicit ev: U <:< FilterableEffect): A !! U = 
       thiz.flatMap(a => if (f(a)) Return(a) else FilterFail)
   }

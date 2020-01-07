@@ -1,4 +1,5 @@
 package skutek.abstraction
+import skutek.abstraction.internals.aux.CanHandle
 
 
 trait Handler { outer =>
@@ -9,7 +10,7 @@ trait Handler { outer =>
 
   final def handle[U] = new HandleApply[U]
   final class HandleApply[U] {
-    def apply[A, V](ma: A !! V)(implicit ev: HandlerConforms[U, V, Effects]) = interpret[A, U](ev(ma))
+    def apply[A, V](ma: A !! V)(implicit ev: CanHandle[U, V, Effects]) = interpret[A, U](ev(ma))
   }
 
   final def run[A](eff: A !! Effects): Result[A] = handle[Any](eff).run
@@ -53,14 +54,5 @@ trait Handler_exports {
   type <<<![H1 <: Handler, H2 <: Handler] = Handler {
     type Effects = H1#Effects with H2#Effects
     type Result[A] = H1#Result[H2#Result[A]]
-  }
-
-  implicit class ComputationHandleWith_extension[A, U](thiz: A !! U) {
-    def handleWith[V] = new HandleWithApply[V]
-    final class HandleWithApply[V] {
-      def apply[H <: Handler](h: H)(implicit ev: HandlerConforms[V, U, h.Effects]) = h.handle[V](thiz)
-    }
-
-    def runWith(h: Handler { type Effects <: U }) = handleWith[Any](h).run
   }
 }
