@@ -1,6 +1,5 @@
-package skutek.abstraction
+package mwords
 
-//@#@ temporary
 
 trait ~>[-F[_], +G[_]] { outer =>
   def apply[A](fa: F[A]): G[A]
@@ -10,8 +9,14 @@ trait ~>[-F[_], +G[_]] { outer =>
   }
 }
 
+
 object ~> {
   def identity[F[_]] = new ~>[F, F] {
     def apply[A](fa: F[A]) = fa
   }
+}
+
+
+trait MiscExports {
+  type Identity[+A] = A
 }

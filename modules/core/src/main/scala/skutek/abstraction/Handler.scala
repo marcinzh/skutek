@@ -1,5 +1,6 @@
 package skutek.abstraction
 import skutek.abstraction.internals.aux.CanHandle
+import mwords.~>
 
 
 sealed trait Handler { outer =>

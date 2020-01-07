@@ -25,7 +25,7 @@ lazy val commonSettings = Seq(
   publishTo := Some("Bintray API Realm" at ("https://api.bintray.com/content/marcinzh/maven/skutek/" ++ version.value))
 )
 
-lazy val lessCommonSettings = Seq(
+lazy val commonExceptCoreSettings = Seq(
   libraryDependencies += compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0"),
 )
 
@@ -52,18 +52,24 @@ lazy val root = project
   .settings(dontPublishMe: _*)
   .aggregate(core, examples, experimental)
 
+lazy val mwords = project
+  .in(file("modules/mwords"))
+  .settings(name := "skutek-mwords")
+  .settings(commonSettings: _*)
+  .settings(commonExceptCoreSettings: _*)
 
 lazy val core = project
   .in(file("modules/core"))
   .settings(name := "skutek-core")
   .settings(commonSettings: _*)
   .settings(testSettings: _*)
+  .dependsOn(mwords)
 
 lazy val experimental = project
   .in(file("modules/experimental"))
   .settings(name := "skutek-experimental")
   .settings(commonSettings: _*)
-  .settings(lessCommonSettings: _*)
+  .settings(commonExceptCoreSettings: _*)
   .settings(testSettings: _*)
   .dependsOn(core)
 
@@ -71,7 +77,7 @@ lazy val examples = project
   .in(file("modules/examples"))
   .settings(name := "skutek-examples")
   .settings(commonSettings: _*)
-  .settings(lessCommonSettings: _*)
+  .settings(commonExceptCoreSettings: _*)
   .settings(dontPublishMe: _*)
   .dependsOn(core)
   
