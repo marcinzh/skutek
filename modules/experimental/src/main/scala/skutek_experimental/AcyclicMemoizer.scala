@@ -34,8 +34,4 @@ trait AcyclicMemoizer[K, V] extends EffectImpl {
           }
       }
   }
-
-  private implicit class Downcast[A, U](thiz: A !! U) {
-    def downCast[V >: U] : A !! V = thiz.asInstanceOf[A !! V]
-  }
 }

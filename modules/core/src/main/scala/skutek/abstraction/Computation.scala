@@ -1,5 +1,6 @@
 package skutek.abstraction
 import skutek.abstraction.internals.aux.{CanRunPure, CanRunImpure, CanHandle}
+import skutek.abstraction.internals.interpreter.Interpreter
 import ComputationCases._
 
 
@@ -22,24 +23,12 @@ sealed trait Computation[+A, -U] {
   final def void: Unit !! U = map(_ => ())
   final def widen[V <: U] = this: A !! V
   final def forceFilterable = this: A !! U with FilterableEffect
-
-  // final def run(implicit ev: CanRunPure[U]): A = ev(this).pureLoop
-  
-  @annotation.tailrec final private[skutek] def pureLoop: A = this match {
-    case Return(a) => a
-    case FlatMap(ma, k) => ma match {
-      case Return(a) => k(a).pureLoop
-      case FlatMap(ma, j) => ma.flatMap(a => j(a).flatMap(k)).pureLoop
-      case Product(ma, mb) => ma.flatMap(a => mb.flatMap(b => k((a, b)))).pureLoop
-      case _ => sys.error(s"Unhandled effect: $ma")
-    }
-    case _ => map(a => a).pureLoop
-  }
 }
 
 object Computation {
   def pure(): Unit !! Any = Return
-  def pure[A](a: A): A !! Any = Return(a)
+  def pure[A](a: A): A !! Any = Return(a) //@#@TODO bad type
+  //@#@TODO:
   // def fail: Nothing !! FailEffect = ???
   // def defer[A, U](ua: => A !! U): A !! U = ???
 }
@@ -53,7 +42,7 @@ object Return extends Return(()) {
 private[abstraction] object ComputationCases {
   case class FlatMap[A, +B, -U](ma: A !! U, k: A => B !! U) extends Computation[B, U]
   case class Product[+A, +B, -U](ma: A !! U, mb: B !! U) extends Computation[(A, B), U]
-  case object FilterFail extends Computation[Nothing, Any]
+  case object FilterFail extends Computation[Nothing, Any] //@#@TODO bad type
 
   trait Operation[+A, -U] extends Computation[A, U] {
     def thisEffect: Effect
@@ -66,7 +55,7 @@ trait Computation_exports {
   def !! = Computation
 
   implicit class Computation_extension[A, U](thiz: A !! U) {
-    def run(implicit ev: CanRunPure[U]): A = ev(thiz).pureLoop
+    def run(implicit ev: CanRunPure[U]): A = Interpreter.runPure(ev(thiz))
 
     def runWith[H <: Handler](h: H)(implicit ev: CanRunImpure[U, h.Effects]): h.Result[A] =
       h.interpret[A, Any](ev(thiz)).run
@@ -79,6 +68,8 @@ trait Computation_exports {
 
     def withFilter(f: A => Boolean)(implicit ev: U <:< FilterableEffect): A !! U = 
       thiz.flatMap(a => if (f(a)) Return(a) else FilterFail)
+
+    def downCast[V >: U] = thiz.asInstanceOf[Computation[A, V]]
   }
 
   implicit class ComputationOfPair_extension[+A, +B, -U](thiz: (A, B) !! U) {
@@ -88,4 +79,5 @@ trait Computation_exports {
 
   def Trampoline[A, U](ma : => A !! U): A !! U = Return.flatMap(_ => ma)
   def Eval[A](a : => A): A !! Any = Return.flatMap(_ => Return(a))
+
 }

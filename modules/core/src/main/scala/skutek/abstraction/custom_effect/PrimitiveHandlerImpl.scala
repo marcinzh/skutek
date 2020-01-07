@@ -1,7 +1,8 @@
 package skutek.abstraction.custom_effect
 import skutek.abstraction._
 import skutek.abstraction.ComputationCases.FilterFail //@#@
-
+//===================
+import skutek.abstraction.internals.interpreter.Interpreter
 
 object PrimitiveHandlerImpl {
   trait Filterable extends PrimitiveHandler {
@@ -22,7 +23,7 @@ object PrimitiveHandlerImpl {
 
   trait Ultimate extends PrimitiveHandler {
     final override type !@![A, U] = Result[A]
-    final override def onConceal[A, B, U](ma: A !! U, k: A => B !@! U): B !@! U = k(ma.pureLoop)
+    final override def onConceal[A, B, U](ma: A !! U, k: A => B !@! U): B !@! U = k(Interpreter.runPurish(ma))
     final override def onReveal[A, U](ma: A !@! U): Result[A] !! U = Return(ma)
   }
 
