@@ -1,4 +1,4 @@
-package skutek.abstraction.custom_effect
+package skutek.abstraction.internals.handler
 import skutek.abstraction._
 import skutek.abstraction.ComputationCases.FilterFail //@#@
 //===================

@@ -1,7 +1,6 @@
 package skutek.std_effects
 import skutek.abstraction._
 import skutek.abstraction.custom_effect._
-import skutek.abstraction.custom_effect.{PrimitiveHandlerImpl => H}
 import skutek.utils.Accumulator
 
 

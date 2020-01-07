@@ -2,7 +2,7 @@ package skutek.abstraction.internals.interpreter
 import skutek.abstraction.{!!, Return}
 import skutek.abstraction.ComputationCases._
 import skutek.abstraction.Computation
-import skutek.abstraction.custom_effect.PrimitiveHandler
+import skutek.abstraction.internals.handler.PrimitiveHandler
 
 
 object Interpreter {

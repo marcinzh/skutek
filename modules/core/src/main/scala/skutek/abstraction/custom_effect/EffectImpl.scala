@@ -2,7 +2,8 @@ package skutek.abstraction.custom_effect
 import skutek.abstraction.ComputationCases
 import skutek.abstraction.Effect //@#@
 import skutek.abstraction.FilterableEffect //@#@
-import skutek.abstraction.custom_effect.{PrimitiveHandlerImpl => H}
+import skutek.abstraction.internals.handler.PrimitiveHandler
+import skutek.abstraction.internals.handler.{PrimitiveHandlerImpl => H}
 
 
 protected sealed trait CommonEffectImpl extends Effect { outer =>

@@ -1,4 +1,4 @@
-package skutek.abstraction.custom_effect
+package skutek.abstraction.internals.handler
 import skutek.abstraction.{!!, HandlerCases, ComputationCases}
 import skutek.abstraction.{Effect}
 import skutek.abstraction.internals.interpreter.Interpreter
