@@ -50,7 +50,7 @@ lazy val root = project
   .settings(name := "skutek-root")
   .settings(commonSettings: _*)
   .settings(dontPublishMe: _*)
-  .aggregate(core, examples, experimental)
+  .aggregate(core, examples, experimental, mwords)
 
 lazy val mwords = project
   .in(file("modules/mwords"))
