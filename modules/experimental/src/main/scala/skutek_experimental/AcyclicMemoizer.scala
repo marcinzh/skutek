@@ -1,6 +1,6 @@
 package skutek_experimental
 import skutek.abstraction._
-import skutek.abstraction.custom_effect._
+import skutek.abstraction.effect._
 import skutek_experimental._internals._
 
 

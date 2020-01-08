@@ -1,6 +1,6 @@
 package skutek.std_effects
 import skutek.abstraction._
-import skutek.abstraction.custom_effect._
+import skutek.abstraction.effect._
 import scala.concurrent._
 import scala.concurrent.duration._
 

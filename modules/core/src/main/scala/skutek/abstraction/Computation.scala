@@ -1,4 +1,5 @@
 package skutek.abstraction
+import skutek.abstraction.effect.{Effect, FilterableEffect}
 import skutek.abstraction.internals.aux.{CanRunPure, CanRunImpure, CanHandle}
 import skutek.abstraction.internals.interpreter.Interpreter
 import ComputationCases._

@@ -1,7 +1,7 @@
 package skutek.std_effects
 import mwords._ //{Monoid, SingletonCons}
 import skutek.abstraction._
-import skutek.abstraction.custom_effect._
+import skutek.abstraction.effect._
 
 
 trait Writer[W] extends EffectImpl {

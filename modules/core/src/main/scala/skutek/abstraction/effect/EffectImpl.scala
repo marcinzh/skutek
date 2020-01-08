@@ -1,7 +1,5 @@
-package skutek.abstraction.custom_effect
+package skutek.abstraction.effect
 import skutek.abstraction.ComputationCases
-import skutek.abstraction.Effect //@#@
-import skutek.abstraction.FilterableEffect //@#@
 import skutek.abstraction.internals.handler.PrimitiveHandler
 import skutek.abstraction.internals.handler.{PrimitiveHandlerImpl => H}
 

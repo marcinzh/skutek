@@ -1,8 +1,9 @@
 package skutek.abstraction.internals.handler
 import skutek.abstraction._
-import skutek.abstraction.ComputationCases.FilterFail //@#@
-//===================
+import skutek.abstraction.ComputationCases.FilterFail
+import skutek.abstraction.effect.FilterableEffect
 import skutek.abstraction.internals.interpreter.Interpreter
+
 
 object PrimitiveHandlerImpl {
   trait Filterable extends PrimitiveHandler {
