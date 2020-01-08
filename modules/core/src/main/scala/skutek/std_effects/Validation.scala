@@ -16,7 +16,7 @@ trait Validation[E] extends EffectImpl {
 
   def handler(implicit E: Monoid[E]) = new DefaultHandler
 
-  class DefaultHandler(implicit E: Monoid[E]) extends Stateless with Parallel {
+  class DefaultHandler(implicit E: Monoid[E]) extends Nullary with Parallel {
     final override type Result[A] = Either[E, A]
 
     final override def onReturn[A, U](a: A): A !@! U =

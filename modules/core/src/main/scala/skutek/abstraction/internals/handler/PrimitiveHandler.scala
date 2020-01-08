@@ -1,26 +1,39 @@
 package skutek.abstraction.internals.handler
-import skutek.abstraction.{!!, HandlerCases, ComputationCases}
+import mwords.{MonadPar, Functor, Identity, ~>}
+import skutek.abstraction.{!!, HandlerStub}
+import skutek.abstraction.{Computation, Return}
+import skutek.abstraction.ComputationCases
 import skutek.abstraction.effect.Effect
-import skutek.abstraction.internals.interpreter.Interpreter
 
 
-trait PrimitiveHandler extends HandlerCases.Unsealed {
-  type ThisEffect <: Effect
+trait Interpreter[U, V, !@![_, _]] {
+  def apply[A](ma: A !! U with V): A !@! U
+}
+
+trait PrimitiveHandler extends HandlerStub {
   final override type Effects = ThisEffect
+  type ThisEffect <: Effect
   val thisEffect: ThisEffect
 
   type !@![A, U]
+  type Result[A]
   type Op[A] <: ComputationCases.Operation[A, ThisEffect]
 
   def onReturn[A, U](a: A): A !@! U
   def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U
   def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U
   def onFail: Option[Op[Nothing]]
-  def onConceal[A, B, U](ma: A !! U, k: A => B !@! U): B !@! U
-  def onReveal[A, U](ma: A !@! U): Result[A] !! U
+  def onSuspend[A, B, U](ma: A !! U, k: A => B !@! U): B !@! U
 
   def isParallel: Boolean
   final def isSequential = !isParallel
 
-  final override def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U = Interpreter.runImpure[A, U, this.type](this)(ma)
+  type ThisInterpreter[U] = Interpreter[U, Effects, !@!]
+  protected[abstraction] final def interpreter[U]: ThisInterpreter[U] = interpreterAny.asInstanceOf[ThisInterpreter[U]]
+  private val interpreterAny: ThisInterpreter[Any] = makeInterpreter[Any]
+  def makeInterpreter[U]: ThisInterpreter[U]
 }
+
+
+// object PrimitiveHandler {
+// }

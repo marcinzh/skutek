@@ -19,7 +19,7 @@ trait Concurrency extends EffectImpl {
     def apply[A, U](run : => A !! U) = new Run(() => run).flatten
   }
 
-  class CommonHandler(implicit ec: ExecutionContext) extends Ultimate with Parallel {
+  class CommonHandler(implicit ec: ExecutionContext) extends Foreign with Parallel {
     final override type Result[A] = Future[A]
 
     final override def onReturn[A, U](a: A): A !@! U =

@@ -1,11 +1,15 @@
 package skutek.abstraction
-import skutek.abstraction.internals.aux.CanHandle
 import mwords.~>
+import skutek.abstraction.internals.aux.CanHandle
+import skutek.abstraction.internals.handler.PrimitiveHandlerImpl
 
 
-sealed trait Handler { outer =>
+private[abstraction] trait HandlerStub {
   type Effects
   type Result[A]
+}
+
+sealed trait Handler extends HandlerStub { outer =>
   final type This = Handler.Apply[Result, Effects]
   final type Into[F[_]] = Result ~> F
 
@@ -34,8 +38,6 @@ object Handler {
 
 
 object HandlerCases {
-  private[abstraction] trait Unsealed extends Handler
-
   final case class Composed[HL <: Handler, HR <: Handler](val lhs: HL, val rhs: HR) extends Handler {
     override type Effects = lhs.Effects with rhs.Effects
     override type Result[A] = lhs.Result[rhs.Result[A]]
@@ -52,6 +54,24 @@ object HandlerCases {
 
     protected[abstraction] override def doHandle[A, U](eff: A !! U with Effects): Result[A] !! U =
       that.doHandle[A, U](eff).map(fun(_))
+  }
+
+  trait Nullary extends Handler with PrimitiveHandlerImpl.Nullary {
+    final override def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U = interpreter[U](ma)
+  }
+
+  trait Unary[S] extends PrimitiveHandlerImpl.Unary[S] { outer =>
+    def apply(initial: S): ThisSaturatedHandler = new ThisSaturatedHandler(initial)
+
+    class ThisSaturatedHandler(initial: S) extends Handler {
+      final override type Effects = outer.Effects
+      final override type Result[A] = outer.Result[A]
+      final override def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U = interpreter[U](ma)(initial)
+    }
+  }
+
+  trait Foreign extends Handler with PrimitiveHandlerImpl.Foreign {
+    final override def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U = Return(interpreter[U](ma))
   }
 }
 

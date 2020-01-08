@@ -11,7 +11,7 @@ trait Choice extends FilterableEffectImpl {
 
   def handler = findAll
 
-  trait CommonHandler extends Stateless with Parallel {
+  trait CommonHandler extends Nullary with Parallel {
     def zero[A] : Result[A]
     def one[A](a: A): Result[A]
     def plus[A](ma1: Result[A], ma2: Result[A]): Result[A]

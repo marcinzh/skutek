@@ -8,15 +8,13 @@ trait Writer[W] extends EffectImpl {
   case class Tell(value: W) extends Op[Unit]
   def Tell[X](x: X)(implicit ev: SingletonCons[X, W]): Unit !! this.type = Tell(ev.singletonCons(x))
 
-  def handler(implicit W: Monoid[W]) = new DefaultHandler
+  def handler(implicit W: Monoid[W]) = new Nullary with Parallel {
+    type Result[A] = (A, W)
 
-  class DefaultHandler(implicit W: Monoid[W]) extends Stateless with Parallel {
-    final override type Result[A] = (A, W)
-
-    final override def onReturn[A, U](a: A): A !@! U =
+    def onReturn[A, U](a: A): A !@! U =
       Return((a, Monoid[W].empty))
 
-    final override def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
+    def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
       op match {
         case Tell(w1) =>
           k(()).map {
@@ -24,7 +22,7 @@ trait Writer[W] extends EffectImpl {
           }
       }
 
-    final override def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+    def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
       (ma *! mb).flatMap {
         case ((a, w1), (b, w2)) =>
           val w12 = w1 |@| w2

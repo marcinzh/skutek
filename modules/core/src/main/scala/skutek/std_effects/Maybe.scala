@@ -12,7 +12,7 @@ trait Maybe extends FilterableEffectImpl {
       case None => Fail
     }
 
-  def handler = new Stateless with Parallel {
+  def handler = new Nullary with Parallel {
     type Result[A] = Option[A]
 
     def onReturn[A, U](a: A): A !@! U =

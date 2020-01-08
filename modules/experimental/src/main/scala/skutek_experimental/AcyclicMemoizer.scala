@@ -10,14 +10,25 @@ trait AcyclicMemoizer[K, V] extends EffectImpl {
 
   def handler[W] = new HandlerApply[W]
   class HandlerApply[W] {
-    def apply(fun: K => V !! W with ThisEffect) = new Handler[W](Map.empty[K, V], fun).dropState
+    def apply(fun: K => V !! W with ThisEffect) = new Handler[W](fun)(Map.empty[K, V]).dropState
   }
 
 
   protected class Handler[W](
-    val initial: Map[K, V],
     fun: K => V !! W with ThisEffect
-  ) extends Stateful[Map[K, V]] with Sequential {
+  ) extends Unary[Map[K, V]] with Sequential {
+    type Result[A] = (A, Map[K, V])
+
+    def onReturn[A, U](a: A): A !@! U =
+      s => Return((a, s))
+
+    def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+      s1 => ma(s1).flatMap {
+        case (a, s2) => mb(s2).flatMap {
+          case (b, s3) => k((a, b))(s3)
+        }
+      }
+
     def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
       op match {
         case Recur(key) => cache =>
@@ -25,7 +36,7 @@ trait AcyclicMemoizer[K, V] extends EffectImpl {
             case Some(v) => k(v)(cache)
             case None =>
               fun(key)
-              .handleWith[U with W](new Handler[W](cache, fun))
+              .handleWith[U with W](new Handler[W](fun)(cache))
               .flatMap { case (v, cache2) =>
                 val cache3 = cache2.updated(key, v)
                 k(v)(cache3)

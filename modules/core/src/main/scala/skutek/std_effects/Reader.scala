@@ -10,7 +10,7 @@ trait Reader[S] extends EffectImpl {
   def Local[A, U](s: S)(scope: A !! U) = LocalMod(_ => s)(scope)
   def LocalMod[A, U](f: S => S)(scope: A !! U) = Ask.flatMap(s => handler(f(s)).handle[U](scope))
 
-  def handler(s: S) = new Stateless with Parallel {
+  def handler(s: S) = new Nullary with Parallel {
     type Result[A] = A
 
     def onReturn[A, U](a: A): A !@! U =

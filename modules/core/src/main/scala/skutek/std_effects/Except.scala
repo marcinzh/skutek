@@ -12,7 +12,7 @@ trait Except[E] extends EffectImpl {
       case Left(e) => Raise(e)
     }
 
-  trait CommonHandler extends Stateless {
+  trait CommonHandler extends Nullary {
     final override type Result[A] = Either[E, A]
 
     final override def onReturn[A, U](a: A): A !@! U =

@@ -1,7 +1,9 @@
 package skutek.abstraction.effect
 import skutek.abstraction.ComputationCases
+// import skutek.abstraction.HandlerCases
+import skutek.abstraction.{HandlerCases => HC}
 import skutek.abstraction.internals.handler.PrimitiveHandler
-import skutek.abstraction.internals.handler.{PrimitiveHandlerImpl => H}
+import skutek.abstraction.internals.handler.{PrimitiveHandlerImpl => HI}
 
 
 protected sealed trait CommonEffectImpl extends Effect { outer =>
@@ -17,23 +19,23 @@ protected sealed trait CommonEffectImpl extends Effect { outer =>
 }
 
 trait EffectImpl extends CommonEffectImpl { outer =>
-  trait ThisHandler extends super.ThisHandler with H.NonFilterable
+  trait ThisHandler extends super.ThisHandler with HI.NonFilterable
 
-  trait Parallel extends H.Parallel with ThisHandler
-  trait Sequential extends H.Sequential with ThisHandler
+  trait Parallel extends HI.Parallel with ThisHandler
+  trait Sequential extends HI.Sequential with ThisHandler
 
-  trait Stateless extends H.Stateless with ThisHandler
-  trait Stateful[S] extends H.Stateful[S] with ThisHandler
-  trait Ultimate extends H.Ultimate with ThisHandler
+  trait Nullary extends HC.Nullary with ThisHandler
+  trait Unary[S] extends HC.Unary[S] with ThisHandler
+  trait Foreign extends HC.Foreign with ThisHandler
 }
 
-trait FilterableEffectImpl extends CommonEffectImpl with FilterableEffect { outer =>
-  trait ThisHandler extends super.ThisHandler with H.Filterable
+trait FilterableEffectImpl extends CommonEffectImpl with FilterableEffect {
+  trait ThisHandler extends super.ThisHandler with HI.Filterable
 
-  trait Parallel extends H.Parallel with ThisHandler
-  trait Sequential extends H.Sequential with ThisHandler
+  trait Parallel extends HI.Parallel with ThisHandler
+  trait Sequential extends HI.Sequential with ThisHandler
 
-  trait Stateless extends H.Stateless with ThisHandler
-  trait Stateful[S] extends H.Stateful[S] with ThisHandler
-  trait Ultimate extends H.Ultimate with ThisHandler
+  trait Nullary extends HC.Nullary with ThisHandler
+  trait Unary[S] extends HC.Unary[S] with ThisHandler
+  trait Foreign extends HC.Foreign with ThisHandler
 }
