@@ -67,7 +67,7 @@ object HandlerCases {
     class ThisSaturatedHandler(initial: S) extends Handler {
       final override type Effects = outer.Effects
       final override type Result[A] = outer.Result[A]
-      final override def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U = interpreter[U](ma)(initial)
+      final override def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U = unaryInterpreter[U](initial)(ma)
     }
   }
 

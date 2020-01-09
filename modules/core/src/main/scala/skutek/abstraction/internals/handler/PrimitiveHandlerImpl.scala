@@ -78,6 +78,41 @@ object PrimitiveHandlerImpl {
   trait Unary[S] extends PrimitiveHandlerImpl {
     final override type !@![A, U] = S => Result[A] !! U
     final override def onSuspend[A, B, U](ma: A !! U, k: A => B !@! U): B !@! U = s => ma.flatMap(a => k(a)(s))
+
+    //=========================
+
+    type UnaryInterpreter[U] = Interpreter[U, Effects, Lambda[(X, V) => Result[X] !! U]]
+    final def unaryInterpreter[U]: S => UnaryInterpreter[U] = unaryInterpreterAny.asInstanceOf[S => UnaryInterpreter[U]]
+    private val unaryInterpreterAny: S => UnaryInterpreter[Any] = makeUnaryInterpreter[Any]
+
+    //// The defaultInterpreter would do, but for some mysterious reason, this version runs noticably faster
+    private final def makeUnaryInterpreter[U]: S => UnaryInterpreter[U] = {
+      import ComputationCases._
+      type UV = U with Effects
+      def loopTramp[A](ma: A !! UV)(s: S): Result[A] !! U = onSuspend[Any, A, U](Return[U], _ => loop(ma, _))(s)
+
+      def loop[A](ma: A !! UV, s: S): Result[A] !! U = ma match {
+        case Return(a) => onReturn(a)(s)
+        case FlatMap(mx: !![tX, UV], k) =>
+          type X = tX
+          def loopK(x: X): A !@! U = loop(k(x), _)
+          def loopTrampK(x: X): A !@! U = loopTramp(k(x))
+          def operate(op: Operation[X, UV], s: S): Result[A] !! U = onOperation[X, A, U](op.asInstanceOf[Op[X]], loopTrampK)(s)
+          mx match {
+            case Return(x) => loop(k(x), s)
+            case FlatMap(mx, j) => loop(mx.flatMap(x => j(x).flatMap(k)), s)
+            case Product(my, mz) => onProduct(loopTramp(my), loopTramp(mz), loopK)(s)
+            case op: Operation[X, UV] if op.thisEffect eq thisEffect => operate(op, s)
+            case FilterFail if !(onFail eq None) => operate(onFail.get, s)
+            case _ => onSuspend(mx.asInstanceOf[X !! U], loopK)(s)
+          }
+        case _ => loop(ma.map(a => a), s)
+      }
+
+      s => new UnaryInterpreter[U] {
+        def apply[A](ma: A !! U with Effects): Result[A] !! U = loop(ma, s)
+      }
+    }
   }
 
   trait Foreign extends PrimitiveHandlerImpl {
