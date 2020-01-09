@@ -1,8 +1,7 @@
 package skutek.abstraction.effect
 import skutek.abstraction.ComputationCases
-// import skutek.abstraction.HandlerCases
 import skutek.abstraction.{HandlerCases => HC}
-import skutek.abstraction.internals.handler.PrimitiveHandler
+import skutek.abstraction.internals.handler.PrimitiveHandlerImpl
 import skutek.abstraction.internals.handler.{PrimitiveHandlerImpl => HI}
 
 
@@ -11,14 +10,14 @@ protected sealed trait CommonEffectImpl extends Effect { outer =>
     final override def thisEffect: ThisEffect = outer
   }
 
-  trait ThisHandler extends PrimitiveHandler {
+  trait ThisHandler extends PrimitiveHandlerImpl {
     final override type Op[A] = outer.Op[A]
     final override type ThisEffect = outer.ThisEffect
     final override val thisEffect: ThisEffect = outer
   }
 }
 
-trait EffectImpl extends CommonEffectImpl { outer =>
+trait EffectImpl extends CommonEffectImpl {
   trait ThisHandler extends super.ThisHandler with HI.NonFilterable
 
   trait Parallel extends HI.Parallel with ThisHandler

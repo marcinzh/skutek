@@ -9,7 +9,8 @@ private[abstraction] trait HandlerStub {
   type Result[A]
 }
 
-sealed trait Handler extends HandlerStub { outer =>
+
+sealed trait Handler extends HandlerStub {
   final type This = Handler.Apply[Result, Effects]
   final type Into[F[_]] = Result ~> F
 

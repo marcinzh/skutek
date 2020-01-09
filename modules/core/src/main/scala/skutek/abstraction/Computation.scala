@@ -90,5 +90,4 @@ trait Computation_exports {
 
   def Trampoline[A, U](ma : => A !! U): A !! U = Return.flatMap(_ => ma)
   def Eval[A](a : => A): A !! Any = Return.flatMap(_ => Return(a))
-
 }
