@@ -1,5 +1,5 @@
 package skutek.abstraction
-import skutek.abstraction.effect.{Effect, FilterableEffect}
+import skutek.abstraction.effect.{EffectId, FilterableEffect}
 import skutek.abstraction.internals.aux.{CanRunPure, CanRunImpure, CanHandle}
 import ComputationCases._
 
@@ -56,7 +56,7 @@ private[abstraction] object ComputationCases {
   case object FilterFail extends Computation[Nothing, Any] //@#@TODO bad type
 
   trait Operation[+A, -U] extends Computation[A, U] {
-    def thisEffect: Effect
+    def effectId: EffectId
   }
 }
 

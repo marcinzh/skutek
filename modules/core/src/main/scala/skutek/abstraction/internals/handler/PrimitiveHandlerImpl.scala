@@ -1,7 +1,7 @@
 package skutek.abstraction.internals.handler
 import skutek.abstraction.{!!, Return, ComputationCases}
 import skutek.abstraction.ComputationCases.{Operation => AbstractOp}
-import skutek.abstraction.effect.FilterableEffect
+import skutek.abstraction.effect.{EffectId, FilterableEffect}
 
 
 trait Interpreter[U, V, !@![_, _]] {
@@ -10,8 +10,7 @@ trait Interpreter[U, V, !@![_, _]] {
 
 
 trait PrimitiveHandlerImpl extends PrimitiveHandler {
-  //@#@TODO backport effectId
-  private[abstraction] val thisEffect: ThisEffect
+  private[abstraction] val effectId: EffectId
 
   def onSuspend[A, B, U](ma: A !! U, k: A => B !@! U): B !@! U
 
@@ -41,7 +40,7 @@ trait PrimitiveHandlerImpl extends PrimitiveHandler {
           case Return(x) => loop(k(x))
           case FlatMap(mx, j) => loop(mx.flatMap(x => j(x).flatMap(k)))
           case Product(my, mz) => onProduct(loopTramp(my), loopTramp(mz), loopK)
-          case op: AbstractOp[X, UV] if op.thisEffect eq thisEffect => operate(op)
+          case op: AbstractOp[X, UV] if op.effectId eq effectId => operate(op)
           case FilterFail if !(onFail eq None) => operate(onFail.get)
           case _ => onSuspend(mx.asInstanceOf[X !! U], loopK)
         }
@@ -105,7 +104,7 @@ object PrimitiveHandlerImpl {
             case Return(x) => loop(k(x), s)
             case FlatMap(mx, j) => loop(mx.flatMap(x => j(x).flatMap(k)), s)
             case Product(my, mz) => onProduct(loopTramp(my), loopTramp(mz), loopK)(s)
-            case op: AbstractOp[X, UV] if op.thisEffect eq thisEffect => operate(op, s)
+            case op: AbstractOp[X, UV] if op.effectId eq effectId => operate(op, s)
             case FilterFail if !(onFail eq None) => operate(onFail.get, s)
             case _ => onSuspend(mx.asInstanceOf[X !! U], loopK)(s)
           }

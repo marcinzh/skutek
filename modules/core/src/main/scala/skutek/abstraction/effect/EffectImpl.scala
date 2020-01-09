@@ -7,13 +7,13 @@ import skutek.abstraction.internals.handler.{PrimitiveHandlerImpl => PHI}
 
 protected sealed trait CommonEffectImpl extends Effect { outer =>
   trait Operation[A] extends AbstractOp[A, ThisEffect] {
-    final override def thisEffect: ThisEffect = outer
+    final override def effectId: EffectId = outer
   }
 
   trait ThisHandler extends PrimitiveHandlerImpl {
     final override type Operation[A] = outer.Operation[A]
     final override type ThisEffect = outer.ThisEffect
-    final override val thisEffect: ThisEffect = outer
+    final override val effectId: EffectId = outer
   }
 }
 

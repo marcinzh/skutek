@@ -1,7 +1,9 @@
 package skutek.abstraction.effect
 
 
-trait Effect {
+sealed trait EffectId
+
+trait Effect extends EffectId {
   type ThisEffect = this.type
 }
 
