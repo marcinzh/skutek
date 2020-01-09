@@ -3,7 +3,7 @@ import skutek.abstraction._
 import skutek.abstraction.effect._
 
 
-trait Maybe extends FilterableEffectImpl {
+trait Maybe extends FilterableEffect {
   case object Fail extends Operation[Nothing]
 
   def from[A](ma: Option[A]): A !! ThisEffect = 

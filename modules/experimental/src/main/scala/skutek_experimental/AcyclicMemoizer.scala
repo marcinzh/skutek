@@ -4,7 +4,7 @@ import skutek.abstraction.effect._
 import skutek_experimental._internals._
 
 
-trait AcyclicMemoizer[K, V] extends EffectImpl {
+trait AcyclicMemoizer[K, V] extends Effect {
   case class Recur(key: K) extends Operation[V]
 
 

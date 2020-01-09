@@ -3,7 +3,7 @@ import skutek.abstraction._
 import skutek.abstraction.effect._
 
 
-trait State[S] extends EffectImpl {
+trait State[S] extends Effect {
   case object Get extends Operation[S]
   case class Put(value: S) extends Operation[Unit]
 

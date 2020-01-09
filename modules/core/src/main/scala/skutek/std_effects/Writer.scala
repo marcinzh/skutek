@@ -4,7 +4,7 @@ import skutek.abstraction._
 import skutek.abstraction.effect._
 
 
-trait Writer[W] extends EffectImpl {
+trait Writer[W] extends Effect {
   case class Tell(value: W) extends Operation[Unit]
   def Tell[X](x: X)(implicit ev: SingletonCons[X, W]): Unit !! this.type = Tell(ev.singletonCons(x))
 

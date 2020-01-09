@@ -4,7 +4,7 @@ import skutek.abstraction._
 import skutek.abstraction.effect._
 
 
-trait Validation[E] extends EffectImpl {
+trait Validation[E] extends Effect {
   case class Invalid(value: E) extends Operation[Nothing]
   def Invalid[X](x: X)(implicit ev: SingletonCons[X, E]): Nothing !! this.type = Invalid(ev.singletonCons(x))
 

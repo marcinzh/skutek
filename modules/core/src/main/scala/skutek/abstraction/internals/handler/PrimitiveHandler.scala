@@ -1,11 +1,11 @@
 package skutek.abstraction.internals.handler
 import skutek.abstraction.HandlerStub
 import skutek.abstraction.ComputationCases.{Operation => AbstractOp}
-import skutek.abstraction.effect.Effect
+import skutek.abstraction.effect.AnyEffect
 
 
 trait PrimitiveHandler extends HandlerStub {
-  type ThisEffect <: Effect
+  type ThisEffect <: AnyEffect
   final override type Effects = ThisEffect
 
   type !@![A, U]

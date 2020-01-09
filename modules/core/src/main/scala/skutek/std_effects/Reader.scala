@@ -3,7 +3,7 @@ import skutek.abstraction._
 import skutek.abstraction.effect._
 
 
-trait Reader[S] extends EffectImpl {
+trait Reader[S] extends Effect {
   case object Ask extends Operation[S]
 
   def Asks[A](f: S => A) = Ask.map(f)

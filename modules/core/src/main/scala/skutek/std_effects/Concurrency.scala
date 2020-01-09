@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 
 case object Concurrency extends Concurrency
 
-trait Concurrency extends EffectImpl {
+trait Concurrency extends Effect {
   sealed class Run[A](val run: () => A) extends Operation[A]
   case class FutureWrapper[A](future: Future[A]) extends Operation[A]
 

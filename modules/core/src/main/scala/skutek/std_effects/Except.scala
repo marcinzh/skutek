@@ -3,7 +3,7 @@ import skutek.abstraction._
 import skutek.abstraction.effect._
 
 
-trait Except[E] extends EffectImpl {
+trait Except[E] extends Effect {
   case class Raise(value: E) extends Operation[Nothing]
 
   def from[A](ma: Either[E, A]): A !! ThisEffect = 

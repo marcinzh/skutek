@@ -3,7 +3,7 @@ import skutek.abstraction._
 import skutek.abstraction.effect._
 
 
-trait Choice extends FilterableEffectImpl {
+trait Choice extends FilterableEffect {
   case class Choose[A](values: Iterable[A]) extends Operation[A]
   val NoChoice = Choose(Iterable.empty[Nothing])
 
