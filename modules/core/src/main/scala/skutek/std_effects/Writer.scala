@@ -5,7 +5,7 @@ import skutek.abstraction.effect._
 
 
 trait Writer[W] extends EffectImpl {
-  case class Tell(value: W) extends Op[Unit]
+  case class Tell(value: W) extends Operation[Unit]
   def Tell[X](x: X)(implicit ev: SingletonCons[X, W]): Unit !! this.type = Tell(ev.singletonCons(x))
 
   def handler(implicit W: Monoid[W]) = (new Unary[W] with Parallel {
@@ -14,7 +14,7 @@ trait Writer[W] extends EffectImpl {
     def onReturn[A, U](a: A): A !@! U =
       w => Return((a, w))
 
-    def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
+    def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
         case Tell(w1) => w0 => k(())(w0 |@| w1)
       }

@@ -4,8 +4,8 @@ import skutek.abstraction.effect._
 
 
 trait State[S] extends EffectImpl {
-  case object Get extends Op[S]
-  case class Put(value: S) extends Op[Unit]
+  case object Get extends Operation[S]
+  case class Put(value: S) extends Operation[Unit]
 
   def Mod(f: S => S) = Get.flatMap(s => Put(f(s)))
 
@@ -15,7 +15,7 @@ trait State[S] extends EffectImpl {
     def onReturn[A, U](a: A): A !@! U =
       s => Return((a, s))
 
-    def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
+    def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
         case Get => s => k(s)(s)
         case Put(s) => _ => k(())(s)

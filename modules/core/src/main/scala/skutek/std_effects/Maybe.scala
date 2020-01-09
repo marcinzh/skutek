@@ -4,7 +4,7 @@ import skutek.abstraction.effect._
 
 
 trait Maybe extends FilterableEffectImpl {
-  case object Fail extends Op[Nothing]
+  case object Fail extends Operation[Nothing]
 
   def from[A](ma: Option[A]): A !! ThisEffect = 
     ma match {
@@ -18,7 +18,7 @@ trait Maybe extends FilterableEffectImpl {
     def onReturn[A, U](a: A): A !@! U =
       Return(Some(a))
 
-    def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
+    def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
         case Fail => Return(None)
       }

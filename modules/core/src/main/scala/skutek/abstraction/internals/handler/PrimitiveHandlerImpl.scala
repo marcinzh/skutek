@@ -1,5 +1,6 @@
 package skutek.abstraction.internals.handler
 import skutek.abstraction.{!!, Return, ComputationCases}
+import skutek.abstraction.ComputationCases.{Operation => AbstractOp}
 import skutek.abstraction.effect.FilterableEffect
 
 
@@ -24,6 +25,7 @@ trait PrimitiveHandlerImpl extends PrimitiveHandler {
   private val interpreterAny: ThisInterpreter[Any] = makeInterpreter[Any]
 
   private final def makeInterpreter[U]: ThisInterpreter[U] = {
+    type ThisOp[A] = Operation[A]
     import ComputationCases._
     type UV = U with Effects
     def loopTramp[A](ma: A !! UV): A !@! U = onSuspend(Return[U], (_: Any) => loop(ma))
@@ -34,12 +36,12 @@ trait PrimitiveHandlerImpl extends PrimitiveHandler {
         type X = tX
         def loopK(x: X): A !@! U = loop(k(x))
         def loopTrampK(x: X): A !@! U = loopTramp(k(x))
-        def operate(op: Operation[X, UV]): A !@! U = onOperation(op.asInstanceOf[Op[X]], loopTrampK)
+        def operate(op: AbstractOp[X, UV]): A !@! U = onOperation(op.asInstanceOf[ThisOp[X]], loopTrampK)
         mx match {
           case Return(x) => loop(k(x))
           case FlatMap(mx, j) => loop(mx.flatMap(x => j(x).flatMap(k)))
           case Product(my, mz) => onProduct(loopTramp(my), loopTramp(mz), loopK)
-          case op: Operation[X, UV] if op.thisEffect eq thisEffect => operate(op)
+          case op: AbstractOp[X, UV] if op.thisEffect eq thisEffect => operate(op)
           case FilterFail if !(onFail eq None) => operate(onFail.get)
           case _ => onSuspend(mx.asInstanceOf[X !! U], loopK)
         }
@@ -87,6 +89,7 @@ object PrimitiveHandlerImpl {
 
     //// The defaultInterpreter would do, but for some mysterious reason, this version runs noticably faster
     private final def makeUnaryInterpreter[U]: S => UnaryInterpreter[U] = {
+      type ThisOp[A] = Operation[A]
       import ComputationCases._
       type UV = U with Effects
       def loopTramp[A](ma: A !! UV)(s: S): Result[A] !! U = onSuspend[Any, A, U](Return[U], _ => loop(ma, _))(s)
@@ -97,12 +100,12 @@ object PrimitiveHandlerImpl {
           type X = tX
           def loopK(x: X): A !@! U = loop(k(x), _)
           def loopTrampK(x: X): A !@! U = loopTramp(k(x))
-          def operate(op: Operation[X, UV], s: S): Result[A] !! U = onOperation[X, A, U](op.asInstanceOf[Op[X]], loopTrampK)(s)
+          def operate(op: AbstractOp[X, UV], s: S): Result[A] !! U = onOperation[X, A, U](op.asInstanceOf[ThisOp[X]], loopTrampK)(s)
           mx match {
             case Return(x) => loop(k(x), s)
             case FlatMap(mx, j) => loop(mx.flatMap(x => j(x).flatMap(k)), s)
             case Product(my, mz) => onProduct(loopTramp(my), loopTramp(mz), loopK)(s)
-            case op: Operation[X, UV] if op.thisEffect eq thisEffect => operate(op, s)
+            case op: AbstractOp[X, UV] if op.thisEffect eq thisEffect => operate(op, s)
             case FilterFail if !(onFail eq None) => operate(onFail.get, s)
             case _ => onSuspend(mx.asInstanceOf[X !! U], loopK)(s)
           }

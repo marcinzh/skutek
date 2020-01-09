@@ -1,27 +1,27 @@
 package skutek.abstraction.effect
-import skutek.abstraction.ComputationCases
+import skutek.abstraction.ComputationCases.{Operation => AbstractOp}
 import skutek.abstraction.{HandlerCases => HC}
 import skutek.abstraction.internals.handler.PrimitiveHandlerImpl
-import skutek.abstraction.internals.handler.{PrimitiveHandlerImpl => HI}
+import skutek.abstraction.internals.handler.{PrimitiveHandlerImpl => PHI}
 
 
 protected sealed trait CommonEffectImpl extends Effect { outer =>
-  trait Op[A] extends ComputationCases.Operation[A, ThisEffect] {
+  trait Operation[A] extends AbstractOp[A, ThisEffect] {
     final override def thisEffect: ThisEffect = outer
   }
 
   trait ThisHandler extends PrimitiveHandlerImpl {
-    final override type Op[A] = outer.Op[A]
+    final override type Operation[A] = outer.Operation[A]
     final override type ThisEffect = outer.ThisEffect
     final override val thisEffect: ThisEffect = outer
   }
 }
 
 trait EffectImpl extends CommonEffectImpl {
-  trait ThisHandler extends super.ThisHandler with HI.NonFilterable
+  trait ThisHandler extends super.ThisHandler with PHI.NonFilterable
 
-  trait Parallel extends HI.Parallel with ThisHandler
-  trait Sequential extends HI.Sequential with ThisHandler
+  trait Parallel extends PHI.Parallel with ThisHandler
+  trait Sequential extends PHI.Sequential with ThisHandler
 
   trait Nullary extends HC.Nullary with ThisHandler
   trait Unary[S] extends HC.Unary[S] with ThisHandler
@@ -29,10 +29,10 @@ trait EffectImpl extends CommonEffectImpl {
 }
 
 trait FilterableEffectImpl extends CommonEffectImpl with FilterableEffect {
-  trait ThisHandler extends super.ThisHandler with HI.Filterable
+  trait ThisHandler extends super.ThisHandler with PHI.Filterable
 
-  trait Parallel extends HI.Parallel with ThisHandler
-  trait Sequential extends HI.Sequential with ThisHandler
+  trait Parallel extends PHI.Parallel with ThisHandler
+  trait Sequential extends PHI.Sequential with ThisHandler
 
   trait Nullary extends HC.Nullary with ThisHandler
   trait Unary[S] extends HC.Unary[S] with ThisHandler

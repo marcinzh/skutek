@@ -4,7 +4,7 @@ import skutek.abstraction.effect._
 
 
 trait Choice extends FilterableEffectImpl {
-  case class Choose[A](values: Iterable[A]) extends Op[A]
+  case class Choose[A](values: Iterable[A]) extends Operation[A]
   val NoChoice = Choose(Iterable.empty[Nothing])
 
   def from[A](as: A*) = Choose(as)
@@ -19,7 +19,7 @@ trait Choice extends FilterableEffectImpl {
     final def onReturn[A, U](a: A): A !@! U =
       Return(one(a))
 
-    final def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
+    final def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
         case Choose(as) => iterate(as, k)
       }

@@ -8,8 +8,8 @@ import scala.concurrent.duration._
 case object Concurrency extends Concurrency
 
 trait Concurrency extends EffectImpl {
-  sealed class Run[A](val run: () => A) extends Op[A]
-  case class FutureWrapper[A](future: Future[A]) extends Op[A]
+  sealed class Run[A](val run: () => A) extends Operation[A]
+  case class FutureWrapper[A](future: Future[A]) extends Operation[A]
 
   object Run {
     def apply[A](run : => A) = new Run(() => run)
@@ -25,7 +25,7 @@ trait Concurrency extends EffectImpl {
     final override def onReturn[A, U](a: A): A !@! U =
       Future.successful(a)
 
-    final override def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
+    final override def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       (op match {
         case r: Run[A] => Future { r.run() }
         case FutureWrapper(fut) => fut

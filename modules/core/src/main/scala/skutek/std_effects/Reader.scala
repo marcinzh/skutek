@@ -4,7 +4,7 @@ import skutek.abstraction.effect._
 
 
 trait Reader[S] extends EffectImpl {
-  case object Ask extends Op[S]
+  case object Ask extends Operation[S]
 
   def Asks[A](f: S => A) = Ask.map(f)
   def Local[A, U](s: S)(scope: A !! U) = LocalMod(_ => s)(scope)
@@ -16,7 +16,7 @@ trait Reader[S] extends EffectImpl {
     def onReturn[A, U](a: A): A !@! U =
       Return(a)
 
-    def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
+    def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
         case Ask => k(s)
       }

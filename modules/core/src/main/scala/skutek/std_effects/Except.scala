@@ -4,7 +4,7 @@ import skutek.abstraction.effect._
 
 
 trait Except[E] extends EffectImpl {
-  case class Raise(value: E) extends Op[Nothing]
+  case class Raise(value: E) extends Operation[Nothing]
 
   def from[A](ma: Either[E, A]): A !! ThisEffect = 
     ma match {
@@ -18,7 +18,7 @@ trait Except[E] extends EffectImpl {
     final override def onReturn[A, U](a: A): A !@! U =
       Return(Right(a))
 
-    final override def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
+    final override def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
         case Raise(e) => Return(Left(e))
       }

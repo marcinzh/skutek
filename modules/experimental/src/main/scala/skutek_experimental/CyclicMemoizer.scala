@@ -5,7 +5,7 @@ import skutek_experimental._internals._
 
 
 trait CyclicMemoizer[K, V] extends EffectImpl {
-  case class Recur(key: K) extends Op[() => V]
+  case class Recur(key: K) extends Operation[() => V]
 
 
   def handler[W] = new HandlerApply[W]
@@ -29,7 +29,7 @@ trait CyclicMemoizer[K, V] extends EffectImpl {
         }
       }
 
-    def onOperation[A, B, U](op: Op[A], k: A => B !@! U): B !@! U =
+    def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
         case Recur(key) => cache => 
           cache.contents.get(key) match {
