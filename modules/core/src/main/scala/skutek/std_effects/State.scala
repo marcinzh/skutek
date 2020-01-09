@@ -21,9 +21,9 @@ trait State[S] extends Effect {
         case Put(s) => _ => k(())(s)
       }
 
-    def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
-      s1 => ma(s1).flatMap {
-        case (a, s2) => mb(s2).flatMap {
+    def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+      s1 => tma(s1).flatMap {
+        case (a, s2) => tmb(s2).flatMap {
           case (b, s3) => k((a, b))(s3)
         }
       }

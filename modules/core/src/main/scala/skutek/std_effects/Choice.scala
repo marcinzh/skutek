@@ -50,8 +50,8 @@ trait Choice extends FilterableEffect {
     def plus[A](ma1: Result[A], ma2: Result[A]) = ma1 ++ ma2
 
 
-    def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
-      (ma *! mb).flatMap {
+    def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+      (tma *! tmb).flatMap {
         case (as, bs) => 
           val abs = for {
             a <- as
@@ -69,8 +69,8 @@ trait Choice extends FilterableEffect {
     def one[A](a: A) = Some(a)
     def plus[A](ma1: Result[A], ma2: Result[A]) = ma1 orElse ma2
 
-    def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
-      (ma *! mb).flatMap {
+    def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+      (tma *! tmb).flatMap {
         case (Some(a), Some(b)) => k((a, b))
         case _ => Return(None)
       }

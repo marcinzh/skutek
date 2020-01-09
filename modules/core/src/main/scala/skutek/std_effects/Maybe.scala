@@ -23,8 +23,8 @@ trait Maybe extends FilterableEffect {
         case Fail => Return(None)
       }
 
-    def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
-      (ma *! mb).flatMap {
+    def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+      (tma *! tmb).flatMap {
         case (Some(a), Some(b)) => k((a, b))
         case _ => Return(None)
       }

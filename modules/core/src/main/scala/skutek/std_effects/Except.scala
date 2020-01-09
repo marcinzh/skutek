@@ -25,8 +25,8 @@ trait Except[E] extends Effect {
   }
 
   def handler = new CommonHandler with Parallel {
-    def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
-      (ma *! mb).flatMap {
+    def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+      (tma *! tmb).flatMap {
         case (Right(a), Right(b)) => k((a, b))
         case (Left(e), _) => Return(Left(e))
         case (_, Left(e)) => Return(Left(e))
@@ -34,9 +34,9 @@ trait Except[E] extends Effect {
   }
 
   def handlerShort = new CommonHandler with Sequential {
-    def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
-      ma.flatMap {
-        case Right(a) => mb.flatMap {
+    def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+      tma.flatMap {
+        case Right(a) => tmb.flatMap {
           case Right(b) => k((a, b))
           case Left(e) => Return(Left(e))
         }

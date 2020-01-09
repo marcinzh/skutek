@@ -31,8 +31,8 @@ trait Concurrency extends Effect {
         case FutureWrapper(fut) => fut
       }).flatMap(k)
 
-    final override def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
-      (ma zip mb).flatMap(k)
+    final override def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+      (tma zip tmb).flatMap(k)
 
     final def await(timeout: Duration = Duration.Inf) =
       map[Lambda[A => A]](new Into[Lambda[A => A]] {

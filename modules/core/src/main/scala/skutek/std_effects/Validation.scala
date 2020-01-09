@@ -27,8 +27,8 @@ trait Validation[E] extends Effect {
         case Invalid(e) => Return(Left(e))
       }
 
-    final override def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
-      (ma *! mb).flatMap {
+    final override def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+      (tma *! tmb).flatMap {
         case (Right(a), Right(b)) => k((a, b))
         case (Left(e1), Left(e2)) => Return(Left(e1 |@| e2))
         case (Left(e), _) => Return(Left(e))

@@ -3,14 +3,14 @@ import skutek.abstraction._
 import skutek.abstraction.effect._
 
 
-trait Reader[S] extends Effect {
-  case object Ask extends Operation[S]
+trait Reader[R] extends Effect {
+  case object Ask extends Operation[R]
 
-  def Asks[A](f: S => A) = Ask.map(f)
-  def Local[A, U](s: S)(scope: A !! U) = LocalMod(_ => s)(scope)
-  def LocalMod[A, U](f: S => S)(scope: A !! U) = Ask.flatMap(s => handler(f(s)).handle[U](scope))
+  def Asks[A](f: R => A) = Ask.map(f)
+  def Local[A, U](r: R)(scope: A !! U) = LocalMod(_ => r)(scope)
+  def LocalMod[A, U](f: R => R)(scope: A !! U) = Ask.flatMap(r => handler(f(r)).handle[U](scope))
 
-  def handler(s: S) = new Nullary with Parallel {
+  def handler(r: R) = new Nullary with Parallel {
     type Result[A] = A
 
     def onReturn[A, U](a: A): A !@! U =
@@ -18,10 +18,10 @@ trait Reader[S] extends Effect {
 
     def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
-        case Ask => k(s)
+        case Ask => k(r)
       }
 
-    def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
-      (ma *! mb).flatMap(k)
+    def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+      (tma *! tmb).flatMap(k)
   }
 }
