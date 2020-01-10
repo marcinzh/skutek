@@ -1,5 +1,5 @@
 package skutek_experimental
-import skutek.abstraction._
+import skutek.abstraction.{!!, Return, Trampoline}
 
 
 object UnsafeFixMemo {

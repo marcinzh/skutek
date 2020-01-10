@@ -1,8 +1,8 @@
 package skutek.std_effects
-import skutek.abstraction._
-import skutek.abstraction.effect._
 import scala.concurrent._
 import scala.concurrent.duration._
+import skutek.abstraction.{!!, Return}
+import skutek.abstraction.effect.Effect
 
 
 case object Concurrency extends Concurrency

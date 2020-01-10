@@ -1,6 +1,6 @@
 package skutek.std_effects
-import skutek.abstraction._
-import skutek.abstraction.effect._
+import skutek.abstraction.{!!, Return}
+import skutek.abstraction.effect.Effect
 
 
 trait State[S] extends Effect {

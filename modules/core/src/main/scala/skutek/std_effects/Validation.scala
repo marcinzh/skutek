@@ -1,7 +1,7 @@
 package skutek.std_effects
 import mwords._ //{Semigroup, SingletonCons}
-import skutek.abstraction._
-import skutek.abstraction.effect._
+import skutek.abstraction.{!!, Return}
+import skutek.abstraction.effect.Effect
 
 
 trait Validation[E] extends Effect {
