@@ -12,19 +12,23 @@ trait Except[E] extends Effect {
       case Left(e) => Raise(e)
     }
 
-  trait CommonHandler extends Nullary {
-    final override type Result[A] = Either[E, A]
+  val handler = DefaultExceptHandler.handler[E, this.type](this)
+  val handlerShort = DefaultExceptHandler.handlerShort[E, this.type](this)
+}
 
-    final override def onReturn[A, U](a: A): A !@! U =
+
+object DefaultExceptHandler {
+  def handler[E, Fx <: Except[E]](fx: Fx) = new fx.Nullary with fx.Sequential {
+    type Result[A] = Either[E, A]
+
+    def onReturn[A, U](a: A): A !@! U =
       Return(Right(a))
 
-    final override def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
+    def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
-        case Raise(e) => Return(Left(e))
+        case fx.Raise(e) => Return(Left(e))
       }
-  }
 
-  def handler = new CommonHandler with Parallel {
     def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
       (tma *! tmb).flatMap {
         case (Right(a), Right(b)) => k((a, b))
@@ -33,7 +37,18 @@ trait Except[E] extends Effect {
       }
   }
 
-  def handlerShort = new CommonHandler with Sequential {
+
+  def handlerShort[E, Fx <: Except[E]](fx: Fx) = new fx.Nullary with fx.Sequential {
+    type Result[A] = Either[E, A]
+
+    def onReturn[A, U](a: A): A !@! U =
+      Return(Right(a))
+
+    def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
+      op match {
+        case fx.Raise(e) => Return(Left(e))
+      }
+
     def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
       tma.flatMap {
         case Right(a) => tmb.flatMap {

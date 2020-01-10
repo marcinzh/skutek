@@ -9,7 +9,12 @@ trait State[S] extends Effect {
 
   def Mod(f: S => S) = Get.flatMap(s => Put(f(s)))
 
-  def handler = new Unary[S] with Sequential {
+  val handler = DefaultStateHandler[S, this.type](this)
+}
+
+
+object DefaultStateHandler {
+  def apply[S, Fx <: State[S]](fx: Fx) = new fx.Unary[S] with fx.Sequential {
     type Result[A] = (A, S)
 
     def onReturn[A, U](a: A): A !@! U =
@@ -17,8 +22,8 @@ trait State[S] extends Effect {
 
     def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
-        case Get => s => k(s)(s)
-        case Put(s) => _ => k(())(s)
+        case fx.Get => s => k(s)(s)
+        case fx.Put(s) => _ => k(())(s)
       }
 
     def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =

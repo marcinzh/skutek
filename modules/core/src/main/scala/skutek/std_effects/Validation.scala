@@ -1,5 +1,5 @@
 package skutek.std_effects
-import mwords._ //{Monoid, SingletonCons}
+import mwords._ //{Semigroup, SingletonCons}
 import skutek.abstraction._
 import skutek.abstraction.effect._
 
@@ -14,9 +14,12 @@ trait Validation[E] extends Effect {
       case Left(e) => Invalid(e)
     }
 
-  def handler(implicit E: Monoid[E]) = new DefaultHandler
+  def handler(implicit E: Semigroup[E]) = DefaultValidationHandler[E, this.type](this)
+}
 
-  class DefaultHandler(implicit E: Monoid[E]) extends Nullary with Parallel {
+
+object DefaultValidationHandler {
+  def apply[E: Semigroup, Fx <: Validation[E]](fx: Fx) = new fx.Nullary with fx.Parallel {
     final override type Result[A] = Either[E, A]
 
     final override def onReturn[A, U](a: A): A !@! U =
@@ -24,7 +27,7 @@ trait Validation[E] extends Effect {
 
     final override def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
-        case Invalid(e) => Return(Left(e))
+        case fx.Invalid(e) => Return(Left(e))
       }
 
     final override def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =

@@ -12,7 +12,12 @@ trait Maybe extends FilterableEffect {
       case None => Fail
     }
 
-  def handler = new Nullary with Parallel {
+  val handler = DefaultMaybeHandler(this)
+}
+
+
+object DefaultMaybeHandler {
+  def apply[Fx <: Maybe](fx: Fx) = new fx.Nullary with fx.Parallel {
     type Result[A] = Option[A]
 
     def onReturn[A, U](a: A): A !@! U =
@@ -20,7 +25,7 @@ trait Maybe extends FilterableEffect {
 
     def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
-        case Fail => Return(None)
+        case fx.Fail => Return(None)
       }
 
     def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
@@ -29,6 +34,6 @@ trait Maybe extends FilterableEffect {
         case _ => Return(None)
       }
       
-    val onFail = Some(Fail)
+    val onFail = Some(fx.Fail)
   }
 }

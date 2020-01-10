@@ -10,7 +10,12 @@ trait Reader[R] extends Effect {
   def Local[A, U](r: R)(scope: A !! U) = LocalMod(_ => r)(scope)
   def LocalMod[A, U](f: R => R)(scope: A !! U) = Ask.flatMap(r => handler(f(r)).handle[U](scope))
 
-  def handler(r: R) = new Nullary with Parallel {
+  def handler(r: R) = DefaultReaderHandler[R, this.type](this, r)
+}
+
+
+object DefaultReaderHandler {
+  def apply[R, Fx <: Reader[R]](fx: Fx, r: R) = new fx.Nullary with fx.Parallel {
     type Result[A] = A
 
     def onReturn[A, U](a: A): A !@! U =
@@ -18,7 +23,7 @@ trait Reader[R] extends Effect {
 
     def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
-        case Ask => k(r)
+        case fx.Ask => k(r)
       }
 
     def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
