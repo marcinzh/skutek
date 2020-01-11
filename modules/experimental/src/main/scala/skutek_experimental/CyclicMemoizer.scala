@@ -17,15 +17,15 @@ trait CyclicMemoizer[K, V] extends Effect {
   protected class Handler[W](
     fun: K => V !! W with ThisEffect
   ) extends Unary[Cache[K, V]] with Sequential {
-    type Result[A] = (A, Cache[K, V])
+    type Result[A] = (Cache[K, V], A)
 
     def onReturn[A, U](a: A): A !@! U =
-      s => Return((a, s))
+      s => Return((s, a))
 
-    def onProduct[A, B, C, U](ma: A !@! U, mb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
-      s1 => ma(s1).flatMap {
-        case (a, s2) => mb(s2).flatMap {
-          case (b, s3) => k((a, b))(s3)
+    def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
+      s1 => tma(s1).flatMap {
+        case (s2, a) => tmb(s2).flatMap {
+          case (s3, b) => k((a, b))(s3)
         }
       }
 
@@ -43,8 +43,8 @@ trait CyclicMemoizer[K, V] extends Effect {
     def tieKnots(initial: Cache[K, V]): Handler.Apply[? !! W, ThisEffect] = {
       val h0 = apply(initial)
       h0.map[? !! W](new h0.Into[? !! W] {
-        def apply[A](pair: (A, Cache[K, V])): A !! W = {
-          val (a, m) = pair
+        def apply[A](pair: (Cache[K, V], A)): A !! W = {
+          val (m, a) = pair
           if (m.untied.isEmpty)
             Return(a)
           else {

@@ -86,19 +86,19 @@ trait Handler_exports {
   }
 
   //@#@TODO swap (A, S)
-  // implicit class HandlerIntoPairExtension[S, U](val thiz: Handler.Apply[(S, ?), U]) {
-  implicit class HandlerIntoPairExtension[S, U](val thiz: Handler.Apply[(?, S), U]) {
+  implicit class HandlerIntoPairExtension[S, U](val thiz: Handler.Apply[(S, ?), U]) {
+  // implicit class HandlerIntoPairExtension[S, U](val thiz: Handler.Apply[(?, S), U]) {
     type Const[X] = S
     type Identity[X] = X
 
-    def eval: Handler.Apply[Identity, U] = thiz.map(new ((?, S) ~> Identity) {
-      def apply[A](pair: (A, S)) = pair._1
-      // def apply[A](pair: (S, A)) = pair._2
+    def eval: Handler.Apply[Identity, U] = thiz.map(new ((S, ?) ~> Identity) {
+      // def apply[A](pair: (A, S)) = pair._1
+      def apply[A](pair: (S, A)) = pair._2
     })
 
-    def exec: Handler.Apply[Const, U] = thiz.map[Const](new ((?, S) ~> Const) {
-      def apply[A](pair: (A, S)) = pair._2
-      // def apply[A](pair: (S, A)) = pair._1
+    def exec: Handler.Apply[Const, U] = thiz.map[Const](new ((S, ?) ~> Const) {
+      // def apply[A](pair: (A, S)) = pair._2
+      def apply[A](pair: (S, A)) = pair._1
     })
 
     def justState = exec

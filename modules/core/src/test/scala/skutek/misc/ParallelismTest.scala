@@ -20,7 +20,7 @@ class ParallelismTest extends Specification {
     val vh = FxV.handler
     val wh = FxW.handler
 
-    def testWV = ((wh <<<! vh) run eff) must_== ((Left(Vector('x', 'y', 'z')), 1 to 3))
+    def testWV = ((wh <<<! vh) run eff) must_== (1 to 3, (Left(Vector('x', 'y', 'z'))))
     def testVW = ((vh <<<! wh) run eff) must_== Left(Vector('x', 'y', 'z'))
 
     def is = 

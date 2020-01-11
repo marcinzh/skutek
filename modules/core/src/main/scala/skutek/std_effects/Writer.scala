@@ -14,10 +14,10 @@ trait Writer[W] extends Effect {
 
 object DefaultWriterHandler {
   def apply[W, Fx <: Writer[W]](fx: Fx)(implicit W: Monoid[W]) = new fx.Unary[W] with fx.Parallel {
-    type Result[A] = (A, W)
+    type Result[A] = (W, A)
 
     def onReturn[A, U](a: A): A !@! U =
-      w => Return((a, w))
+      w => Return((w, a))
 
     def onOperation[A, B, U](op: Operation[A], k: A => B !@! U): B !@! U =
       op match {
@@ -26,7 +26,7 @@ object DefaultWriterHandler {
 
     def onProduct[A, B, C, U](tma: A !@! U, tmb: B !@! U, k: ((A, B)) => C !@! U): C !@! U =
       w0 => (tma(W.empty) *! tmb(W.empty)).flatMap {
-        case ((a, w1), (b, w2)) => k((a, b))(w0 |@| w1 |@| w2)
+        case ((w1, a), (w2, b)) => k((a, b))(w0 |@| w1 |@| w2)
       }
   }
 }

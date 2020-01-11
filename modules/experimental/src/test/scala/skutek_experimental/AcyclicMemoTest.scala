@@ -42,7 +42,7 @@ class AcyclicMemoTest extends Specification with CanLaunchTheMissiles {
       } yield Vertex(n, edges)
     }
 
-    val (roots, log) =
+    val (log, roots) =
       Vector(0)
       .map(FxMemo.Recur(_)).traverse
       .handleWith[FxW.type](FxMemo.handler[FxW.type](visit))
