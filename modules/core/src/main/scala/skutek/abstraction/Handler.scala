@@ -1,7 +1,7 @@
 package skutek.abstraction
 import mwords.~>
 import skutek.abstraction.internals.aux.CanHandle
-import skutek.abstraction.internals.handler.PrimitiveHandlerImpl
+import skutek.abstraction.internals.PrimitiveHandlerImpl
 
 
 private[abstraction] trait HandlerStub {

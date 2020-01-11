@@ -1,8 +1,8 @@
 package skutek.abstraction.effect
 import skutek.abstraction.ComputationCases.{Operation => AbstractOp}
 import skutek.abstraction.{HandlerCases => HC}
-import skutek.abstraction.internals.handler.PrimitiveHandlerImpl
-import skutek.abstraction.internals.handler.{PrimitiveHandlerImpl => PHI}
+import skutek.abstraction.internals.PrimitiveHandlerImpl
+import skutek.abstraction.internals.{PrimitiveHandlerImpl => PHI}
 
 
 sealed trait EffectId

@@ -1,4 +1,4 @@
-package skutek.abstraction.internals.handler
+package skutek.abstraction.internals
 import skutek.abstraction.HandlerStub
 import skutek.abstraction.ComputationCases.{Operation => AbstractOp}
 import skutek.abstraction.effect.AnyEffect
