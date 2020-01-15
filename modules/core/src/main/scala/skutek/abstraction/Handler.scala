@@ -1,7 +1,9 @@
 package skutek.abstraction
 import mwords.~>
 import skutek.abstraction.internals.aux.CanHandle
+//==========================
 import skutek.abstraction.internals.PrimitiveHandlerImpl
+import skutek.abstraction.internals.{NullaryInterpreter, UnaryInterpreter, ForeignInterpreter}
 
 
 private[abstraction] trait HandlerStub {
@@ -57,11 +59,13 @@ object HandlerCases {
       that.doHandle[A, U](eff).map(fun(_))
   }
 
-  trait Nullary extends Handler with PrimitiveHandlerImpl.Nullary {
+  // trait Nullary extends Handler with PrimitiveHandlerImpl.Nullary {
+  trait Nullary extends Handler with NullaryInterpreter {
     final override def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U = interpreter[U](ma)
   }
 
-  trait Unary[S] extends PrimitiveHandlerImpl.Unary[S] { outer =>
+  // trait Unary[S] extends PrimitiveHandlerImpl.Unary[S] { outer =>
+  trait Unary[S] extends UnaryInterpreter[S] { outer =>
     def apply(initial: S): ThisSaturatedHandler = new ThisSaturatedHandler(initial)
 
     class ThisSaturatedHandler(initial: S) extends Handler {
@@ -71,7 +75,8 @@ object HandlerCases {
     }
   }
 
-  trait Foreign extends Handler with PrimitiveHandlerImpl.Foreign {
+  // trait Foreign extends Handler with PrimitiveHandlerImpl.Foreign {
+  trait Foreign extends Handler with ForeignInterpreter {
     final override def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U = Return(interpreter[U](ma))
   }
 }
