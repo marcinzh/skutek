@@ -28,7 +28,7 @@ object FunctorInstances {
   }
 
   def either[E]: Functor[Either[E, +?]] = new Functor[Either[E, +?]] {
-    def map[A, B](fa: Either[E, A])(f: A => B): Either[E, B] = fa.map(f)
+    def map[A, B](fa: Either[E, A])(f: A => B): Either[E, B] = fa.right.map(f)
   }
 
   val vector: Functor[Vector] = new Functor[Vector] {
