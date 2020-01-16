@@ -49,14 +49,14 @@ The inferred type of `computation` above is equivalent to:
 ```scala
   Unit !! MyState.type with MyReader.type with MyExcept.type
 ```
-where `!!` is infix type alias for [Computation](./core/src/main/scala/skutek/abstraction/Computation.scala) monad:
+where `!!` is infix type alias for [Computation](./modules/core/src/main/scala/skutek/abstraction/Computation.scala) monad:
 ```scala
   Computation[Unit, MyState.type with MyReader.type with MyExcept.type]
 ```
 
 ---
 
-More usage in [examples](./examples/src/main/scala/skutek_examples) directory.
+More usage in [examples](./modules/examples/src/main/scala/skutek_examples) directory.
 
 # Setup
 
