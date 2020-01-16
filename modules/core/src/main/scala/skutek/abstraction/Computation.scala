@@ -28,10 +28,10 @@ sealed trait Computation[+A, -U] {
 
 object Computation {
   def pure(): Unit !! Any = Return
-  def pure[A](a: A): A !! Any = Return(a) //@#@TODO bad type
-  //@#@TODO:
-  // def fail: Nothing !! FailEffect = ???
-  // def defer[A, U](ua: => A !! U): A !! U = ???
+  def pure[A](a: A): A !! Any = Return(a)
+  def fail: Nothing !! FailEffect = Fail
+  def trampoline[A, U](ma: => A !! U): A !! U = Return.flatMap(_ => ma)
+  def eval[A](a: => A): A !! Any = Return.flatMap(_ => Return(a))
 }
 
 case class Return[+A](value: A) extends Computation[A, Any]
@@ -43,7 +43,7 @@ object Return extends Return(()) {
 private[abstraction] object ComputationCases {
   case class FlatMap[A, +B, -U](ma: A !! U, k: A => B !! U) extends Computation[B, U]
   case class Product[+A, +B, -U](ma: A !! U, mb: B !! U) extends Computation[(A, B), U]
-  case object FilterFail extends Computation[Nothing, Any] //@#@TODO bad type
+  case object Fail extends Computation[Nothing, Any] //// Should be FailEffect instead of Any, but
 
   trait Operation[+A, -U] extends Computation[A, U] {
     def effectId: EffectId
@@ -67,8 +67,8 @@ trait Computation_exports {
         h.doHandle[A, V](ev(thiz))
     }
 
-    def withFilter(f: A => Boolean)(implicit ev: U <:< FailEffect): A !! U = 
-      thiz.flatMap(a => if (f(a)) Return(a) else FilterFail)
+    def withFilter(f: A => Boolean)(implicit ev: U <:< FailEffect): A !! U with FailEffect = 
+      thiz.flatMap(a => if (f(a)) Return(a) else !!.fail)
 
     def downCast[V >: U] = thiz.asInstanceOf[Computation[A, V]]
   }
@@ -78,6 +78,6 @@ trait Computation_exports {
     def flatMap2[C, V](f: (A, B) => C !! V): C !! U with V = thiz.flatMap(f.tupled)
   }
 
-  def Trampoline[A, U](ma : => A !! U): A !! U = Return.flatMap(_ => ma)
-  def Eval[A](a : => A): A !! Any = Return.flatMap(_ => Return(a))
+  def Trampoline[A, U](ma : => A !! U): A !! U = !!.trampoline(ma)
+  def Eval[A](a : => A): A !! Any = !!.eval(a)
 }

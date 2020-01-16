@@ -46,7 +46,7 @@ trait WithDefaultInterpreter extends PrimitiveHandler {
           case FlatMap(mx, j) => loop(mx.flatMap(x => j(x).flatMap(k)))
           case Product(my, mz) => onProduct(loopTramp(my), loopTramp(mz), loopK)
           case op: AbstractOp[X, UV] if op.effectId eq effectId => operate(op)
-          case FilterFail if !(onFail eq None) => operate(onFail.get)
+          case Fail if !(onFail eq None) => operate(onFail.get)
           case _ => onSuspend(mx.asInstanceOf[X !! U], loopK)
         }
       case _ => loop(ma.map(a => a))
@@ -82,7 +82,7 @@ trait WithUnaryInterpreter[S] extends PrimitiveHandler.Unary[S] {
           case FlatMap(mx, j) => loop(mx.flatMap(x => j(x).flatMap(k)), s)
           case Product(my, mz) => onProduct(loopTramp(my), loopTramp(mz), loopK)(s)
           case op: AbstractOp[X, UV] if op.effectId eq effectId => operate(op, s)
-          case FilterFail if !(onFail eq None) => operate(onFail.get, s)
+          case Fail if !(onFail eq None) => operate(onFail.get, s)
           case _ => onSuspend(mx.asInstanceOf[X !! U], loopK)(s)
         }
       case _ => loop(ma.map(a => a), s)
