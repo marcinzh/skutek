@@ -2,8 +2,8 @@ sourcesInBase := false
 
 lazy val commonSettings = Seq(
   organization := "com.github.marcinzh",
-  version := "0.11.0",
-  scalaVersion := "2.12.8",
+  version := "0.12.0",
+  scalaVersion := "2.12.10",
   crossScalaVersions := Seq(scalaVersion.value, "2.11.12"),
   scalacOptions ++= Seq(
     "-language:implicitConversions",
@@ -18,20 +18,20 @@ lazy val commonSettings = Seq(
     // "-Ywarn-unused:imports,privates,-patvars,-locals,-params,-implicits"
   ),
   resolvers += Resolver.sonatypeRepo("releases"),
-  libraryDependencies += compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8"),
+  libraryDependencies += compilerPlugin("org.typelevel" % "kind-projector" % "0.10.0" cross CrossVersion.binary),
   licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
   resolvers += Resolver.jcenterRepo,
   credentials += Credentials(Path.userHome / ".bintray" / ".credentials"),
   publishTo := Some("Bintray API Realm" at ("https://api.bintray.com/content/marcinzh/maven/skutek/" ++ version.value))
 )
 
-lazy val lessCommonSettings = Seq(
-  libraryDependencies += compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.3"),
+lazy val commonExceptCoreSettings = Seq(
+  libraryDependencies += compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0"),
 )
 
 lazy val testSettings = Seq(
-  libraryDependencies += "org.specs2" %% "specs2-core" % "3.9.1" % "test",
-  libraryDependencies += "org.specs2" %% "specs2-matcher-extra" % "3.9.1" % "test",
+  libraryDependencies += "org.specs2" %% "specs2-core" % "4.3.4" % "test",
+  libraryDependencies += "org.specs2" %% "specs2-matcher-extra" % "4.3.4" % "test",
   parallelExecution in Test := false,
   scalacOptions in Test += "-Yrangepos",
 )
@@ -50,28 +50,34 @@ lazy val root = project
   .settings(name := "skutek-root")
   .settings(commonSettings: _*)
   .settings(dontPublishMe: _*)
-  .aggregate(core, examples, experimental)
+  .aggregate(core, examples, experimental, mwords)
 
+lazy val mwords = project
+  .in(file("modules/mwords"))
+  .settings(name := "skutek-mwords")
+  .settings(commonSettings: _*)
+  .settings(commonExceptCoreSettings: _*)
 
 lazy val core = project
-  .in(file("core"))
+  .in(file("modules/core"))
   .settings(name := "skutek-core")
   .settings(commonSettings: _*)
   .settings(testSettings: _*)
+  .dependsOn(mwords)
 
 lazy val experimental = project
-  .in(file("experimental"))
+  .in(file("modules/experimental"))
   .settings(name := "skutek-experimental")
   .settings(commonSettings: _*)
-  .settings(lessCommonSettings: _*)
+  .settings(commonExceptCoreSettings: _*)
   .settings(testSettings: _*)
   .dependsOn(core)
 
 lazy val examples = project
-  .in(file("examples"))
+  .in(file("modules/examples"))
   .settings(name := "skutek-examples")
   .settings(commonSettings: _*)
-  .settings(lessCommonSettings: _*)
+  .settings(commonExceptCoreSettings: _*)
   .settings(dontPublishMe: _*)
   .dependsOn(core)
   
