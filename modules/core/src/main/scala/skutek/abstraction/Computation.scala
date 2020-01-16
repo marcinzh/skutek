@@ -22,7 +22,7 @@ sealed trait Computation[+A, -U] {
   final def &&![B, V](that : => B !! V): B !! U with V = this **>! that
 
   final def void: Unit !! U = map(_ => ())
-  final def widen[V <: U] = this: A !! V
+  final def upCast[V <: U] = this: A !! V
   final def forceFilterable = this: A !! U with FailEffect
 }
 
@@ -37,7 +37,7 @@ object Computation {
 case class Return[+A](value: A) extends Computation[A, Any]
 
 object Return extends Return(()) {
-  def apply[U] : Unit !! U = this.widen[U]
+  def apply[U] : Unit !! U = this.upCast[U]
 }
 
 private[abstraction] object ComputationCases {
