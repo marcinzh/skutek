@@ -1,6 +1,7 @@
 package skutek.abstraction
-import skutek.abstraction.effect.{EffectId, FilterableEffect}
+import skutek.abstraction.effect.{EffectId, FailEffect}
 import skutek.abstraction.internals.aux.{CanRunPure, CanRunImpure, CanHandle}
+import skutek.abstraction.internals.Interpreter
 import ComputationCases._
 
 
@@ -22,18 +23,7 @@ sealed trait Computation[+A, -U] {
 
   final def void: Unit !! U = map(_ => ())
   final def widen[V <: U] = this: A !! V
-  final def forceFilterable = this: A !! U with FilterableEffect
-
-  @annotation.tailrec final private[skutek] def runPure: A = this match {
-    case Return(a) => a
-    case FlatMap(ma, k) => ma match {
-      case Return(a) => k(a).runPure
-      case FlatMap(ma, j) => ma.flatMap(a => j(a).flatMap(k)).runPure
-      case Product(ma, mb) => ma.flatMap(a => mb.flatMap(b => k((a, b)))).runPure
-      case _ => sys.error(s"Unhandled effect: $ma")
-    }
-    case _ => map(a => a).runPure
-  }
+  final def forceFilterable = this: A !! U with FailEffect
 }
 
 object Computation {
@@ -66,7 +56,7 @@ trait Computation_exports {
   def !! = Computation
 
   implicit class Computation_extension[A, U](thiz: A !! U) {
-    def run(implicit ev: CanRunPure[U]): A = thiz.runPure //Interpreter.runPure(ev(thiz))
+    def run(implicit ev: CanRunPure[U]): A = Interpreter.runPure(ev(thiz))
 
     def runWith[H <: Handler](h: H)(implicit ev: CanRunImpure[U, h.Effects]): h.Result[A] =
       h.doHandle[A, Any](ev(thiz)).run
@@ -77,7 +67,7 @@ trait Computation_exports {
         h.doHandle[A, V](ev(thiz))
     }
 
-    def withFilter(f: A => Boolean)(implicit ev: U <:< FilterableEffect): A !! U = 
+    def withFilter(f: A => Boolean)(implicit ev: U <:< FailEffect): A !! U = 
       thiz.flatMap(a => if (f(a)) Return(a) else FilterFail)
 
     def downCast[V >: U] = thiz.asInstanceOf[Computation[A, V]]

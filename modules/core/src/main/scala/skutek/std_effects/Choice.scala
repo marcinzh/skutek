@@ -1,9 +1,9 @@
 package skutek.std_effects
 import skutek.abstraction.{!!, Return}
-import skutek.abstraction.effect.FilterableEffect
+import skutek.abstraction.effect.Effect
 
 
-trait Choice extends FilterableEffect {
+trait Choice extends Effect.Filterable {
   case class Choose[A](values: Iterable[A]) extends Operation[A]
   val NoChoice = Choose(Iterable.empty[Nothing])
 

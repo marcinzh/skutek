@@ -1,9 +1,9 @@
 package skutek.std_effects
 import skutek.abstraction.{!!, Return}
-import skutek.abstraction.effect.FilterableEffect
+import skutek.abstraction.effect.Effect
 
 
-trait Maybe extends FilterableEffect {
+trait Maybe extends Effect.Filterable {
   case object Fail extends Operation[Nothing]
 
   def from[A](ma: Option[A]): A !! ThisEffect = 

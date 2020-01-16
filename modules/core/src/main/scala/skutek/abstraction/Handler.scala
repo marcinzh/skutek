@@ -1,9 +1,7 @@
 package skutek.abstraction
 import mwords.~>
 import skutek.abstraction.internals.aux.CanHandle
-//==========================
-import skutek.abstraction.internals.PrimitiveHandlerImpl
-import skutek.abstraction.internals.{NullaryInterpreter, UnaryInterpreter, ForeignInterpreter}
+import skutek.abstraction.internals.{PrimitiveHandler, WithDefaultInterpreter, WithUnaryInterpreter}
 
 
 private[abstraction] trait HandlerStub {
@@ -28,7 +26,7 @@ sealed trait Handler extends HandlerStub {
 
   final def map[F[_]](f: Result ~> F): Handler.Apply[F, Effects] = HandlerCases.Mapped[This, F](this)(f)
 
-  protected[abstraction] def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U
+  private[abstraction] def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U
 }
 
 
@@ -45,7 +43,7 @@ object HandlerCases {
     override type Effects = lhs.Effects with rhs.Effects
     override type Result[A] = lhs.Result[rhs.Result[A]]
 
-    protected[abstraction] override def doHandle[A, U](eff: A !! U with lhs.Effects with rhs.Effects): Result[A] !! U =
+    private[abstraction] override def doHandle[A, U](eff: A !! U with lhs.Effects with rhs.Effects): Result[A] !! U =
       lhs.doHandle[rhs.Result[A], U](
         rhs.doHandle[A, U with lhs.Effects](eff)
       )
@@ -55,17 +53,15 @@ object HandlerCases {
     override type Result[A] = F[A]
     override type Effects = that.Effects
 
-    protected[abstraction] override def doHandle[A, U](eff: A !! U with Effects): Result[A] !! U =
+    private[abstraction] override def doHandle[A, U](eff: A !! U with Effects): Result[A] !! U =
       that.doHandle[A, U](eff).map(fun(_))
   }
 
-  // trait Nullary extends Handler with PrimitiveHandlerImpl.Nullary {
-  trait Nullary extends Handler with NullaryInterpreter {
+  trait Nullary extends Handler with PrimitiveHandler.Nullary with WithDefaultInterpreter {
     final override def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U = interpreter[U](ma)
   }
 
-  // trait Unary[S] extends PrimitiveHandlerImpl.Unary[S] { outer =>
-  trait Unary[S] extends UnaryInterpreter[S] { outer =>
+  trait Unary[S] extends WithUnaryInterpreter[S] { outer =>
     def apply(initial: S): ThisSaturatedHandler = new ThisSaturatedHandler(initial)
 
     class ThisSaturatedHandler(initial: S) extends Handler {
@@ -74,9 +70,8 @@ object HandlerCases {
       final override def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U = unaryInterpreter[U](initial)(ma)
     }
   }
-
-  // trait Foreign extends Handler with PrimitiveHandlerImpl.Foreign {
-  trait Foreign extends Handler with ForeignInterpreter {
+ 
+  trait Foreign extends Handler with PrimitiveHandler.Foreign with WithDefaultInterpreter {
     final override def doHandle[A, U](ma: A !! U with Effects): Result[A] !! U = Return(interpreter[U](ma))
   }
 }
@@ -90,19 +85,16 @@ trait Handler_exports {
     type Result[A] = H1#Result[H2#Result[A]]
   }
 
-  //@#@TODO swap (A, S)
+
   implicit class HandlerIntoPairExtension[S, U](val thiz: Handler.Apply[(S, ?), U]) {
-  // implicit class HandlerIntoPairExtension[S, U](val thiz: Handler.Apply[(?, S), U]) {
     type Const[X] = S
     type Identity[X] = X
 
     def eval: Handler.Apply[Identity, U] = thiz.map(new ((S, ?) ~> Identity) {
-      // def apply[A](pair: (A, S)) = pair._1
       def apply[A](pair: (S, A)) = pair._2
     })
 
     def exec: Handler.Apply[Const, U] = thiz.map[Const](new ((S, ?) ~> Const) {
-      // def apply[A](pair: (A, S)) = pair._2
       def apply[A](pair: (S, A)) = pair._1
     })
 

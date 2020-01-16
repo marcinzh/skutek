@@ -1,8 +1,8 @@
 package skutek.abstraction.effect
 import skutek.abstraction.ComputationCases.{Operation => AbstractOp}
 import skutek.abstraction.{HandlerCases => HC}
-import skutek.abstraction.internals.PrimitiveHandlerImpl
-import skutek.abstraction.internals.{PrimitiveHandlerImpl => PHI}
+import skutek.abstraction.internals.PrimitiveHandler
+import skutek.abstraction.internals.{PrimitiveHandler => PH}
 
 
 sealed trait EffectId
@@ -15,7 +15,7 @@ private[skutek] sealed trait AnyEffect extends EffectId { outer =>
     final override def effectId: EffectId = outer
   }
 
-  trait ThisHandler extends PrimitiveHandlerImpl {
+  trait ThisHandler extends PrimitiveHandler {
     final override type Operation[A] = outer.Operation[A]
     final override type ThisEffect = outer.ThisEffect
     final override val effectId: EffectId = outer
@@ -24,24 +24,29 @@ private[skutek] sealed trait AnyEffect extends EffectId { outer =>
 
 
 trait Effect extends AnyEffect {
-  trait ThisHandler extends super.ThisHandler with PHI.NonFilterable
+  trait ThisHandler extends super.ThisHandler with PH.NonFilterable
 
-  trait Parallel extends PHI.Parallel with ThisHandler
-  trait Sequential extends PHI.Sequential with ThisHandler
+  trait Parallel extends ThisHandler with PH.Parallel
+  trait Sequential extends ThisHandler with PH.Sequential
 
-  trait Nullary extends HC.Nullary with ThisHandler
-  trait Unary[S] extends HC.Unary[S] with ThisHandler
-  trait Foreign extends HC.Foreign with ThisHandler
+  trait Nullary extends ThisHandler with HC.Nullary
+  trait Unary[S] extends ThisHandler with HC.Unary[S]
+  trait Foreign extends ThisHandler with HC.Foreign
 }
 
 
-trait FilterableEffect extends AnyEffect {
-  trait ThisHandler extends super.ThisHandler with PHI.Filterable
+trait FailEffect
 
-  trait Parallel extends PHI.Parallel with ThisHandler
-  trait Sequential extends PHI.Sequential with ThisHandler
 
-  trait Nullary extends HC.Nullary with ThisHandler
-  trait Unary[S] extends HC.Unary[S] with ThisHandler
-  trait Foreign extends HC.Foreign with ThisHandler
+object Effect {
+  trait Filterable extends AnyEffect with FailEffect {
+    trait ThisHandler extends super.ThisHandler with PH.Filterable
+
+    trait Parallel extends ThisHandler with PH.Parallel
+    trait Sequential extends ThisHandler with PH.Sequential
+
+    trait Nullary extends ThisHandler with HC.Nullary
+    trait Unary[S] extends ThisHandler with HC.Unary[S]
+    trait Foreign extends ThisHandler with HC.Foreign
+  }
 }
