@@ -1,5 +1,5 @@
 package skutek.std_effects
-import mwords._ //{Semigroup, SingletonCons}
+import skutek.mwords._ //{Semigroup, SingletonCons}
 import skutek.abstraction.{!!, Return}
 import skutek.abstraction.effect.Effect
 

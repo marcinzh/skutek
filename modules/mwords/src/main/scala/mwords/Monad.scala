@@ -1,4 +1,4 @@
-package mwords
+package skutek.mwords
 
 
 trait Functor[F[_]] {

@@ -1,4 +1,4 @@
-package mwords
+package skutek.mwords
 
 
 trait ~>[-F[_], +G[_]] { outer =>

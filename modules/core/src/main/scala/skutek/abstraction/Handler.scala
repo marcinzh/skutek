@@ -1,5 +1,5 @@
 package skutek.abstraction
-import mwords.~>
+import skutek.mwords.~>
 import skutek.abstraction.internals.aux.CanHandle
 import skutek.abstraction.internals.{PrimitiveHandler, WithDefaultInterpreter, WithUnaryInterpreter}
 
