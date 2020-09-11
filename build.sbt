@@ -3,8 +3,8 @@ sourcesInBase := false
 lazy val commonSettings = Seq(
   organization := "com.github.marcinzh",
   version := "0.14.0-SNAPSHOT",
-  scalaVersion := "2.12.12",
-  crossScalaVersions := Seq(scalaVersion.value, "2.11.12"),
+  scalaVersion := "2.13.3",
+  crossScalaVersions := Seq(scalaVersion.value, "2.12.12"),
   scalacOptions ++= Seq(
     "-language:implicitConversions",
     "-language:higherKinds",
@@ -19,6 +19,7 @@ lazy val commonSettings = Seq(
   ),
   resolvers += Resolver.sonatypeRepo("releases"),
   libraryDependencies += compilerPlugin("org.typelevel" % "kind-projector" % "0.11.0" cross CrossVersion.full),
+  libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.2.0",
   licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
   resolvers += Resolver.jcenterRepo,
   credentials += Credentials(Path.userHome / ".bintray" / ".credentials"),
@@ -80,4 +81,3 @@ lazy val examples = project
   .settings(commonExceptCoreSettings: _*)
   .settings(dontPublishMe: _*)
   .dependsOn(core)
-  

@@ -10,6 +10,6 @@ object Main extends App {
 
   args.headOption.flatMap(arg => registry.toMap.get(arg.toLowerCase)) match { 
     case None => println("Available examples:\n" + registry.map(_._1).mkString("  ", "\n  ", ""))
-    case Some(f) => f.apply(args.drop(1))
+    case Some(f) => f.apply(args.toIndexedSeq.drop(1))
   }
 }

@@ -1,7 +1,6 @@
 package skutek.utils
+import scala.collection.compat._
 import skutek.abstraction._
-import scala.collection.generic.CanBuildFrom
-// import scala.collection.mutable.Builder
 
 
 trait Traverse_exports {
@@ -19,13 +18,12 @@ trait Traverse_exports {
     }
   }
 
-
-  implicit class IterableOfComputationCBF_extension[+A, -U, S[+X] <: Iterable[X]](thiz: S[A !! U])(implicit cbf: CanBuildFrom[S[A !! U], A, S[A]]) {
+  implicit class IterableOfComputationCBF_extension[+A, -U, S[+X] <: Iterable[X]](thiz: S[A !! U])(implicit bf: BuildFrom[S[A !! U], A, S[A]]) {
     def traverse: S[A] !! U =
       thiz.foldLeft(Return(Vector.empty[A]).upCast[U]) { 
         case (as_!, a_!) => (as_! *! a_!).map2(_ :+ _) 
       }
-      .map(as => (cbf() ++= as).result())
+      .map(as => (bf.newBuilder(thiz) ++= as).result())
 
     def traverseShort: S[A] !! U = {
       def loop(todos: Iterable[A !! U], accum: Vector[A]): Vector[A] !! U =
@@ -35,10 +33,9 @@ trait Traverse_exports {
           todos.head.flatMap(a => loop(todos.tail, accum :+ a))
 
       loop(thiz, Vector())
-      .map(as => (cbf() ++= as).result())
+      .map(as => (bf.newBuilder(thiz) ++= as).result())
     }
   }
-
 
   implicit class OptionOfComputation_extension[+A, -U](thiz: Option[A !! U]) {
     def traverse: Option[A] !! U =

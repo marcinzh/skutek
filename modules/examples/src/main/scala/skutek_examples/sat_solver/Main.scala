@@ -48,10 +48,10 @@ object Main {
       println("The formula after conversion to CNF:")
       for (line <- lines.sorted)
         println(line)
-      println
+      println()
     }
 
-    val names = formula.filter(_.isLetter).distinct
+    val names = formula.filter(_.isLetter).toSeq.distinct
     val substs = Solve.Fx.findAll.run(
       for {
         result <- Solve(cnf)
