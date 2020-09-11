@@ -48,7 +48,7 @@ object Queens {
     println(Vector.fill(boardSize)(u(" ")).mkString("  ", " ", ""))
     for (p <- ps) {
       val line = Vector.fill(boardSize)(u(" ")).updated(p.column, u("\u265B")).mkString("|", "|", "|")
-      println((boardSize - p.row) + line)
+      println(s"${boardSize - p.row}${line}")
     }
     println((0 until boardSize).map(i => ('a'.toInt + i).toChar).mkString("  ", " ", " "))
   }

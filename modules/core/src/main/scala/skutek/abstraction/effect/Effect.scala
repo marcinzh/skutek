@@ -15,7 +15,7 @@ private[skutek] sealed trait AnyEffect extends EffectId { outer =>
     final override def effectId: EffectId = outer
   }
 
-  trait ThisHandler extends PrimitiveHandler {
+  trait Super_ThisHandler extends PrimitiveHandler {
     final override type Operation[A] = outer.Operation[A]
     final override type ThisEffect = outer.ThisEffect
     final override val effectId: EffectId = outer
@@ -24,7 +24,7 @@ private[skutek] sealed trait AnyEffect extends EffectId { outer =>
 
 
 trait Effect extends AnyEffect {
-  trait ThisHandler extends super.ThisHandler with PH.NonFilterable
+  trait ThisHandler extends Super_ThisHandler with PH.NonFilterable
 
   trait Parallel extends ThisHandler with PH.Parallel
   trait Sequential extends ThisHandler with PH.Sequential
@@ -40,7 +40,7 @@ trait FailEffect
 
 object Effect {
   trait Filterable extends AnyEffect with FailEffect {
-    trait ThisHandler extends super.ThisHandler with PH.Filterable
+    trait ThisHandler extends Super_ThisHandler with PH.Filterable
 
     trait Parallel extends ThisHandler with PH.Parallel
     trait Sequential extends ThisHandler with PH.Sequential

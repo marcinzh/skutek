@@ -1,3 +1,5 @@
+package skutek
+
 package object mwords
   extends MiscExports
   with FunctorExports

@@ -1,5 +1,5 @@
 package skutek.std_effects
-import mwords._ //{Monoid, SingletonCons}
+import skutek.mwords._ //{Monoid, SingletonCons}
 import skutek.abstraction.{!!, Return}
 import skutek.abstraction.effect.Effect
 

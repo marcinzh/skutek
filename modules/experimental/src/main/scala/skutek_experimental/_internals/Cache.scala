@@ -1,5 +1,6 @@
 package skutek_experimental
 package _internals
+import scala.collection.compat._
 
 
 class Cache[K, V](
@@ -14,7 +15,7 @@ class Cache[K, V](
     )
   }
 
-  def snapshot() = contents.mapValues(f => f())
+  def snapshot() = contents.view.mapValues(f => f()).toMap
 }
 
 
