@@ -1,4 +1,10 @@
 
+# :headstone:
+
+Skutek has evolved to, and been superseded by [Turbolift](https://github.com/marcinzh/turbolift). Turbolift retains most of features and syntax of Skutek. But it internally, it's no longer based on Eff monad.
+
+---
+
 # Skutek: extensible effects without (heavy) lifting
 
 Skutek ([pronounced](https://translate.google.com/#pl/en/skutek): *skoo-tech*) is a framework implementing a monad of extensible effects 
@@ -61,15 +67,13 @@ More usage in [examples](./modules/examples/src/main/scala/skutek_examples) dire
 # Setup
 
 ```scala
-resolvers += Resolver.jcenterRepo
-
-libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.12.0"
+libraryDependencies += "com.github.marcinzh" %% "skutek-core" % "0.16.0"
 ```
-Cross built for 2.11 and 2.12.
+~~Cross built~~ Built for Scala 2.13.
 
 # Features
 
-  **Warning:** contains links to partially outdated manual.
+  **Warning:** contains links to partially outdated and somewhat embarrassing manual.
 
 - Simplicity of use:
     - No need of defining the effect stack upfront. 
